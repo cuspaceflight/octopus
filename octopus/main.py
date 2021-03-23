@@ -52,3 +52,22 @@ class FluidMixture:
 class Manifold:
     """The manifold class is used to organise injection elements by
        their propellant, and provide fluid property attributes to elements."""
+
+    def __init__(self, fluid, T_inlet, p_inlet):
+
+        self.T_inlet = T_inlet  # Kelvin
+        self.p_inlet = p_inlet  # Pa
+
+        self.fluid = fluid
+        if isinstance(fluid, Fluid):
+            self.fluid.chem.calculate(T=self.T_inlet, P=self.p_inlet)
+            # Update thermo conditions
+
+        if self.fluid.chem.phase != "l":
+            print(self.fluid.chem.phase)
+            raise Exception("""Fluid \"{}\" is entering the manifold
+                            as a non-liquid!""".format(self.fluid.name))
+
+        self.rho = self.fluid.chem.rho
+        # self.transport
+        # Might want to use transport properties for manifold modelling later
