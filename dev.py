@@ -25,3 +25,5 @@ fuel_mix_man = octo.Manifold(fluid=fuel_mix, T_inlet=fuel_T, p_inlet=fuel_p)
 oxidiser_man = octo.Manifold(fluid=oxidiser, T_inlet=ox_T, p_inlet=ox_p)
 # Create (empty) manifolds for elements
 # fuel_mix_man is just to test the class properly handles a FluidMixture
+
+print(fuel_man.rho, fuel_mix_man.rho, oxidiser_man.rho)
