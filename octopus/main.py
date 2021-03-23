@@ -25,13 +25,22 @@ class Fluid:
 class FluidMixture:
     """Easily create mixtures from Fluid objects, e.g. to observe
        the performance impact of additives.
-       Currently just a container for the thermo equivalent, like Fluid"""
+       Currently just a container for the thermo equivalent, like Fluid.
 
-    def __init__(self, name, component_1, component_2, mf_1,
+       Might add option for any number of components with **kwargs
+       Or a mixture of mixtures?
+
+       Attributes:
+            component_1 (string): Name of a chemical component of the
+                                  mixture, recognised by the source.
+            component_2 (string): Name of a chemical component of the
+                                  mixture, recognised by the source.
+            mf_1 (float): Mass fraction of component_1 in mixture.
+            mf_2 (float): Mass fraction of component_2 in mixture.
+    """
+
+    def __init__(self, component_1, component_2, mf_1,
                  mf_2, source="thermo"):
-        # Might add option for any number of components with **kwargs
-        # Or a mixture of mixtures as an alternative?
-        self.name = name
 
         if source == "thermo":
             self.mix = thermo.chemical.Chemical(
