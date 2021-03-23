@@ -5,14 +5,15 @@ import octopus as octo
 fuel_name = "isopropanol"
 oxidiser_name = "nitrous oxide"
 
-fuel = octo.Fluid(fuel_name)
-oxidiser = octo.Fluid(fuel_name)
+fuel = octo.Fluid(fuel_name, source="thermo")
+oxidiser = octo.Fluid(oxidiser_name)
 # Propellants
 
 water = octo.Fluid("water")
 # Additives
 
-fuel_mix = octo.FluidMixture("water", fuel_name, 0.1, 0.9,)
+fuel_mix = octo.Fluid(name_1=fuel_name, name_2="water", mf_1=0.9, mf_2=0.1)
+# Test mixture
 
 fuel_T = 330
 fuel_p = 18E5
@@ -27,3 +28,4 @@ oxidiser_man = octo.Manifold(fluid=oxidiser, T_inlet=ox_T, p_inlet=ox_p)
 # fuel_mix_man is just to test the class properly handles a FluidMixture
 
 print(fuel_man.rho, fuel_mix_man.rho, oxidiser_man.rho)
+print(fuel_man.Cp, fuel_mix_man.Cp, oxidiser_man.Cp)
