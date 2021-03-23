@@ -37,14 +37,19 @@ class FluidMixture:
                                   mixture, recognised by the source.
             mf_1 (float): Mass fraction of component_1 in mixture.
             mf_2 (float): Mass fraction of component_2 in mixture.
+            source (string): Property source. Currently, only option is thermo.
+                             Defaults to "thermo".
     """
 
     def __init__(self, component_1, component_2, mf_1,
                  mf_2, source="thermo"):
 
+        self.names = [component_1, component_2]
+
         if source == "thermo":
-            self.mix = thermo.chemical.Chemical(
-                       [component_1, component_2], ws=[mf_1, mf_2])
+            self.chem = thermo.chemical.Mixture(
+                                               [component_1, component_2],
+                                               ws=[mf_1, mf_2])
         else:
             raise ValueError("Only \"thermo\" is supported currently.")
 
@@ -57,17 +62,29 @@ class Manifold:
 
         self.T_inlet = T_inlet  # Kelvin
         self.p_inlet = p_inlet  # Pa
-
         self.fluid = fluid
+
         if isinstance(fluid, Fluid):
             self.fluid.chem.calculate(T=self.T_inlet, P=self.p_inlet)
             # Update thermo conditions
 
-        if self.fluid.chem.phase != "l":
-            print(self.fluid.chem.phase)
-            raise Exception("""Fluid \"{}\" is entering the manifold
-                            as a non-liquid!""".format(self.fluid.name))
+            if self.fluid.chem.phase != "l":
+                print(self.fluid.chem.phase)
+                raise Exception("""Fluid \"{}\" is entering the manifold
+                                as a non-liquid!""".format(self.fluid.name))
+            # Phase check at inlet
 
-        self.rho = self.fluid.chem.rho
-        # self.transport
-        # Might want to use transport properties for manifold modelling later
+            self.rho = self.fluid.chem.rho
+            # self.transport
+            # Might use transport properties for manifold modelling later
+
+        elif isinstance(fluid, FluidMixture):
+            print("It's a mixture!")
+            self.fluid.chem.calculate(T=self.T_inlet, P=self.p_inlet)
+            for name in self.fluid.names:
+                component = Fluid(name)
+                component.chem.calculate(T=self.T_inlet, P=self.p_inlet)
+                if component.chem.phase != "l":
+                    raise Exception("""Fluid \"{}\" is entering the manifold
+                                    as a non-liquid!""".format(name))
+            # Phase check for each mixture component, at inlet
