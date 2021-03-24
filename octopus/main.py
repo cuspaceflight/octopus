@@ -75,7 +75,7 @@ class Fluid:
         rho = 0
         for i in range(len(self.name_list)):
             rho += self.mf_list[i] * thermo.chemical.Chemical(
-                                     self.name_list[i], T=T, P=p).rho
+                self.name_list[i], T=T, P=p).rho
 
         return rho
 
@@ -94,12 +94,13 @@ class Fluid:
         Cp = 0
         for i in range(len(self.name_list)):
             Cp += self.mf_list[i] * thermo.chemical.Chemical(
-                                     self.name_list[i], T=T, P=p).Cp
+                self.name_list[i], T=T, P=p).Cp
 
         return Cp
 
     def h(self, T, p):  # Ref [1], used for liquid phase enthalpy of nitrous
         pass
+
     # Not sure what the best way to do this is - would be better if we
     # didn't have to manually reference tables on a per compound basis
     # thermopy3 is a candidate to do this with a different module
@@ -127,7 +128,6 @@ class Manifold:
        their propellant, and provide fluid property attributes to elements."""
 
     def __init__(self, fluid, T_inlet, p_inlet):
-
         self.T_inlet = T_inlet  # Stagnation temperature, Kelvin
         self.p_inlet = p_inlet  # Stagnation, Pa
         self.fluid = fluid
