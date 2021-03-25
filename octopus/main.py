@@ -144,16 +144,15 @@ class Orifice:  # WIP
     """The orifice class is used to model thermodynamic changes in the
     fluid as it moves from the manifold into the combustion chamber """
 
-    def __init__(self, fluid, T_o, p_o, orifice_type, L, D):
+    def __init__(self, fluid: thermo.chemical.Chemical, orifice_type, L, D):
         # subscript o represents initial conditions at stagnation
         self.fluid = fluid
-        self.T_o = T_o
-        self.p_o = p_o
-        self.C_fo = fluid.Cp(T_o, p_o)
-        self.v_fo = 1 / fluid.rho(T_o, p_o)
-        self.h_fo = fluid.h(T_o, p_o)
-        self.v_fgo = None
-        self.h_fgo = None  # IMPLEMENT
+        self.T_o = fluid.T
+        self.p_o = fluid.P
+        self.C_fo = 1976 # debug fluid.Cpl
+        self.v_fo = 1 / fluid.rhol
+        self.v_fgo = abs(1 / fluid.rhol - 1 / fluid.rhog)
+        self.h_fgo = abs(fluid.Hvap)
         self.orifice_type = orifice_type
 
         if orifice_type == 0:
@@ -163,4 +162,4 @@ class Orifice:  # WIP
     def v(self, p):
         if self.orifice_type == 0:
             # calculate specific volume from pressure using omega
-            return self.v_fo * (self.omega * self.p_o / p + 1)
+            return self.v_fo * (self.omega * (self.p_o / p - 1) + 1)

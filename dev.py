@@ -4,10 +4,14 @@ import octopus as octo
 
 
 def main():
-    nitrous_saturated = thermo.chemical.Chemical('nitrous oxide', P=1.2 * 15e6, T=270)
+    # p_COM = 15e6
+    # nitrous_saturated = thermo.chemical.Chemical('nitrous oxide', P=1902e3, T=255)
+    # orifice = octo.Orifice(nitrous_saturated, octo.STRAIGHT, 1, 1)
+    # print(orifice.C_fo,orifice.T_o,orifice.p_o,orifice.v_fo,orifice.v_fgo,orifice.h_fgo)
+    # print(f'omega: {orifice.omega}, v: {orifice.v(0.85*1902e3)}')
 
-    h1 = octo.saturation_h(octo.NITROUS_OXIDE, 270, 'l')
-    print(f'specific enthalpy at inlet: {h1}, should be: -311')
+    # h1 = octo.saturation_h(octo.NITROUS_OXIDE, 270, 'l')
+    # print(f'specific enthalpy at inlet: {h1}, should be: -311')
 
     # For testing WIP code
 
