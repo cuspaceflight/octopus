@@ -1,7 +1,14 @@
+import thermo
+
 import octopus as octo
 
 
 def main():
+    nitrous_saturated = thermo.chemical.Chemical('nitrous oxide', P=1.2 * 15e6, T=270)
+
+    h1 = octo.saturation_h(octo.NITROUS_OXIDE, 270, 'l')
+    print(f'specific enthalpy at inlet: {h1}, should be: -311')
+
     # For testing WIP code
 
     fuel_name = "isopropanol"

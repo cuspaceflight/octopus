@@ -99,7 +99,8 @@ class Fluid:
         return Cp
 
     def h(self, T, p):  # Ref [1], used for liquid phase enthalpy of nitrous
-        pass
+        """DEBUG ONLY - Returns the value of h of nitrous oxide at -25C"""
+        return -355000.0  # IMPLEMENT
 
     # Not sure what the best way to do this is - would be better if we
     # didn't have to manually reference tables on a per compound basis
@@ -137,3 +138,29 @@ class Manifold:
 
         self.rho = self.fluid.rho(T=T_inlet, p=p_inlet)
         self.Cp = self.fluid.Cp(T=T_inlet, p=p_inlet)
+
+
+class Orifice:  # WIP
+    """The orifice class is used to model thermodynamic changes in the
+    fluid as it moves from the manifold into the combustion chamber """
+
+    def __init__(self, fluid, T_o, p_o, orifice_type, L, D):
+        # subscript o represents initial conditions at stagnation
+        self.fluid = fluid
+        self.T_o = T_o
+        self.p_o = p_o
+        self.C_fo = fluid.Cp(T_o, p_o)
+        self.v_fo = 1 / fluid.rho(T_o, p_o)
+        self.h_fo = fluid.h(T_o, p_o)
+        self.v_fgo = None
+        self.h_fgo = None  # IMPLEMENT
+        self.orifice_type = orifice_type
+
+        if orifice_type == 0:
+            # omega is a parameter from Juang's paper relating pressure and temperature in the isentropic expansion
+            self.omega = self.C_fo * self.T_o * self.p_o * (self.v_fgo / self.h_fgo) ** 2 / self.v_fo
+
+    def v(self, p):
+        if self.orifice_type == 0:
+            # calculate specific volume from pressure using omega
+            return self.v_fo * (self.omega * self.p_o / p + 1)

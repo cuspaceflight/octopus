@@ -47,12 +47,12 @@ if __name__ == "__main__":
     Cd = 0.7  # sensible discharge coefficient
     A = np.pi * 0.5e-3 ** 2  # area of a 0.5mm radius orifice
     rho = 995.4  # kg/m3
-    mdot=4.1
+    mdot = 4.1
     p_chamber = 1500000  # 1.5MPa, 15bar
 
     # mdot_spi(Cd, A, n, rho, p_chamber)
     calc_A = req_A(mdot)
-    n=int(calc_A/A)
-    dp=delta_p(mdot,A,n,Cd,rho)
-    print(f'required area for {mdot}kg/s: {round(calc_A,7)}m^2. Assuming 1mm diameter, {n} orifices required')
-    print(f'required pressure drop for {mdot}kg/s over {n} {round(A,7)}m^2 orifices: {round(dp,4)}Pa')
+    n = int(calc_A / A)
+    dp = delta_p(mdot, A, n, Cd, rho)
+    print(f'required area for {mdot}kg/s: {round(calc_A, 7)}m^2. Assuming 1mm diameter, {n} orifices required')
+    print(f'required pressure drop for {mdot}kg/s over {n} {round(A, 7)}m^2 orifices: {round(dp, 4)}Pa')
