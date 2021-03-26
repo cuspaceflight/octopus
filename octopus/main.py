@@ -42,46 +42,21 @@ class Fluid(thermo.chemical.Chemical):
         else:
             return temp_Cpl
 
-    def h(self, T, p):  # Ref [1], used for liquid phase enthalpy of nitrous
-        """DEBUG ONLY - Returns the value of h of nitrous oxide at -25C"""
-        return -355000.0  # IMPLEMENT
-
-    # Not sure what the best way to do this is - would be better if we
-    # didn't have to manually reference tables on a per compound basis
-    # thermopy3 is a candidate to do this with a different module
-
-    def liqCheck(self, T, p):
-        """Checks if the fluid contains any non-liquids.
-
-        Args:
-            T (float): Fluid temperature, Kelvin
-            p (float): Fluid pressure, Pascals
-
-        Returns:
-            bool: True if all fluid components are liquid, else false.
-        """
-
-        for name in self.name_list:
-            if thermo.chemical.Chemical(name, T=T, P=p).phase != "l":
-                return False
-
-        return True
-
 
 class Manifold:
     """The manifold class is used to organise injection elements by
        their propellant, and provide fluid property attributes to elements."""
 
-    def __init__(self, fluid, T_inlet, p_inlet):
+    def __init__(self, fluid: Fluid, T_inlet, p_inlet):
         self.T_inlet = T_inlet  # Stagnation temperature, Kelvin
         self.p_inlet = p_inlet  # Stagnation, Pa
         self.fluid = fluid
 
-        if self.fluid.liqCheck(T=T_inlet, p=p_inlet) is False:
+        if self.fluid.phase!='l':
             raise ValueError("Fluid is entering the manifold as a non-liquid!")
 
-        self.rho = self.fluid.rho(T=T_inlet, p=p_inlet)
-        self.Cp = self.fluid.Cp(T=T_inlet, p=p_inlet)
+        self.rho = self.fluid.rho
+        self.Cp = self.fluid.Cp
 
 
 class Orifice:  # WIP
