@@ -1,16 +1,14 @@
-import thermo
-
 import octopus as octo
 
 
 def main():
-    n1=octo.Fluid('N2O',T=250.0)
+    n1 = octo.Fluid('N2O', T=254.0)
     n1.P = n1.Psat
-    print(n1.T, n1.P, n1.Cpl, 1 / n1.rhol)
-    orifice1 = octo.Orifice(n1, octo.STRAIGHT, 1, 1)
-    print(orifice1.omega)
-    print(orifice1.v(n1.Psat*0.8))
-
+    print(f'T: {n1.T}, P: {n1.P}')
+    orifice1 = octo.Orifice(n1, octo.STRAIGHT, 1, 1e-3)
+    eta_Pin = orifice1.eta*n1.P
+    print(f'eta_Pin: {round(eta_Pin *1e-6,4)}Mpa\n'
+          f'T: {n1.T}, P: {n1.P}, Cpl: {n1.Cpl}')
     # For testing WIP code
     '''
     fuel_name = "isopropanol"

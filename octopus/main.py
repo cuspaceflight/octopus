@@ -6,6 +6,7 @@ References:
 """
 
 import thermo
+from numpy import pi, sqrt, log
 
 
 class Fluid(thermo.chemical.Chemical):
@@ -34,10 +35,10 @@ class Fluid(thermo.chemical.Chemical):
             if temp_Cpl > 1500:  # If Cpl is below 1500, the supercritical polynomial is being used mistakenly by the solver
                 return temp_Cpl
             else:
-                orig_T = super().__getattribute__('T')  # temporarily saves T (T is an attribute, not a property)
-                super().__setattr__('T', 10)  # temporarily sets T=10 to allow solver to reset
-                super().Cpl  # computes Cpl to reset thermo's solver
-                super().__setattr__('T', orig_T)  # resets T
+                orig_T = self.T  # temporarily saves T (T is an attribute, not a property)
+                self.T = 10  # temporarily sets T=10 to allow solver to reset
+                super().Cpl  # computes Cpl(10) to reset thermo's solver
+                self.T = orig_T  # resets T
                 return super().Cpl  # returns value of Cpl using correct solver
         else:
             return temp_Cpl
@@ -52,7 +53,7 @@ class Manifold:
         self.p_inlet = p_inlet  # Stagnation, Pa
         self.fluid = fluid
 
-        if self.fluid.phase!='l':
+        if self.fluid.phase != 'l':
             raise ValueError("Fluid is entering the manifold as a non-liquid!")
 
         self.rho = self.fluid.rho
@@ -67,18 +68,28 @@ class Orifice:  # WIP
         # subscript o represents initial conditions at stagnation
         self.fluid = fluid
         self.T_o = fluid.T
-        self.p_o = fluid.P
+        self.P_o = fluid.P
         self.C_fo = fluid.Cpl
         self.v_fo = 1 / fluid.rhol
         self.v_fgo = abs(1 / fluid.rhol - 1 / fluid.rhog)
         self.h_fgo = abs(fluid.Hvap)
         self.orifice_type = orifice_type
+        self.L = L
+        self.D = D
 
         if orifice_type == 0:
             # omega is a parameter from Juang's paper relating pressure and temperature in the isentropic expansion
-            self.omega = self.C_fo * self.T_o * self.p_o * (self.v_fgo / self.h_fgo) ** 2 / self.v_fo
+            # eta is the critical pressure ratio
+            self.omega = self.C_fo * self.T_o * self.P_o * (self.v_fgo / self.h_fgo) ** 2 / self.v_fo
+            self.eta = 0.55 + 0.217 * log(self.omega) - 0.046 * log(self.omega) ** 2 + 0.004 * log(self.omega) ** 3
 
-    def v(self, p):
+    def v(self, P):
         if self.orifice_type == 0:
             # calculate specific volume from pressure using omega
-            return self.v_fo * (self.omega * (self.p_o / p - 1) + 1)
+            return self.v_fo * (self.omega * (self.P_o / P - 1) + 1)
+
+    def m_dot(self):
+        if self.orifice_type == 0:
+            # m_dot = A*sqrt(Po/vo)*eta/sqrt(omega)
+            return (pi * self.D ** 2) * self.eta \
+                   * sqrt(self.P_o / self.v_fo / self.omega)
