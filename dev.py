@@ -1,14 +1,33 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 import octopus as octo
 
 
 def main():
-    n1 = octo.Fluid('N2O', T=254.0)
-    n1.P = n1.Psat
-    print(f'T: {n1.T}, P: {n1.P}')
-    orifice1 = octo.Orifice(n1, octo.STRAIGHT, 1, 1e-3)
-    eta_Pin = orifice1.eta*n1.P
-    print(f'eta_Pin: {round(eta_Pin *1e-6,4)}Mpa\n'
-          f'T: {n1.T}, P: {n1.P}, Cpl: {n1.Cpl}')
+    n1 = octo.Fluid('N2O', P=18e5)
+    n1.T = n1.Tsat(n1.P)
+
+    M = 50
+    V = 0.1
+    chi0 = n1.calc_chi(M, V)
+    Cpl=n1.Cpl
+    Cpg=n1.Cpg
+
+    orifice = octo.Orifice(n1, chi0, 17.9e5, octo.STRAIGHT, 1e-2, 1e-3)
+    print(f'HEM mass flow: {orifice.m_dot_HEM()}kg/s\n'
+          f'SPI mass flow: {orifice.m_dot_SPI()}kg/s')
+
+    P = np.linspace(1, 20e5, 40)
+    M = []
+    for p in P:
+        orifice.P_cc=p
+        M.append(orifice.m_dot_HEM())
+
+    plt.plot(P, M)
+
+    plt.show()
+
     # For testing WIP code
     '''
     fuel_name = "isopropanol"
