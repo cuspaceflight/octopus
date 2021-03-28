@@ -1,9 +1,11 @@
-from octopus import Fluid, thermo, Manifold
+from thermo import chemical
+
+from octopus import Fluid, Manifold
 
 
 def test_octopus_Fluid():
     water = Fluid("water")
-    assert isinstance(water, thermo.chemical.Chemical)
+    assert isinstance(water, chemical.Chemical)
 
 
 '''
@@ -16,4 +18,4 @@ def test_octopus_FluidMixture():
 def test_octopus_Manifold():
     IPA = Fluid("isopropanol")
     manifold = Manifold(IPA, 300, 1.75E6)
-    assert isinstance(manifold.fluid, thermo.chemical.Chemical)
+    assert isinstance(manifold.fluid, chemical.Chemical)
