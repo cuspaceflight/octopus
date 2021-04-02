@@ -1,5 +1,5 @@
 from .main import *
-from .chemical import *
+from .utils import *
 
 # define injector orifice types
 STRAIGHT = 0
