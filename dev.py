@@ -9,7 +9,7 @@ fluid.calculate()
 
 
 def main():
-    T = array(linspace(200, 309, 100))
+    T = array(linspace(260, 309, 100))
     r_helm = [fluid.rho_sat(t) for t in T]
     rg_helm = [rg for rg, rl in r_helm]
     rl_helm = [rl for rg, rl in r_helm]

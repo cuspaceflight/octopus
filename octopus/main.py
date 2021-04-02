@@ -117,7 +117,7 @@ class Fluid(chemical.Chemical):
     def dg_drho(self,rho,T):
         delta = rho / self.rhoc
         tau = self.Tc / T
-        return self.R_specific*T*(self.ar_d(delta,tau)+delta*self.ar_dd(delta,tau))
+        return self.R_specific*T*(2*self.ar_d(delta,tau)+delta*self.ar_dd(delta,tau))
 
     def p(self, rho, T):
         delta = rho / self.rhoc
