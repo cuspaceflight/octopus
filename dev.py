@@ -2,25 +2,24 @@ from matplotlib import pyplot as plt
 from numpy import array
 from numpy import linspace
 
-from octopus import Fluid
+from octopus import Fluid,Orifice,STRAIGHT
 
-fluid = Fluid('N2O', T=250, P=18e5)
-fluid.calculate()
+
 
 
 def main():
-    T = array(linspace(260, 309, 100))
-    r_helm = [fluid.rho_sat(t) for t in T]
-    rg_helm = [rg for rg, rl in r_helm]
-    rl_helm = [rl for rg, rl in r_helm]
-    rg_thermo = [fluid.rho_g(t) for t in T]
-    rl_thermo = [fluid.rho_l(t) for t in T]
+    fluid = Fluid('N2O', T=250, P=18e5)
+    fluid.calculate()
 
-    plt.plot(T, rg_helm, color='red')
-    plt.plot(T, rl_helm, color='red')
-    plt.plot(T, rg_thermo, color='green')
-    plt.plot(T, rl_thermo, color='green')
-    plt.scatter(fluid.Tc, fluid.rhoc, color='blue')
+    orifice=Orifice(fluid,0,15e5,STRAIGHT,1e-2,1e-3)
+    P_cc=linspace(0,17.9e5,100)
+    mdot=[]
+    for P in P_cc:
+        orifice.P_cc=P
+        mdot.append(orifice.m_dot_HEM())
+    plt.plot(18e5-P_cc,mdot)
+    plt.xlabel('Pressure Drop (Pa)')
+    plt.ylabel('Mass Flow Rate (kg/s)')
     plt.show()
 
 

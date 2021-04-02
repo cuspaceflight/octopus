@@ -7,7 +7,7 @@ References:
 
 from numpy import pi, sqrt, array, log, exp
 from scipy.optimize import least_squares
-from thermo import chemical, property_molar_to_mass, utils
+from thermo import chemical
 
 from .utils import derivative
 
@@ -112,12 +112,12 @@ class Fluid(chemical.Chemical):
     def dp_drho(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
-        return self.R_specific*T*(1+2*delta*self.ar_d(delta,tau)+delta*delta*self.ar_dd(delta,tau))
+        return self.R_specific * T * (1 + 2 * delta * self.ar_d(delta, tau) + delta * delta * self.ar_dd(delta, tau))
 
-    def dg_drho(self,rho,T):
+    def dg_drho(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
-        return self.R_specific*T*(2*self.ar_d(delta,tau)+delta*self.ar_dd(delta,tau))
+        return self.R_specific * T * (2 * self.ar_d(delta, tau) + delta * self.ar_dd(delta, tau))
 
     def p(self, rho, T):
         delta = rho / self.rhoc
@@ -149,168 +149,110 @@ class Fluid(chemical.Chemical):
         return self.R_specific * T * \
                (1 + self.alpha_0(delta, tau) + self.alpha_r(delta, tau) + delta * self.ar_d(delta, tau))
 
-    def p_g_error(self, x, Ts):
-        rho_g, rho_l = x
-        return array([self.p(rho_g, Ts) - self.p(rho_l, Ts),
-                      self.g(rho_g, Ts) - self.g(rho_l, Ts)])
-
-    def p_g_sep_args(self, rho_g, rho_l, Ts):
-        return array([self.p(rho_g, Ts) - self.p(rho_l, Ts),
-                      self.g(rho_g, Ts) - self.g(rho_l, Ts)])
-
-    def jac(self, x, Ts):
-        res = array([[self.dp_drho(x[0],Ts),self.dp_drho(x[1],Ts)],
-                     [self.dg_drho(x[0],Ts),self.dg_drho(x[1],Ts)]])
-
-        return res
-
-    def rho_sat(self, T):
-
-        x = array([self.rho_g(T),self.rho_l(T)])
-
-        res = least_squares(self.p_g_error, x, jac=self.jac, args=[T])
-        print(res.fun)
-        return res.x
+    def fun_ps(self, x, u, y):
+        return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
 
     def get_properties(self, rho, T):
         rhog = self.rho_g(T)
         rhol = self.rho_l(T)
-        p = self.p(rhog, T)
-        chi = (self.rhog - rho) * ((self.rhol - rho) / (self.rhol - self.rhog))
-        h = self.h(rhog, T) * chi + self.h(rhol, T) * (1 - chi)
-        s = self.s(rhog, T) * chi + self.s(rhol, T) * (1 - chi)
 
-    class Manifold:
-        """The manifold class is used to organise injection elements by
-           their propellant, and provide fluid property attributes to elements."""
+        if rho < rhog:
+            p = self.p(rho, T)
+            chi = 1
+            h = self.h(rho, T)
+            s = self.s(rho, T)
 
-        def __init__(self, fluid, T_inlet, p_inlet):
-            self.T_inlet = T_inlet  # Stagnation temperature, Kelvin
-            self.p_inlet = p_inlet  # Stagnation, Pa
-            self.fluid = fluid
+        elif rho > rhol:
+            p = self.p(rho, T)
+            chi = 0
+            h = self.h(rho, T)
+            s = self.s(rho, T)
+        else:
+            p = self.VaporPressure(T)
+            chi = rhog * (rhol - rho) / (rho * (rhol - rhog))
+            h = self.h(rhog, T) * chi + self.h(rhol, T) * (1 - chi)
+            s = self.s(rhog, T) * chi + self.s(rhol, T) * (1 - chi)
 
-            if self.fluid.phase != 'l':
-                raise ValueError("Fluid is entering the manifold as a non-liquid!")
+        res = {'p': p, 'chi': chi, 'h': h, 's': s}
 
-            self.rho = self.fluid.rho
-            self.Cp = self.fluid.Cp
+        return res
 
-    class Orifice:  # WIP
-        """The orifice class is used to model thermodynamic changes in the
-        fluid as it moves from the manifold into the combustion chamber """
 
-        def __init__(self, fluid, chi0, P_cc, orifice_type, L, D, Cd=0.7):
-            # subscript o represents initial conditions at stagnation
-            self.fluid = fluid
-            self.P_o = fluid.P
-            self.chi0 = chi0
+class Manifold:
+    """The manifold class is used to organise injection elements by
+       their propellant, and provide fluid property attributes to elements."""
 
-            self.P_cc = P_cc
-            self.orifice_type = orifice_type
-            self.L = L
-            self.D = D
-            self.A = 0.2 * pi * self.D ** 2
-            self.Cd = Cd
+    def __init__(self, fluid, T_inlet, p_inlet):
+        self.T_inlet = T_inlet  # Stagnation temperature, Kelvin
+        self.p_inlet = p_inlet  # Stagnation, Pa
+        self.fluid = fluid
 
-            self.c_lo = fluid.Cpl
-            self.h_o = chi0 * fluid.Hg + (chi0 - 1) * fluid.Hl
-            self.s_o = None
+        if self.fluid.phase != 'l':
+            raise ValueError("Fluid is entering the manifold as a non-liquid!")
 
-            self.v_lgo = abs(1 / fluid.rhol - 1 / fluid.rhog)
-            self.h_lgo = abs(fluid.Hvap)
+        self.rho = self.fluid.rho
+        self.Cp = self.fluid.Cp
 
-            self.T_o = fluid.Tsat(self.P_o)
-            self.fluid.T = self.T_o
-            self.v_o = fluid.Vl + chi0 * self.v_lgo
 
-            self.h_1 = 0
+class Orifice:  # WIP
+    """The orifice class is used to model thermodynamic changes in the
+    fluid as it moves from the manifold into the combustion chamber """
 
-            '''
-            if orifice_type == 0:
-                # omega is a parameter from Juang's paper relating pressure and temperature in the isentropic expansion
-                # eta is the critical pressure ratio
-                self.omega = self.C_fo * self.T_o * self.P_o * (self.v_fgo / self.h_fgo) ** 2 / self.v_fo
-                self.eta = 0.55 + 0.217 * log(self.omega) - 0.046 * log(self.omega) ** 2 + 0.004 * log(self.omega) ** 3
-            '''
+    def __init__(self, fluid, chi0, P_cc, orifice_type, L, D, Cd=0.7):
+        # subscript o represents initial conditions at stagnation
+        self.fluid = fluid
+        self.P_o = fluid.P
+        self.chi0 = chi0
 
-        def m_dot_SPI(self):
-            if self.orifice_type == 0:
-                return self.Cd * self.A * sqrt(2 * 1 / self.v_o * (self.P_o - self.P_cc))
+        self.P_cc = P_cc
+        self.orifice_type = orifice_type
+        self.L = L
+        self.D = D
+        self.A = 0.2 * pi * self.D ** 2
+        self.Cd = Cd
 
-        def f(self, x, u):
+        '''
+        if orifice_type == 0:
+            # omega is a parameter from Juang's paper relating pressure and temperature in the isentropic expansion
+            # eta is the critical pressure ratio
+            self.omega = self.C_fo * self.T_o * self.P_o * (self.v_fgo / self.h_fgo) ** 2 / self.v_fo
+            self.eta = 0.55 + 0.217 * log(self.omega) - 0.046 * log(self.omega) ** 2 + 0.004 * log(self.omega) ** 3
+        '''
 
-            chi, fluid = u
-            P = fluid.VaporPressure(T)
+    def m_dot_SPI(self):
+        if self.orifice_type == 0:
+            return self.Cd * self.A * sqrt(2 * 1 / self.v_o * (self.P_o - self.P_cc))
 
-            # liquid entropy at outlet wrt critical pressure (equal for liquid & gas)
-            Slm = fluid.HeatCapacityLiquid.T_dependent_property_integral_over_T(309, T) + fluid.eos.to_TP(T,
-                                                                                                          P).S_dep_l - utils.R * log(
-                P / fluid.Pc)
-            Sl = property_molar_to_mass(Slm, fluid.MW)
-            # gaseous entropy at outlet wrt critical pressure (equal for liquid & gas)
-            Sgm = fluid.HeatCapacityGas.T_dependent_property_integral_over_T(309, T) + fluid.eos.to_TP(T,
-                                                                                                       P).S_dep_g - utils.R * log(
-                P / fluid.Pc)
-            Sg = property_molar_to_mass(Sgm, fluid.MW)
+    def m_dot_HEM(self):
+        if self.orifice_type == 0:
+            # find initial conditions
+            # chi0,p0 known
+            p0 = self.P_o
+            chi0 = self.chi0
 
-            Vl = property_molar_to_mass(fluid.eos.to_TP(T, P).V_l, fluid.MW)
-            Vg = property_molar_to_mass(fluid.eos.to_TP(T, P).V_g, fluid.MW)
+            u = ['p', 'chi']
+            y = [p0, chi0]
+            initial = least_squares(self.fluid.fun_ps, [800, 250], args=[u, y])
+            rho0, T0 = initial.x
+            h0 = self.fluid.get_properties(rho0, T0)['h']
+            s0 = self.fluid.get_properties(rho0, T0)['s']
 
-            p_res = P
-            chi_res = (v - Vl) / (Vg - Vl)
-            S_res = Sl + chi_res * (Sg - Sl)
+            # set final conditions
+            # p1, s1 known
+            p1 = self.P_cc
+            s1 = s0
 
-            return array([p_res, S_res])
+            u = ['p', 's']
+            y = [p1, s1]
 
-        def fun(self, x, u, y):
-            return self.f(x, u) - y
+            final = least_squares(self.fluid.fun_ps, [500, 245], args=[u, y])
+            rho1, T1 = final.x
+            h1 = self.fluid.get_properties(rho1, T1)['h']
+            X1 = self.fluid.get_properties(rho1, T1)['chi']
+            print(self.P_o - self.P_cc, T1, X1)
 
-        def m_dot_HEM(self):
-            if self.orifice_type == 0:
-                P_o = self.P_o
-                T_o = self.fluid.Tsat(P_o)
-                # ambient pressure at outlet = P_cc
-                P_1 = self.P_cc
-                # liquid entropy at inlet
-                S_1m = self.fluid.HeatCapacityLiquid.T_dependent_property_integral_over_T(self.fluid.Tc, T_o) \
-                       + self.fluid.eos.to_TP(T_o, P_o).S_dep_l - utils.R * log(P_o / self.fluid.Pc)
-                S_1 = property_molar_to_mass(S_1m, self.fluid.MW)
+            return self.Cd * self.A * rho1 * sqrt(h0 - h1)
 
-                print(f'set:{S_1}')
-
-                # measured values are exit pressure and entropy (s=const)
-                y = array([P_1, S_1])
-                # independent variables are the fluid initial state
-                u = array([self.chi0, self.fluid])
-                # initial guess of T and v
-                x0 = array([245, self.fluid.Vg / 2])
-                # bounds on T
-                bounds = ([184, self.fluid.Vl], [308, self.fluid.Vg])
-
-                res = least_squares(self.fun, x0, args=(u, y), bounds=bounds)
-                T_1, v_1 = res.x
-                P, S = self.f([T_1, v_1], [0, self.fluid])
-
-                # set fluid
-                self.fluid.calculate(T_1, P_1)
-
-                Vl = property_molar_to_mass(self.fluid.eos.to_TP(T_1, P_1).V_l, self.fluid.MW)
-                Vg = property_molar_to_mass(self.fluid.eos.to_TP(T_1, P_1).V_g, self.fluid.MW)
-                chi_1 = (v_1 - Vl) / (Vg - Vl)
-
-                print(f'chi: {chi_1}')
-                print(f'T: {bounds[0][0]},\t\t\t\t\t\t {T_1}, \t{bounds[1][0]}')
-                print(f'v: {bounds[0][1]}, \t{v_1}, \t{bounds[1][1]}')
-
-                print(P, S)
-
-                # calculate dh
-                self.h_1 = chi_1 * self.fluid.Hg + (1 - chi_1) * self.fluid.Hl
-
-                # print(chi_1, v_1, self.fluid.Vg, self.fluid.eos.to_TP(T_1, self.P_cc).V_g)
-
-                return self.Cd * self.A * sqrt(self.h_o - self.h_1) / v_1
-
-        def m_dot_dyer(self):
-            kappa = 1  # fluid enters orifice at vapour pressure
-            return 1 / (1 + kappa) * self.m_dot_HEM() + (1 - 1 / (1 + kappa)) * self.m_dot_SPI()
+    def m_dot_dyer(self):
+        kappa = 1  # fluid enters orifice at vapour pressure
+        return 1 / (1 + kappa) * self.m_dot_HEM() + (1 - 1 / (1 + kappa)) * self.m_dot_SPI()
