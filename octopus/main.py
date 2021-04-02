@@ -109,6 +109,16 @@ class Fluid(chemical.Chemical):
     def ar_tt(self, delta, tau):
         return derivative(self.ar_t, 1, delta, tau)
 
+    def dp_drho(self, rho, T):
+        delta = rho / self.rhoc
+        tau = self.Tc / T
+        return self.R_specific*T*(1+2*delta*self.ar_d(delta,tau)+delta*delta*self.ar_dd(delta,tau))
+
+    def dg_drho(self,rho,T):
+        delta = rho / self.rhoc
+        tau = self.Tc / T
+        return self.R_specific*T*(self.ar_d(delta,tau)+delta*self.ar_dd(delta,tau))
+
     def p(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
@@ -149,21 +159,17 @@ class Fluid(chemical.Chemical):
                       self.g(rho_g, Ts) - self.g(rho_l, Ts)])
 
     def jac(self, x, Ts):
+        res = array([[self.dp_drho(x[0],Ts),self.dp_drho(x[1],Ts)],
+                     [self.dg_drho(x[0],Ts),self.dg_drho(x[1],Ts)]])
 
-        # [ df1/dx1 df1/dx1
-        #   df2/dx2 df2/dx2 ]
-
-        # [ d(dp)/d(rg) d(dp)/d(rl)
-        #   d(dg)/d(rg) d(dg)/d(rl) ]
-
-        return array([derivative(self.p_g_sep_args, 0, x[0], x[1], Ts),
-                      derivative(self.p_g_sep_args, 1, x[0], x[1], Ts)]).T
+        return res
 
     def rho_sat(self, T):
-        sep = 300
-        x = array([10, 700])
-        res = least_squares(self.p_g_error, x, jac=self.jac, args=[T])
 
+        x = array([self.rho_g(T),self.rho_l(T)])
+
+        res = least_squares(self.p_g_error, x, jac=self.jac, args=[T])
+        print(res.fun)
         return res.x
 
     def get_properties(self, rho, T):

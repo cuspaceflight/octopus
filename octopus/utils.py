@@ -4,7 +4,7 @@ from csv import reader
 from numpy import array, nan_to_num
 
 
-def derivative(f, axis, *args, dx=1):
+def derivative(f, axis, *args, dx=0.01):
     if axis >= len(args):
         raise ValueError("axis index too high")
     args_l = list(args)
@@ -12,7 +12,7 @@ def derivative(f, axis, *args, dx=1):
     args_l[axis] -= dx
     args_h[axis] += dx
 
-    return nan_to_num(array((f(*args_h) - f(*args_l)) / (2 * dx))) / dx
+    return nan_to_num(array((f(*args_h) - f(*args_l)) / (2 * dx)))
 
 
 class Nist:
