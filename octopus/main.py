@@ -5,9 +5,10 @@ References:
             IHS ESDU, http://edge.rit.edu/edge/P07106/public/Nox.pdf
 """
 
-from numpy import pi, sqrt, array, log, exp
+from numpy import pi, sqrt, array, log, exp, float64, nan_to_num
 from scipy.optimize import least_squares
 from thermo import chemical
+
 
 from .utils import derivative
 
@@ -81,12 +82,12 @@ class Fluid(chemical.Chemical):
     def rho_g(self, T):
         A = [-878.637631, 357.7403382, 574.66924864, -972.57488693, 630.47903568]
         tau = 1 - T / self.Tc
-        return self.rhoc + A[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(A))
+        return nan_to_num(self.rhoc + A[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(A)))
 
     def rho_l(self, T):
         A = [899.61701036, 179.53626729, 857.66247459, -2160.66039529, 2029.1923931]
         tau = 1 - T / self.Tc
-        return self.rhoc + A[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(A))
+        return nan_to_num(self.rhoc + A[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(A)))
 
     def a0_t(self, delta, tau):
         return derivative(self.alpha_0, 1, delta, tau)
@@ -158,13 +159,13 @@ class Fluid(chemical.Chemical):
 
         if rho < rhog:
             p = self.p(rho, T)
-            chi = 1
+            chi = 1.0
             h = self.h(rho, T)
             s = self.s(rho, T)
 
         elif rho > rhol:
             p = self.p(rho, T)
-            chi = 0
+            chi = float64(0.0)
             h = self.h(rho, T)
             s = self.s(rho, T)
         else:
@@ -174,7 +175,9 @@ class Fluid(chemical.Chemical):
             s = self.s(rhog, T) * chi + self.s(rhol, T) * (1 - chi)
 
         res = {'p': p, 'chi': chi, 'h': h, 's': s}
-
+        for key in res:
+            if isinstance(res[key], type(None)):
+                print(key,res[key],rho,rhol,rhog)
         return res
 
 
@@ -221,7 +224,13 @@ class Orifice:  # WIP
 
     def m_dot_SPI(self):
         if self.orifice_type == 0:
-            return self.Cd * self.A * sqrt(2 * 1 / self.v_o * (self.P_o - self.P_cc))
+            p0 = self.P_o
+            chi0 = self.chi0
+            u = ['p', 'chi']
+            y = [p0, chi0]
+            initial = least_squares(self.fluid.fun_ps, [800, 250], args=[u, y])
+            rho0, T0 = initial.x
+            return self.A * sqrt(2 * rho0 * (self.P_o - self.P_cc))
 
     def m_dot_HEM(self):
         if self.orifice_type == 0:
@@ -249,10 +258,10 @@ class Orifice:  # WIP
             rho1, T1 = final.x
             h1 = self.fluid.get_properties(rho1, T1)['h']
             X1 = self.fluid.get_properties(rho1, T1)['chi']
-            print(self.P_o - self.P_cc, T1, X1)
 
-            return self.Cd * self.A * rho1 * sqrt(h0 - h1)
+            return self.A * rho1 * sqrt(h0 - h1)
 
     def m_dot_dyer(self):
         kappa = 1  # fluid enters orifice at vapour pressure
-        return 1 / (1 + kappa) * self.m_dot_HEM() + (1 - 1 / (1 + kappa)) * self.m_dot_SPI()
+        W = 1 / (1 + kappa)
+        return self.Cd * ((1 - W) * self.m_dot_SPI() + W * self.m_dot_HEM())
