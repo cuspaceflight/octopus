@@ -172,12 +172,12 @@ class Fluid(chemical.Chemical):
                         13.0945*(1-Tr)**2 - 14.5180*(1-Tr)**3)
 
     def z(self, delta, tau):
-        return 1 + delta*ar_d(delta, tau)
+        return 1 + delta*self.ar_d(delta, tau)
         # Return the compressibility - see Ref [3], Eqn (15)
 
     # I might not be following your intended syntax here
-    def dz_dT(self, ):
-        return derivative(z, 0, )
+    # def dz_dT(self, ):
+    #    return derivative(z, 0, )
 
     def fun_ps(self, x, u, y):
         return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
