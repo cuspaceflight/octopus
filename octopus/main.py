@@ -3,6 +3,9 @@
 References:
     - [1] - Thermophyiscal properties of nitrous oxide,
             IHS ESDU, http://edge.rit.edu/edge/P07106/public/Nox.pdf
+    - [2] - An investigation of injectors for use with high vapor pressure
+            propellants with applications to hybrid rockets, Benjamin S. Waxman
+            https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf
 """
 
 from numpy import pi, sqrt, array, log, exp, float64, nan_to_num
@@ -150,6 +153,23 @@ class Fluid(chemical.Chemical):
         return self.R_specific * T * \
                (1 + self.alpha_0(delta, tau) + self.alpha_r(delta, tau) + delta * self.ar_d(delta, tau))
 
+    def cpl(self, T):
+        """Specific heat at constant pressure for saturated liquid N2O.
+           See Ref [1].
+
+        Args:
+            T (float): Nitrous oxide temperature, K
+
+        Returns:
+            (float): Cp for liquid N2O at given temperature.
+        """
+        if not 183.15 <= T <= 303.15:
+            raise ValueError(f"Temperature ({T} K) out of range")
+        Tr = 309.57  # Find the reduced temperature (T / T_crit)
+        return 2.49973*(1 + 0.023454/(1-Tr) - 3.80136*(1-Tr) +
+                        13.0945*(1-Tr)**2 - 14.5180*(1-Tr)**3)
+
+
     def fun_ps(self, x, u, y):
         return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
 
@@ -265,3 +285,13 @@ class Orifice:  # WIP
         kappa = 1  # fluid enters orifice at vapour pressure
         W = 1 / (1 + kappa)
         return self.Cd * ((1 - W) * self.m_dot_SPI() + W * self.m_dot_HEM())
+
+    def Y(self):
+        """Calculate the compressibility correction factor for the orifice.
+        See Ref [2], section 2.1.1.2.
+        n = gamma
+
+        Returns:
+            [type]: [description]
+        """
+        return number
