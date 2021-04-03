@@ -6,6 +6,8 @@ References:
     - [2] - An investigation of injectors for use with high vapor pressure
             propellants with applications to hybrid rockets, Benjamin S. Waxman
             https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf
+    - [3] - Short Fundamental Equations of State for 20 Industrial Fluids,
+            Lemmon and Span, https://pubs.acs.org/doi/pdf/10.1021/je050186n
 """
 
 from numpy import pi, sqrt, array, log, exp, float64, nan_to_num
@@ -169,6 +171,13 @@ class Fluid(chemical.Chemical):
         return 2.49973*(1 + 0.023454/(1-Tr) - 3.80136*(1-Tr) +
                         13.0945*(1-Tr)**2 - 14.5180*(1-Tr)**3)
 
+    def z(self, delta, tau):
+        return 1 + delta*ar_d(delta, tau)
+        # Return the compressibility - see Ref [3], Eqn (15)
+
+    # I might not be following your intended syntax here
+    def dz_dT(self, ):
+        return derivative(z, 0, )
 
     def fun_ps(self, x, u, y):
         return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
@@ -286,12 +295,24 @@ class Orifice:  # WIP
         W = 1 / (1 + kappa)
         return self.Cd * ((1 - W) * self.m_dot_SPI() + W * self.m_dot_HEM())
 
-    def Y(self):
-        """Calculate the compressibility correction factor for the orifice.
+    def Y(self, Fluid):
+        """Calculate the general compressibility correction factor for the orifice.
         See Ref [2], section 2.1.1.2.
-        n = gamma
 
         Returns:
-            [type]: [description]
+            float: Mass flow compressibility correction.
         """
-        return number
+        T = Fluid.T
+        P = Fluid.P
+        R = 8.31446/(Fluid.MW/1000)  # Get the specific gas constant
+        #  cpl = Fluid.cpl(T)  # Saturated liquid Cp at this temperature
+        #  gamma = cpl/(cpl - R)  # Ratio of specific heats
+        rho_l = Fluid.rho_l(T)
+
+        # Isentropic power law exponent - equation 2.22 of Ref [2]
+        Z = P/(rho_l*R*T)  # Compressibiliy
+        #  dZdT_rho = None
+
+        #  n = gamma * (Z + T)/(Z+T)
+
+        return None
