@@ -4,11 +4,11 @@ References:
     - [1] - Thermophyiscal properties of nitrous oxide,
             IHS ESDU, http://edge.rit.edu/edge/P07106/public/Nox.pdf
 """
+from functools import lru_cache
 
-from numpy import pi, sqrt, array, log, exp, float64, nan_to_num
+from numpy import pi, sqrt, array, log, exp, nan_to_num
 from scipy.optimize import least_squares
 from thermo import chemical
-
 
 from .utils import derivative
 
@@ -19,31 +19,30 @@ class Fluid(chemical.Chemical):
     def __init__(self, ID: str, T: float = 298.15, P: float = 101325):
         super().__init__(ID, T, P)
 
+    @lru_cache(maxsize=1)
     def alpha_0(self, delta, tau):
-        """calculates the reduced helmholz idea gas energy if the chemical is nitrus oxide"""
+        """Calculate the reduced ideal gas Helmzold energy is the fluid coefficients are known"""
         # symbol|superscript|subscipt --> c_p^0 = cp0
         if self.ID == 'N2O':
 
-            a1 = -4.4262736272
-            a2 = 4.3120475243
-            c0 = 3.5
-            c1 = 0  # not needed
-            c2 = 1  # not needed
+            a = [-4.4262736272, 4.3120475243]
+            c = [3.5, 0, 1]
 
             v = array([2.1769, 1.6145, 0.48393])
             u = array([879.0, 2372.0, 5447.0])
 
-            alpha_0 = a1 \
-                      + a2 * tau \
+            alpha_0 = a[0] \
+                      + a[1] * tau \
                       + log(delta) \
-                      + (c0 - 1) * log(tau) \
-                      - (c1 * self.Tc ** c2) / (c2 * (c2 + 1)) * tau ** (-c2) \
+                      + (c[0] - 1) * log(tau) \
+                      - (c[1] * self.Tc ** c[2]) / (c[2] * (c[2] + 1)) * tau ** (-c[2]) \
                       + sum(v * log(1 - exp(-u * tau / self.Tc)))
             return alpha_0
 
         else:
             return None
 
+    @lru_cache(maxsize=1)
     def alpha_r(self, delta, tau):
         """calculates the reduced helmholz residual energy if the chemical is nitrus oxide"""
         # symbol|superscript|subscipt --> c_p^0 = cp0
@@ -89,61 +88,75 @@ class Fluid(chemical.Chemical):
         tau = 1 - T / self.Tc
         return nan_to_num(self.rhoc + A[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(A)))
 
+    @lru_cache(maxsize=1)
     def a0_t(self, delta, tau):
         return derivative(self.alpha_0, 1, delta, tau)
 
+    @lru_cache(maxsize=1)
     def a0_tt(self, delta, tau):
         return derivative(self.a0_t, 1, delta, tau)
 
+    @lru_cache(maxsize=1)
     def ar_d(self, delta, tau):
         return derivative(self.alpha_r, 0, delta, tau)
 
+    @lru_cache(maxsize=1)
     def ar_t(self, delta, tau):
         return derivative(self.alpha_r, 1, delta, tau)
 
+    @lru_cache(maxsize=1)
     def ar_dd(self, delta, tau):
         return derivative(self.ar_d, 0, delta, tau)
 
+    @lru_cache(maxsize=1)
     def ar_dt(self, delta, tau):
         return derivative(self.ar_d, 1, delta, tau)
 
+    @lru_cache(maxsize=1)
     def ar_tt(self, delta, tau):
         return derivative(self.ar_t, 1, delta, tau)
 
+    @lru_cache(maxsize=1)
     def dp_drho(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
         return self.R_specific * T * (1 + 2 * delta * self.ar_d(delta, tau) + delta * delta * self.ar_dd(delta, tau))
 
+    @lru_cache(maxsize=1)
     def dg_drho(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
         return self.R_specific * T * (2 * self.ar_d(delta, tau) + delta * self.ar_dd(delta, tau))
 
+    @lru_cache(maxsize=1)
     def p(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
         return rho * self.R_specific * T * \
                (1 + delta * self.ar_d(delta, tau))
 
+    @lru_cache(maxsize=1)
     def u(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
         return self.R_specific * T * \
                tau * (self.a0_t(delta, tau) + self.ar_t(delta, tau))
 
+    @lru_cache(maxsize=1)
     def h(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
         return self.R_specific * T * \
                (1 + tau * (self.a0_t(delta, tau) + self.ar_t(delta, tau)) + delta * self.ar_d(delta, tau))
 
+    @lru_cache(maxsize=1)
     def s(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
         return self.R_specific * \
                (tau * (self.a0_t(delta, tau) + self.ar_t(delta, tau)) - self.alpha_0(delta, tau) - self.alpha_r(delta, tau))
 
+    @lru_cache(maxsize=1)
     def g(self, rho, T):
         delta = rho / self.rhoc
         tau = self.Tc / T
@@ -153,6 +166,7 @@ class Fluid(chemical.Chemical):
     def fun_ps(self, x, u, y):
         return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
 
+    @lru_cache(maxsize=1)
     def get_properties(self, rho, T):
         rhog = self.rho_g(T)
         rhol = self.rho_l(T)
@@ -165,7 +179,7 @@ class Fluid(chemical.Chemical):
 
         elif rho > rhol:
             p = self.p(rho, T)
-            chi = float64(0.0)
+            chi = 0.0
             h = self.h(rho, T)
             s = self.s(rho, T)
         else:
@@ -175,15 +189,12 @@ class Fluid(chemical.Chemical):
             s = self.s(rhog, T) * chi + self.s(rhol, T) * (1 - chi)
 
         res = {'p': p, 'chi': chi, 'h': h, 's': s}
-        for key in res:
-            if isinstance(res[key], type(None)):
-                print(key,res[key],rho,rhol,rhog)
+
         return res
 
 
 class Manifold:
-    """The manifold class is used to organise injection elements by
-       their propellant, and provide fluid property attributes to elements."""
+    """Organises Orifices into Elements, contains propellants"""
 
     def __init__(self, fluid, T_inlet, p_inlet):
         self.T_inlet = T_inlet  # Stagnation temperature, Kelvin
@@ -198,31 +209,22 @@ class Manifold:
 
 
 class Orifice:  # WIP
-    """The orifice class is used to model thermodynamic changes in the
-    fluid as it moves from the manifold into the combustion chamber """
+    """Model the thermodynamic changes as fluid moves through the orifice"""
 
-    def __init__(self, fluid, chi0, P_cc, orifice_type, L, D, Cd=0.7):
+    def __init__(self, fluid, chi0, orifice_type, L, D, Cd=0.7):
         # subscript o represents initial conditions at stagnation
         self.fluid = fluid
         self.P_o = fluid.P
         self.chi0 = chi0
 
-        self.P_cc = P_cc
         self.orifice_type = orifice_type
         self.L = L
         self.D = D
         self.A = 0.2 * pi * self.D ** 2
         self.Cd = Cd
 
-        '''
-        if orifice_type == 0:
-            # omega is a parameter from Juang's paper relating pressure and temperature in the isentropic expansion
-            # eta is the critical pressure ratio
-            self.omega = self.C_fo * self.T_o * self.P_o * (self.v_fgo / self.h_fgo) ** 2 / self.v_fo
-            self.eta = 0.55 + 0.217 * log(self.omega) - 0.046 * log(self.omega) ** 2 + 0.004 * log(self.omega) ** 3
-        '''
-
-    def m_dot_SPI(self):
+    @lru_cache(maxsize=1)
+    def m_dot_SPI(self, P_cc):
         if self.orifice_type == 0:
             p0 = self.P_o
             chi0 = self.chi0
@@ -230,9 +232,10 @@ class Orifice:  # WIP
             y = [p0, chi0]
             initial = least_squares(self.fluid.fun_ps, [800, 250], args=[u, y])
             rho0, T0 = initial.x
-            return self.A * sqrt(2 * rho0 * (self.P_o - self.P_cc))
+            return self.A * sqrt(2 * rho0 * (self.P_o - P_cc))
 
-    def m_dot_HEM(self):
+    @lru_cache(maxsize=1)
+    def m_dot_HEM(self, P_cc):
         if self.orifice_type == 0:
             # find initial conditions
             # chi0,p0 known
@@ -248,7 +251,7 @@ class Orifice:  # WIP
 
             # set final conditions
             # p1, s1 known
-            p1 = self.P_cc
+            p1 = P_cc
             s1 = s0
 
             u = ['p', 's']
@@ -258,10 +261,10 @@ class Orifice:  # WIP
             rho1, T1 = final.x
             h1 = self.fluid.get_properties(rho1, T1)['h']
             X1 = self.fluid.get_properties(rho1, T1)['chi']
-
             return self.A * rho1 * sqrt(h0 - h1)
 
-    def m_dot_dyer(self):
+    @lru_cache(maxsize=1)
+    def m_dot_dyer(self, P_cc):
         kappa = 1  # fluid enters orifice at vapour pressure
         W = 1 / (1 + kappa)
-        return self.Cd * ((1 - W) * self.m_dot_SPI() + W * self.m_dot_HEM())
+        return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))
