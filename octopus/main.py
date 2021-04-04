@@ -36,7 +36,7 @@ class Fluid(chemical.Chemical):
         super().__init__(ID, T, P)
         self.method = method.lower()
         if self.method == 'helmholz':
-            with open(f'{dirname(__file__)}\\{self.CAS}.json', 'r') as f:
+            with open(f'{dirname(__file__)}/data/{self.CAS}.json', 'r') as f:
                 data = load(f)
 
             self.a = data['a']
