@@ -268,8 +268,32 @@ class Fluid(chemical.Chemical):
         return (self.R_specific * T
                 * (1 + self.alpha_0(delta, tau) + self.alpha_r(delta, tau) + delta * self.ar_d(delta, tau)))
 
+    def z(self, rho: float, T: float) -> float:
+        """Return compressibility
+
+        :param rho: density
+        :param T: temperature
+        :return: compressibility, z
+        """
+        delta = rho / self.rhoc
+        tau = self.Tc / T
+        return 1 + delta * self.ar_d(delta, tau)
+
+    def cp(self, rho: float, T: float) -> float:
+        """Return specific heat capacity at constant pressure.
+
+        :param rho: density
+        :param T: temperature
+        :return: heat capacity at constant pressure
+
+        """
+        delta = rho / self.rhoc
+        tau = self.Tc / T
+        return (self.R_specific * (1 + delta * self.ar_d(delta, tau) - delta * tau * self.ar_dt(delta, tau)) ** 2 /
+                (1 + 2 * delta * self.ar_d(delta, tau) + delta * delta * self.ar_dd(delta, tau)))
+
     def fun_ps(self, x: Sequence[float], u: Sequence[str], y: Sequence[float]) -> List[float]:
-        """Return a vectorised cost function to be used in a property solver
+        """Return a vectorised cost function to be used in a property solver.
 
         Usage:
             fun_ps([rho, T], ['p', 's'], [p0, s0]) --> [p(rho, T) - p0, s(rho, T) - s0]
@@ -283,30 +307,6 @@ class Fluid(chemical.Chemical):
         :return: object containing difference between calculated property values and those in y
         """
         return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
-      
-    def cpl(self, T):
-        """Specific heat at constant pressure for saturated liquid N2O.
-           See Ref [1].
-
-        Args:
-            T (float): Nitrous oxide temperature, K
-
-        Returns:
-            (float): Cp for liquid N2O at given temperature.
-        """
-        if not 183.15 <= T <= 303.15:
-            raise ValueError(f"Temperature ({T} K) out of range")
-        Tr = 309.57  # Find the reduced temperature (T / T_crit)
-        return 2.49973*(1 + 0.023454/(1-Tr) - 3.80136*(1-Tr) +
-                        13.0945*(1-Tr)**2 - 14.5180*(1-Tr)**3)
-
-    def z(self, delta, tau):
-        return 1 + delta*self.ar_d(delta, tau)
-        # Return the compressibility - see Ref [3], Eqn (15)
-
-    # I might not be following your intended syntax here
-    # def dz_dT(self, ):
-    #    return derivative(z, 0, )
 
     @lru_cache(maxsize=1)
     def get_properties(self, rho: float, T: float) -> Dict[str, float]:
@@ -458,24 +458,22 @@ class Orifice:
             return None
         return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))
 
-    def Y(self, Fluid):
+    def Y(self, P_cc):
         """Calculate the general compressibility correction factor for the orifice.
         See Ref [2], section 2.1.1.2.
 
-        Returns:
-            float: Mass flow compressibility correction.
         """
-        T = Fluid.T
-        P = Fluid.P
-        R = 8.31446/(Fluid.MW/1000)  # Get the specific gas constant
-        #  cpl = Fluid.cpl(T)  # Saturated liquid Cp at this temperature
+        T = self.fluid.T
+        P = P_cc
+        """
+        cpl =   # Saturated liquid Cp at this temperature
         #  gamma = cpl/(cpl - R)  # Ratio of specific heats
         rho_l = Fluid.rho_l(T)
 
         # Isentropic power law exponent - equation 2.22 of Ref [2]
-        Z = P/(rho_l*R*T)  # Compressibiliy
+        Z = P / (rho_l * R * T)  # Compressibiliy
         #  dZdT_rho = None
 
         #  n = gamma * (Z + T)/(Z+T)
-
-        return None
+        """
+        return T, P
