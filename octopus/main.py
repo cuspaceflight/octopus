@@ -20,15 +20,13 @@ from thermo import chemical
 
 from .utils import derivative
 
-cwd = dirname(__file__)
-
 STRAIGHT = 0
 
 
 class Fluid(chemical.Chemical):
     """Inherits the thermo Chemical class, and represents a fluid with a Helmholz EOS."""
 
-    def __init__(self, ID: str, T: float = 298.15, P: float = 101325):
+    def __init__(self, ID: str, T: float = 298.15, P: float = 101325, method='thermo'):
         """Initiate a Fluid instance.
 
         :param ID: id of fluid with a name recognisable by thermo
@@ -36,18 +34,23 @@ class Fluid(chemical.Chemical):
         :param P: Pressure (Pa)
         """
         super().__init__(ID, T, P)
+        self.method = method.lower()
+        if self.method == 'helmholz':
+            with open(f'{dirname(__file__)}/data/{self.CAS}.json', 'r') as f:
+                data = load(f)
 
-        with open(f'{cwd}\\{self.ID}.json', 'r') as f:
-            data = load(f)
-
-        self.a = data['a']
-        self.c = data['c']
-        self.v = array(data['v'])
-        self.u = array(data['u'])
-        self.n = data['n']
-        self.Ag = data['Ag']
-        self.Al = data['Al']
-        self.polar = bool(data['polar'])
+            self.a = data['a']
+            self.c = data['c']
+            self.v = array(data['v'])
+            self.u = array(data['u'])
+            self.n = data['n']
+            self.Ag = data['Ag']
+            self.Al = data['Al']
+            self.polar = bool(data['polar'])
+        elif self.method == 'thermo':
+            pass
+        else:
+            raise NotImplementedError(f'method cannot be: {method}')
 
     @lru_cache(maxsize=1)
     def alpha_0(self, delta: float, tau: float):
@@ -58,6 +61,8 @@ class Fluid(chemical.Chemical):
         :return: ideal gas component of Helmholz energy
         :rtype: float
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         alpha_0 = (self.a[0]
                    + self.a[1] * tau
                    + log(delta)
@@ -74,6 +79,8 @@ class Fluid(chemical.Chemical):
         :param tau: T_c/T to be evaluated at
         :return: residual component of Helmholz energy
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         if self.polar:
 
             alpha_r = (self.n[0] * delta * tau ** 0.25
@@ -98,6 +105,8 @@ class Fluid(chemical.Chemical):
         :param T: Temperature (K)
         :return: vapour density
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         tau = 1 - T / self.Tc
         return nan_to_num(self.rhoc + self.Ag[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(self.Ag)))
 
@@ -107,6 +116,8 @@ class Fluid(chemical.Chemical):
         :param T: Temperature (K)
         :return: liquid density
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         tau = 1 - T / self.Tc
         return nan_to_num(self.rhoc + self.Al[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(self.Al)))
 
@@ -118,6 +129,8 @@ class Fluid(chemical.Chemical):
         :param tau: T_c/T to be evaluated at
         :return: d(alpha_0)/d(tau)
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         return derivative(self.alpha_0, 1, delta, tau)
 
     @lru_cache(maxsize=1)
@@ -128,6 +141,8 @@ class Fluid(chemical.Chemical):
         :param tau: T_c/T to be evaluated at
         :return: d2(alpha_0)/d(tau)d(tau)
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         return derivative(self.a0_t, 1, delta, tau)
 
     @lru_cache(maxsize=1)
@@ -138,6 +153,8 @@ class Fluid(chemical.Chemical):
         :param tau: T_c/T to be evaluated at
         :return: d(alpha_r)/d(delta)
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         return derivative(self.alpha_r, 0, delta, tau)
 
     @lru_cache(maxsize=1)
@@ -148,6 +165,8 @@ class Fluid(chemical.Chemical):
         :param tau: T_c/T to be evaluated at
         :return: d(alpha_r)/d(tau)
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         return derivative(self.alpha_r, 1, delta, tau)
 
     @lru_cache(maxsize=1)
@@ -158,6 +177,8 @@ class Fluid(chemical.Chemical):
         :param tau: T_c/T to be evaluated at
         :return: d2(alpha_r)/d(delta)d(delta
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         return derivative(self.ar_d, 0, delta, tau)
 
     @lru_cache(maxsize=1)
@@ -168,6 +189,8 @@ class Fluid(chemical.Chemical):
         :param tau: T_c/T to be evaluated at
         :return: d2(alpha_r)/d(delta)d(tau)
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         return derivative(self.ar_d, 1, delta, tau)
 
     @lru_cache(maxsize=1)
@@ -178,6 +201,8 @@ class Fluid(chemical.Chemical):
         :param tau: T_c/T to be evaluated at
         :return: d2(alpha_r)/d(tau)d(tau)
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         return derivative(self.ar_t, 1, delta, tau)
 
     @lru_cache(maxsize=1)
@@ -188,6 +213,8 @@ class Fluid(chemical.Chemical):
         :param T: temperature to be evaluated at
         :return: d(p)/d(rho)
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return self.R_specific * T * (1 + 2 * delta * self.ar_d(delta, tau) + delta * delta * self.ar_dd(delta, tau))
@@ -200,6 +227,8 @@ class Fluid(chemical.Chemical):
         :param T: temperature to be evaluated at
         :return: d(g)/d(rho)
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return self.R_specific * T * (2 * self.ar_d(delta, tau) + delta * self.ar_dd(delta, tau))
@@ -212,6 +241,8 @@ class Fluid(chemical.Chemical):
         :param T: temperature
         :return: pressure
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return (rho * self.R_specific * T
@@ -225,6 +256,8 @@ class Fluid(chemical.Chemical):
         :param T: temperature
         :return: specific internal energy
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return (self.R_specific * T
@@ -238,6 +271,8 @@ class Fluid(chemical.Chemical):
         :param T: temperature
         :return: specific enthalpy
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return (self.R_specific * T
@@ -251,6 +286,8 @@ class Fluid(chemical.Chemical):
         :param T: temperature
         :return: specific entropy
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return (self.R_specific * (
@@ -265,6 +302,8 @@ class Fluid(chemical.Chemical):
         :param T: temperature
         :return: specific gibbs free energy
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return (self.R_specific * T
@@ -277,6 +316,8 @@ class Fluid(chemical.Chemical):
         :param T: temperature
         :return: compressibility, z
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return 1 + delta * self.ar_d(delta, tau)
@@ -287,8 +328,9 @@ class Fluid(chemical.Chemical):
         :param rho: density
         :param T: temperature
         :return: heat capacity at constant pressure
-
         """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
         return (self.R_specific * (1 + delta * self.ar_d(delta, tau) - delta * tau * self.ar_dt(delta, tau)) ** 2 /
@@ -398,11 +440,14 @@ class Orifice:
             if p0 < P_cc:
                 return None
 
-            u = ['p', 'chi']
-            y = [p0, chi0]
+            if self.fluid.method == 'helmholz':
+                u = ['p', 'chi']
+                y = [p0, chi0]
 
-            initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
-            rho0, T0 = initial.x
+                initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
+                rho0, T0 = initial.x
+            elif self.fluid.method == 'thermo':
+                rho0 = self.fluid.rhol
 
             return self.A * sqrt(2 * rho0 * (self.P_o - P_cc))
         else:
