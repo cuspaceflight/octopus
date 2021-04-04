@@ -1,0 +1,39 @@
+from matplotlib import pyplot as plt
+from numpy import linspace
+
+import octopus
+
+
+def main():
+    fluid = octopus.Fluid('nitrous oxide', P=50e5, T=256, method="helmholz")
+    orifice_waxman = octopus.Orifice(fluid, 1e-2, 1e-3, orifice_type=1)
+    orifice_straight = octopus.Orifice(fluid, 1e-2, 1e-3, orifice_type=0)
+
+    # Used to check against the injector Waxman built
+    fluid2 = octopus.Fluid('nitrous oxide', P=48.4e5, T=256, method="helmholz")
+    check_orifice = octopus.Orifice(fluid2, 1e-2, 2.15e-3, orifice_type=1)
+    print(check_orifice.m_dot_waxman(37.1e5)["m_dot"])
+
+    P_cc = linspace(0, 20e5, 200)
+    SPI = []
+    HEM = []
+    DYER = []
+    WAXMAN = []
+    for Pcc in P_cc:
+        SPI.append(orifice_straight.m_dot_SPI(Pcc))
+        HEM.append(orifice_straight.m_dot_HEM(Pcc))
+        DYER.append(orifice_straight.m_dot_dyer(Pcc))
+        WAXMAN.append(orifice_waxman.m_dot_waxman(Pcc)["m_dot"])
+
+    plt.plot(P_cc, SPI, label='SPI')
+    plt.plot(P_cc, HEM, label='HEM')
+    plt.plot(P_cc, DYER, label='DYER')
+    plt.plot(P_cc, WAXMAN, label='WAXMAN')
+    plt.xlabel('Downstream pressure (Pa)')
+    plt.ylabel('Mass Flow Rate (kg/s)')
+    plt.legend()
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
