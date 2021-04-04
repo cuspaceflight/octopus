@@ -3,6 +3,11 @@
 References:
     - [1] - Thermophyiscal properties of nitrous oxide,
             IHS ESDU, http://edge.rit.edu/edge/P07106/public/Nox.pdf
+    - [2] - An investigation of injectors for use with high vapor pressure
+            propellants with applications to hybrid rockets, Benjamin S. Waxman
+            https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf
+    - [3] - Short Fundamental Equations of State for 20 Industrial Fluids,
+            Lemmon and Span, https://pubs.acs.org/doi/pdf/10.1021/je050186n
 """
 from functools import lru_cache
 from json import load
@@ -272,13 +277,36 @@ class Fluid(chemical.Chemical):
             where [d(p),d(s)] is the difference between  [p,s] calculated from [rho,T] and [p0,s0]
             i.e to be used as a non-linear solver's cost function.
 
-
         :param x: object containing arguments to be passed to get_properties
         :param u: object containing property names of properties to be returned and compared
         :param y: object containing property values to compare returned values to
         :return: object containing difference between calculated property values and those in y
         """
         return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
+      
+    def cpl(self, T):
+        """Specific heat at constant pressure for saturated liquid N2O.
+           See Ref [1].
+
+        Args:
+            T (float): Nitrous oxide temperature, K
+
+        Returns:
+            (float): Cp for liquid N2O at given temperature.
+        """
+        if not 183.15 <= T <= 303.15:
+            raise ValueError(f"Temperature ({T} K) out of range")
+        Tr = 309.57  # Find the reduced temperature (T / T_crit)
+        return 2.49973*(1 + 0.023454/(1-Tr) - 3.80136*(1-Tr) +
+                        13.0945*(1-Tr)**2 - 14.5180*(1-Tr)**3)
+
+    def z(self, delta, tau):
+        return 1 + delta*self.ar_d(delta, tau)
+        # Return the compressibility - see Ref [3], Eqn (15)
+
+    # I might not be following your intended syntax here
+    # def dz_dT(self, ):
+    #    return derivative(z, 0, )
 
     @lru_cache(maxsize=1)
     def get_properties(self, rho: float, T: float) -> Dict[str, float]:
@@ -429,3 +457,25 @@ class Orifice:
         if not (self.m_dot_SPI(P_cc) and self.m_dot_HEM(P_cc)):
             return None
         return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))
+
+    def Y(self, Fluid):
+        """Calculate the general compressibility correction factor for the orifice.
+        See Ref [2], section 2.1.1.2.
+
+        Returns:
+            float: Mass flow compressibility correction.
+        """
+        T = Fluid.T
+        P = Fluid.P
+        R = 8.31446/(Fluid.MW/1000)  # Get the specific gas constant
+        #  cpl = Fluid.cpl(T)  # Saturated liquid Cp at this temperature
+        #  gamma = cpl/(cpl - R)  # Ratio of specific heats
+        rho_l = Fluid.rho_l(T)
+
+        # Isentropic power law exponent - equation 2.22 of Ref [2]
+        Z = P/(rho_l*R*T)  # Compressibiliy
+        #  dZdT_rho = None
+
+        #  n = gamma * (Z + T)/(Z+T)
+
+        return None
