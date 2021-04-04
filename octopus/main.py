@@ -22,6 +22,8 @@ from .utils import derivative
 
 cwd = dirname(__file__)
 
+STRAIGHT = 0
+
 
 class Fluid(chemical.Chemical):
     """Inherits the thermo Chemical class, and represents a fluid with a Helmholz EOS."""
@@ -387,7 +389,7 @@ class Orifice:
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
         """
-        if self.orifice_type == 0:
+        if self.orifice_type == STRAIGHT:
             # find initial conditions
             # chi0,p0 known
             p0 = self.P_o
@@ -403,6 +405,8 @@ class Orifice:
             rho0, T0 = initial.x
 
             return self.A * sqrt(2 * rho0 * (self.P_o - P_cc))
+        else:
+            return NotImplementedError(f'Orifice type {self.orifice_type} not implemented')
 
     @lru_cache(maxsize=1)
     def m_dot_HEM(self, P_cc: float):
@@ -411,7 +415,7 @@ class Orifice:
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
         """
-        if self.orifice_type == 0:
+        if self.orifice_type == STRAIGHT:
             # find initial conditions
             # chi0,p0 known
             p0 = self.P_o
@@ -444,6 +448,8 @@ class Orifice:
             if h1 > h0:
                 return None
             return self.A * rho1 * sqrt(h0 - h1)
+        else:
+            return NotImplementedError(f'Orifice type {self.orifice_type} not implemented')
 
     @lru_cache(maxsize=1)
     def m_dot_dyer(self, P_cc: float):
