@@ -19,7 +19,7 @@ def main():
     T = 193
     rho = nitrous.rho_g(T)
 
-    print(nitrous.cp(rho, T) - nitrous.cv(rho, T))
+    print(nitrous.cp(rho, T) - nitrous.cv(rho, T),nitrous.MW,nitrous.R_specific)
     print(nitrous.cp(rho, T) / nitrous.cv(rho, T))
 
 

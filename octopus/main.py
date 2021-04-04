@@ -307,6 +307,7 @@ class Fluid(chemical.Chemical):
         return (self.R_specific * T
                 * (1 + self.alpha_0(delta, tau) + self.alpha_r(delta, tau) + delta * self.ar_d(delta, tau)))
 
+    @lru_cache(maxsize=1)
     def z(self, rho: float, T: float) -> float:
         """Return compressibility
 
