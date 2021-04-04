@@ -21,6 +21,7 @@ from thermo import chemical
 from .utils import derivative
 
 STRAIGHT = 0
+CAVITATING = 1
 
 
 class Fluid(chemical.Chemical):
@@ -509,22 +510,76 @@ class Orifice:
             return None
         return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))
 
-    def Y(self, P_cc):
-        """Calculate the general compressibility correction factor for the orifice.
-        See Ref [2], section 2.1.1.2.
+    @lru_cache(maxsize=1)
+    def m_dot_waxman(self, Pcc: float, D1: float = 0, choke_margin: float = 0.8,
+                     Cd_tot: float = 1, Cd_diff: float = 1):
+        """Return Waxman style cavitating injector mass flow rate.
+        See Ref [2], section 6.
 
-        """
-        T = self.fluid.T
-        P = P_cc
-        """
-        cpl =   # Saturated liquid Cp at this temperature
-        #  gamma = cpl/(cpl - R)  # Ratio of specific heats
-        rho_l = Fluid.rho_l(T)
+        D is used as the exit diameter.
+        If an inlet diameter, D1, is not provided, the inlet area is 10*A2,
+        such that the quantity (A2/A1)**2 is inconsequential.
+        Both discharge coefficients default to 1 if not specified.
+        Recommend 0.65 for Cd_total, 0.99 for Cd_diff.
 
-        # Isentropic power law exponent - equation 2.22 of Ref [2]
-        Z = P / (rho_l * R * T)  # Compressibiliy
-        #  dZdT_rho = None
+        To increase the probability of the onset of choking, the safety
+        factor should be increased.
 
-        #  n = gamma * (Z + T)/(Z+T)
+        :param P_cc: combustion chamber pressure (Pa)
+        :return: mass flow rate (kg/s)
         """
-        return T, P
+        if self.orifice_type != 1:
+            raise ValueError("Must use cavitating-type orifice.")
+
+        A2 = pi*self.D**2/4
+        P1 = self.fluid.P
+
+        if Pcc > P1:
+            raise ValueError("Downstream pressure exceeeds upstream pressure")
+
+        if D1 == 0:
+            A1 = 10*A2
+        else:
+            A1 = pi*D1**2/4
+
+        if self.fluid.method == 'helmholz':
+            p0 = self.P_o
+            chi0 = self.chi0
+            u = ['p', 'chi']
+            y = [p0, chi0]
+
+            initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
+            rho0, T0 = initial.x
+        elif self.fluid.method == 'thermo':
+            rho0 = self.fluid.rhol
+
+        Pv = self.fluid.p(rho0, self.fluid.T)
+
+        if Pv * choke_margin > Pcc:
+            raise ValueError("Cannot choke flow: Chill propellant or"
+                             " increase downstream pressure.")
+
+        # Calculate the throat area from Ref [2], equation 6.33
+        At = A2/sqrt(1 + (Cd_diff/Cd_tot)**2 * (Pcc - choke_margin*Pv)
+                     * (1 - (A2/A1)**2) / (P1 - Pcc))
+
+        # Calculate actual throat pressure from Ref [2], equation 6.21
+        Pt_actual = Pcc - (Cd_tot/Cd_diff)**2 * (A2/At)**2 * \
+            (1-(At/A2)**2)*(P1-Pcc)/(1-(A2/A1)**2)
+
+        Pt_target = Pv * choke_margin
+
+        # mdot_diff is the choked mass flow through the diffuser section.
+        mdot_diff = Cd_diff * At * sqrt(2*rho0*(Pcc-Pt_actual)/(1-(At/A2)**2))
+        mdot_inj = Cd_tot * A2 * sqrt(2*rho0*(P1-Pcc)/(1-(A2/A1)**2))
+
+        # Perform sense checks (by continuity, mdot_diff = mdot_inj)
+        if round(mdot_diff, 6) != round(mdot_inj, 6):
+            raise ValueError("Continuity check failed on Waxman injector.")
+
+        if round(Pt_actual, 6) != round(Pt_target, 6):
+            raise ValueError("Target throat pressure was not acheived"
+                             " in Waxman injector.")
+
+        return {"m_dot": mdot_inj,
+                "At": At}
