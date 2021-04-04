@@ -5,12 +5,16 @@ References:
             IHS ESDU, http://edge.rit.edu/edge/P07106/public/Nox.pdf
 """
 from functools import lru_cache
+from json import load
+from os.path import dirname
 
-from numpy import pi, sqrt, array, log, exp, nan_to_num
+from numpy import pi, sqrt, array, log, exp, nan_to_num, inf
 from scipy.optimize import least_squares
 from thermo import chemical
 
 from .utils import derivative
+
+cwd = dirname(__file__)
 
 
 class Fluid(chemical.Chemical):
@@ -19,74 +23,59 @@ class Fluid(chemical.Chemical):
     def __init__(self, ID: str, T: float = 298.15, P: float = 101325):
         super().__init__(ID, T, P)
 
+        with open(f'{cwd}\\{self.ID}.json', 'r') as f:
+            data = load(f)
+
+        self.a = data['a']
+        self.c = data['c']
+        self.v = array(data['v'])
+        self.u = array(data['u'])
+        self.n = data['n']
+        self.Ag = data['Ag']
+        self.Al = data['Al']
+        self.polar = bool(data['polar'])
+
     @lru_cache(maxsize=1)
     def alpha_0(self, delta, tau):
-        """Calculate the reduced ideal gas Helmzold energy is the fluid coefficients are known"""
-        # symbol|superscript|subscipt --> c_p^0 = cp0
-        if self.ID == 'N2O':
+        """Calculate the reduced ideal gas Helmholz energy is the fluid coefficients are known"""
 
-            a = [-4.4262736272, 4.3120475243]
-            c = [3.5, 0, 1]
-
-            v = array([2.1769, 1.6145, 0.48393])
-            u = array([879.0, 2372.0, 5447.0])
-
-            alpha_0 = a[0] \
-                      + a[1] * tau \
-                      + log(delta) \
-                      + (c[0] - 1) * log(tau) \
-                      - (c[1] * self.Tc ** c[2]) / (c[2] * (c[2] + 1)) * tau ** (-c[2]) \
-                      + sum(v * log(1 - exp(-u * tau / self.Tc)))
-            return alpha_0
-
-        else:
-            return None
+        alpha_0 = (self.a[0]
+                   + self.a[1] * tau
+                   + log(delta)
+                   + (self.c[0] - 1) * log(tau)
+                   - (self.c[1] * self.Tc ** self.c[2]) / (self.c[2] * (self.c[2] + 1)) * tau ** (-self.c[2])
+                   + sum(self.v * log(1 - exp(-self.u * tau / self.Tc))))
+        return alpha_0
 
     @lru_cache(maxsize=1)
     def alpha_r(self, delta, tau):
         """calculates the reduced helmholz residual energy if the chemical is nitrus oxide"""
-        # symbol|superscript|subscipt --> c_p^0 = cp0
-        if self.ID == 'N2O':
 
-            n1 = 0.88045
-            n2 = -2.4235
-            n3 = 0.38237
-            n4 = 0.068917
-            n5 = 0.00020367
-            n6 = 0.13122
-            n7 = 0.46032
-            n8 = -0.0036985
-            n9 = -0.23263
-            n10 = -0.00042859
-            n11 = -0.042810
-            n12 = -0.023038
+        if self.polar:
 
-            alpha_r = n1 * delta * tau ** 0.25 + \
-                      n2 * delta * tau ** 1.25 + \
-                      n3 * delta * tau ** 1.5 + \
-                      n4 * delta ** 3 * tau ** 0.25 + \
-                      n5 * delta ** 7 * tau ** 0.875 + \
-                      n6 * delta * tau ** 2.375 * exp(-delta) + \
-                      n7 * delta ** 2 * tau ** 2 * exp(-delta) + \
-                      n8 * delta ** 5 * tau ** 2.125 * exp(-delta) + \
-                      n9 * delta * tau * 3.5 * exp(-delta ** 2) + \
-                      n10 * delta * tau ** 6.5 * exp(-delta ** 2) + \
-                      n11 * delta ** 4 * tau ** 4.75 * exp(-delta ** 2) + \
-                      n12 * delta ** 2 * tau ** 12.5 * exp(-delta ** 3)
+            alpha_r = (self.n[0] * delta * tau ** 0.25
+                       + self.n[1] * delta * tau ** 1.25
+                       + self.n[2] * delta * tau ** 1.5
+                       + self.n[3] * delta ** 3 * tau ** 0.25
+                       + self.n[4] * delta ** 7 * tau ** 0.875
+                       + self.n[5] * delta * tau ** 2.375 * exp(-delta)
+                       + self.n[6] * delta ** 2 * tau ** 2 * exp(-delta)
+                       + self.n[7] * delta ** 5 * tau ** 2.125 * exp(-delta)
+                       + self.n[8] * delta * tau * 3.5 * exp(-delta ** 2)
+                       + self.n[9] * delta * tau ** 6.5 * exp(-delta ** 2)
+                       + self.n[10] * delta ** 4 * tau ** 4.75 * exp(-delta ** 2)
+                       + self.n[11] * delta ** 2 * tau ** 12.5 * exp(-delta ** 3))
             return alpha_r
         else:
-
-            return None
+            raise NotImplementedError
 
     def rho_g(self, T):
-        A = [-878.637631, 357.7403382, 574.66924864, -972.57488693, 630.47903568]
         tau = 1 - T / self.Tc
-        return nan_to_num(self.rhoc + A[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(A)))
+        return nan_to_num(self.rhoc + self.Ag[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(self.Ag)))
 
     def rho_l(self, T):
-        A = [899.61701036, 179.53626729, 857.66247459, -2160.66039529, 2029.1923931]
         tau = 1 - T / self.Tc
-        return nan_to_num(self.rhoc + A[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(A)))
+        return nan_to_num(self.rhoc + self.Al[0] * (tau ** 0.35 - 1) + sum(a * tau ** i for i, a in enumerate(self.Al)))
 
     @lru_cache(maxsize=1)
     def a0_t(self, delta, tau):
@@ -226,12 +215,19 @@ class Orifice:  # WIP
     @lru_cache(maxsize=1)
     def m_dot_SPI(self, P_cc):
         if self.orifice_type == 0:
+            # find initial conditions
+            # chi0,p0 known
             p0 = self.P_o
             chi0 = self.chi0
+
+            if p0 < P_cc: return None
+
             u = ['p', 'chi']
             y = [p0, chi0]
-            initial = least_squares(self.fluid.fun_ps, [800, 250], args=[u, y])
+
+            initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
             rho0, T0 = initial.x
+
             return self.A * sqrt(2 * rho0 * (self.P_o - P_cc))
 
     @lru_cache(maxsize=1)
@@ -242,10 +238,14 @@ class Orifice:  # WIP
             p0 = self.P_o
             chi0 = self.chi0
 
+            if p0 < P_cc: return None
+
             u = ['p', 'chi']
             y = [p0, chi0]
-            initial = least_squares(self.fluid.fun_ps, [800, 250], args=[u, y])
+
+            initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
             rho0, T0 = initial.x
+
             h0 = self.fluid.get_properties(rho0, T0)['h']
             s0 = self.fluid.get_properties(rho0, T0)['s']
 
@@ -257,14 +257,17 @@ class Orifice:  # WIP
             u = ['p', 's']
             y = [p1, s1]
 
-            final = least_squares(self.fluid.fun_ps, [500, 245], args=[u, y])
+            final = least_squares(self.fluid.fun_ps, [500, 245], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
             rho1, T1 = final.x
+
             h1 = self.fluid.get_properties(rho1, T1)['h']
             X1 = self.fluid.get_properties(rho1, T1)['chi']
+            if h1 > h0: return None
             return self.A * rho1 * sqrt(h0 - h1)
 
     @lru_cache(maxsize=1)
     def m_dot_dyer(self, P_cc):
         kappa = 1  # fluid enters orifice at vapour pressure
         W = 1 / (1 + kappa)
+        if not (self.m_dot_SPI(P_cc) and self.m_dot_HEM(P_cc)): return None
         return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))

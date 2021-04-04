@@ -1,7 +1,7 @@
 import time
 
 from matplotlib import pyplot as plt
-from numpy import linspace
+from numpy import linspace, seterr
 
 from octopus import Fluid, Orifice, STRAIGHT
 
@@ -10,7 +10,7 @@ def main():
     fluid = Fluid('N2O', P=18e5)
     orifice = Orifice(fluid, 0, STRAIGHT, 1e-2, 1e-3)
 
-    P_cc = linspace(0, 19e5, 100)
+    P_cc = linspace(0, 19e5, 50)
     SPI = []
     HEM = []
     DYER = []
