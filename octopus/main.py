@@ -25,7 +25,7 @@ CAVITATING = 1
 
 
 class Fluid(chemical.Chemical):
-    """Inherits the thermo Chemical class, and represents a fluid with a Helmholz EOS."""
+    """Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS."""
 
     def __init__(self, ID: str, T: float = 298.15, P: float = 101325, method='thermo'):
         """Initiate a Fluid instance.
@@ -36,6 +36,7 @@ class Fluid(chemical.Chemical):
         """
         super().__init__(ID, T, P)
         self.method = method.lower()
+
         if self.method == 'helmholz':
             with open(f'{dirname(__file__)}/data/{self.CAS}.json', 'r') as f:
                 data = load(f)
@@ -51,7 +52,7 @@ class Fluid(chemical.Chemical):
         elif self.method == 'thermo':
             pass
         else:
-            raise NotImplementedError(f'method cannot be: {method}')
+            raise NotImplementedError(f'method cannot be: {self.method}')
 
     @lru_cache(maxsize=1)
     def alpha_0(self, delta: float, tau: float):
@@ -387,22 +388,18 @@ class Fluid(chemical.Chemical):
 
 
 class Manifold:
-    """Organises Orifices into Elements, contains propellants"""
+    """Represent a propellant manifold, at least one Fluid input and one Element output."""
 
-    def __init__(self, fluid, T_inlet, p_inlet):
-        self.T_inlet = T_inlet  # Stagnation temperature, Kelvin
-        self.p_inlet = p_inlet  # Stagnation, Pa
-        self.fluid = fluid
+    def __init__(self, fluid: Fluid):
+        pass
 
-        if self.fluid.phase != 'l':
-            raise ValueError("Fluid is entering the manifold as a non-liquid!")
 
-        self.rho = self.fluid.rho
-        self.Cp = self.fluid.Cp
+class Element:
+    """Represent an injector element, at least one Manifold input and one Orifice output."""
 
 
 class Orifice:
-    """Model the thermodynamic changes as fluid moves through the orifice"""
+    """Represent a propellant orifice on the injector plate, at least one Manifold input."""
 
     def __init__(self, fluid: Fluid, L: float, D: float, chi0: float = 0, orifice_type: int = 0, Cd: float = 0.7):
         """Initiate an Orifice instance.
@@ -427,7 +424,7 @@ class Orifice:
 
     @lru_cache(maxsize=1)
     def m_dot_SPI(self, P_cc: float):
-        """Return single-phase-incompressible mass flow rate
+        """Return single-phase-incompressible mass flow rate.
 
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
@@ -458,7 +455,7 @@ class Orifice:
 
     @lru_cache(maxsize=1)
     def m_dot_HEM(self, P_cc: float):
-        """Return homogeneous-equilibrium-model mass flow rate
+        """Return homogeneous-equilibrium-model mass flow rate.
 
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
@@ -504,7 +501,7 @@ class Orifice:
 
     @lru_cache(maxsize=1)
     def m_dot_dyer(self, P_cc: float):
-        """Return Dyer model mass flow rate
+        """Return Dyer model mass flow rate.
 
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
@@ -518,7 +515,8 @@ class Orifice:
     @lru_cache(maxsize=1)
     def m_dot_waxman(self, Pcc: float, choke_margin: float = 0.8,
                      Cd_inj: float = 0.65, Cd_diff: float = 0.9):
-        """Return Waxman style cavitating injector mass flow rate.
+        """Return estimate of cavitating injector mass flow rate and throat diameter.
+
         See Ref [2], section 6.
 
         D is used as the exit diameter.

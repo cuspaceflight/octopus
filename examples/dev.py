@@ -1,13 +1,17 @@
 from matplotlib import pyplot as plt
 from numpy import linspace
+from thermo import Chemical
 
 from octopus import Fluid, Orifice
+
 
 def main():
     nitrous = Fluid('nitrous oxide', P=18e5, method='helmholz')
     isopropanol = Fluid('isopropanol', P=18e5, method='thermo')
     nitrous_orifice = Orifice(nitrous, 1e-2, 1e-3)
     ipa_orifice = Orifice(isopropanol, 1e-2, 1e-3)
+
+    print(nitrous.Tc)
 
     # Used to check against the injector Waxman built
     fluid2 = Fluid('nitrous oxide', P=48.4e5, T=256, method="helmholz")
