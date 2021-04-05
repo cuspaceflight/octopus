@@ -43,8 +43,8 @@ class Fluid(chemical.Chemical):
 
             self.a = data['a']
             self.c = data['c']
-            self.v = array(data['v'])
-            self.u = array(data['u'])
+            self.v_ = array(data['v'])
+            self.u_ = array(data['u'])
             self.n = data['n']
             self.Ag = data['Ag']
             self.Al = data['Al']
@@ -70,7 +70,7 @@ class Fluid(chemical.Chemical):
                    + log(delta)
                    + (self.c[0] - 1) * log(tau)
                    - (self.c[1] * self.Tc ** self.c[2]) / (self.c[2] * (self.c[2] + 1)) * tau ** (-self.c[2])
-                   + sum(self.v * log(1 - exp(-self.u * tau / self.Tc))))
+                   + sum(self.v_ * log(1 - exp(-self.u_ * tau / self.Tc))))
         return alpha_0
 
     @lru_cache(maxsize=1)
@@ -247,8 +247,7 @@ class Fluid(chemical.Chemical):
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
-        return (rho * self.R_specific * T
-                * (1 + delta * self.ar_d(delta, tau)))
+        return rho * self.R_specific * T * (1 + delta * self.ar_d(delta, tau))
 
     @lru_cache(maxsize=1)
     def u(self, rho: float, T: float) -> float:
@@ -262,8 +261,7 @@ class Fluid(chemical.Chemical):
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
-        return (self.R_specific * T
-                * tau * (self.a0_t(delta, tau) + self.ar_t(delta, tau)))
+        return self.R_specific * T * tau * (self.a0_t(delta, tau) + self.ar_t(delta, tau))
 
     @lru_cache(maxsize=1)
     def h(self, rho: float, T: float) -> float:
@@ -292,9 +290,9 @@ class Fluid(chemical.Chemical):
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
         delta = rho / self.rhoc
         tau = self.Tc / T
-        return (self.R_specific * (
-                tau * (self.a0_t(delta, tau) + self.ar_t(delta, tau)) - self.alpha_0(delta, tau) - self.alpha_r(delta,
-                                                                                                                tau)))
+        return (self.R_specific *
+                (tau * (self.a0_t(delta, tau) + self.ar_t(delta, tau)) - self.alpha_0(delta, tau) - self.alpha_r(delta,
+                                                                                                                 tau)))
 
     @lru_cache(maxsize=1)
     def g(self, rho: float, T: float) -> float:
@@ -311,6 +309,7 @@ class Fluid(chemical.Chemical):
         return (self.R_specific * T
                 * (1 + self.alpha_0(delta, tau) + self.alpha_r(delta, tau) + delta * self.ar_d(delta, tau)))
 
+    @lru_cache(maxsize=1)
     def z(self, rho: float, T: float) -> float:
         """Return compressibility
 
@@ -324,6 +323,7 @@ class Fluid(chemical.Chemical):
         tau = self.Tc / T
         return 1 + delta * self.ar_d(delta, tau)
 
+    @lru_cache(maxsize=1)
     def cp(self, rho: float, T: float) -> float:
         """Return specific heat capacity at constant pressure.
 
@@ -333,10 +333,21 @@ class Fluid(chemical.Chemical):
         """
         if self.method != 'helmholz':
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
-        delta = rho / self.rhoc
-        tau = self.Tc / T
-        return (self.R_specific * (1 + delta * self.ar_d(delta, tau) - delta * tau * self.ar_dt(delta, tau)) ** 2 /
-                (1 + 2 * delta * self.ar_d(delta, tau) + delta * delta * self.ar_dd(delta, tau)))
+
+        return derivative(self.h, 1, rho, T)  # cp = dh/dT
+
+    @lru_cache(maxsize=1)
+    def cv(self, rho: float, T: float) -> float:
+        """Return specific heat capacity at constant volume.
+
+        :param rho: density
+        :param T: temperature
+        :return: heat capacity at constant volume
+        """
+        if self.method != 'helmholz':
+            raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
+
+        return derivative(self.u, 1, rho, T)  # cv = du/dT
 
     def fun_ps(self, x: Sequence[float], u: Sequence[str], y: Sequence[float]) -> List[float]:
         """Return a vectorised cost function to be used in a property solver.

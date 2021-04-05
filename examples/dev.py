@@ -1,7 +1,3 @@
-from matplotlib import pyplot as plt
-from numpy import linspace
-from thermo import Chemical
-
 from octopus import Fluid, Orifice
 
 
