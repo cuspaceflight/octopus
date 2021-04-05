@@ -1,3 +1,4 @@
+import numpy as np
 from octopus import Fluid, Orifice
 
 
@@ -16,7 +17,7 @@ def main():
     [print(f'{key}: {val}') for key, val in check_orifice.m_dot_waxman(37.1e5).items()]
     print(f'D2: {check_orifice.D}')
 
-    P_cc = linspace(0, 19e5, 50)
+    P_cc = np.linspace(0, 19e5, 50)
     SPI = []
     DYER = []
     for Pcc in P_cc:

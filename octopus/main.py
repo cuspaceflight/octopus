@@ -525,7 +525,7 @@ class Orifice:
 
     @lru_cache(maxsize=1)
     def m_dot_waxman(self, Pcc: float, choke_margin: float = 0.8,
-                     Cd_inj: float = 0.65, Cd_diff: float = 0.9):
+                     Cd_inj: float = 0.65, Cd_diff: float = 0.99, suppress = False):
         """Return estimate of cavitating injector mass flow rate and throat diameter.
 
         See Ref [2], section 6.
@@ -567,7 +567,7 @@ class Orifice:
 
         Pv = self.fluid.Psat
 
-        if Pv * choke_margin > Pcc:
+        if Pv * choke_margin > Pcc and suppress is False:
             print("Cannot choke flow: Chill propellant or increase downstream pressure.")
 
         # allow for fluid cooling in injector
@@ -585,11 +585,13 @@ class Orifice:
         mdot_inj = Cd_inj * A2 * sqrt(2 * rho1 * (P1 - Pcc))
 
         # Perform sense checks (by continuity, mdot_diff = mdot_inj)
-        if round(mdot_diff, 6) != round(mdot_inj, 6):
-            raise Warning("Continuity check failed on Waxman injector.")
+        # Unless intentionally ignored
+        if suppress is False:
+            if round(mdot_diff, 6) != round(mdot_inj, 6):
+                raise Warning("Continuity check failed on Waxman injector.")
 
-        if round(Pt_actual, 6) != round(Pt_target, 6):
-            print("Target throat pressure was not acheived in Waxman injector.")
+            if round(Pt_actual, 6) != round(Pt_target, 6):
+                print("Target throat pressure was not acheived in Waxman injector.")
 
         return {"m_dot": mdot_inj,
                 "Dt": Dt}
