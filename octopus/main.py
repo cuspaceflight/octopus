@@ -449,10 +449,12 @@ class Orifice:
                 rho0, T0 = initial.x
             elif self.fluid.method == 'thermo':
                 rho0 = self.fluid.rhol
+            else:
+                raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
 
             return self.A * sqrt(2 * rho0 * (self.P_o - P_cc))
         else:
-            return NotImplementedError(f'Orifice type {self.orifice_type} not implemented')
+            raise NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
     @lru_cache(maxsize=1)
     def m_dot_HEM(self, P_cc: float):
@@ -469,6 +471,9 @@ class Orifice:
 
             if p0 < P_cc:
                 return None
+
+            if self.fluid.method != 'helmholz':
+                raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
 
             u = ['p', 'chi']
             y = [p0, chi0]
@@ -495,7 +500,7 @@ class Orifice:
                 return None
             return self.A * rho1 * sqrt(h0 - h1)
         else:
-            return NotImplementedError(f'Orifice type {self.orifice_type} not implemented')
+            return NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
     @lru_cache(maxsize=1)
     def m_dot_dyer(self, P_cc: float):
@@ -511,75 +516,71 @@ class Orifice:
         return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))
 
     @lru_cache(maxsize=1)
-    def m_dot_waxman(self, Pcc: float, D1: float = 0, choke_margin: float = 0.8,
-                     Cd_tot: float = 1, Cd_diff: float = 1):
+    def m_dot_waxman(self, Pcc: float, choke_margin: float = 0.8,
+                     Cd_inj: float = 0.65, Cd_diff: float = 0.9):
         """Return Waxman style cavitating injector mass flow rate.
         See Ref [2], section 6.
 
         D is used as the exit diameter.
-        If an inlet diameter, D1, is not provided, the inlet area is 10*A2,
-        such that the quantity (A2/A1)**2 is inconsequential.
         Both discharge coefficients default to 1 if not specified.
         Recommend 0.65 for Cd_total, 0.99 for Cd_diff.
 
         To increase the probability of the onset of choking, the safety
         factor should be increased.
 
-        :param P_cc: combustion chamber pressure (Pa)
+        To be used as a tool for informing cold flow tests, NOT accurate simulation.
+
+        :param Pcc: combustion chamber pressure (Pa)
+        :param choke_margin: rough margin to reduce the vapour pressure why
+        :param Cd_inj: injector discharge coefficient
+        :param Cd_diff: diffuser discharge coefficient
         :return: mass flow rate (kg/s)
         """
         if self.orifice_type != 1:
-            raise ValueError("Must use cavitating-type orifice.")
+            raise NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented for Waxman orifice analysis')
 
-        A2 = pi*self.D**2/4
-        P1 = self.fluid.P
+        if self.fluid.method != 'helmholz':
+            raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
+
+        P1 = self.P_o
+
+        P2 = Pcc
+        A2 = self.A
 
         if Pcc > P1:
             raise ValueError("Downstream pressure exceeeds upstream pressure")
 
-        if D1 == 0:
-            A1 = 10*A2
-        else:
-            A1 = pi*D1**2/4
+        u = ['p', 'chi']
+        y = [P1, self.chi0]
 
-        if self.fluid.method == 'helmholz':
-            p0 = self.P_o
-            chi0 = self.chi0
-            u = ['p', 'chi']
-            y = [p0, chi0]
+        initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
+        rho1, T1 = initial.x
 
-            initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
-            rho0, T0 = initial.x
-        elif self.fluid.method == 'thermo':
-            rho0 = self.fluid.rhol
-
-        Pv = self.fluid.p(rho0, self.fluid.T)
+        Pv = self.fluid.Psat
 
         if Pv * choke_margin > Pcc:
-            raise ValueError("Cannot choke flow: Chill propellant or"
-                             " increase downstream pressure.")
+            print("Cannot choke flow: Chill propellant or increase downstream pressure.")
 
-        # Calculate the throat area from Ref [2], equation 6.33
-        At = A2/sqrt(1 + (Cd_diff/Cd_tot)**2 * (Pcc - choke_margin*Pv)
-                     * (1 - (A2/A1)**2) / (P1 - Pcc))
-
-        # Calculate actual throat pressure from Ref [2], equation 6.21
-        Pt_actual = Pcc - (Cd_tot/Cd_diff)**2 * (A2/At)**2 * \
-            (1-(At/A2)**2)*(P1-Pcc)/(1-(A2/A1)**2)
-
+        # allow for fluid cooling in injector
         Pt_target = Pv * choke_margin
 
+        # Calculate the throat area from Ref [2], equation 6.33
+        At = A2 / sqrt(1 + (Cd_diff / Cd_inj) * (P2 - Pt_target) / (P1 - P2))
+        Dt = sqrt(4 * At / pi)
+
+        # Calculate actual throat pressure from Ref [2], equation 6.21
+        Pt_actual = P2 - (Cd_inj / Cd_diff) ** 2 * (A2 / At) ** 2 * (P1 - P2) * (1 - (At / A2) ** 2)
+
         # mdot_diff is the choked mass flow through the diffuser section.
-        mdot_diff = Cd_diff * At * sqrt(2*rho0*(Pcc-Pt_actual)/(1-(At/A2)**2))
-        mdot_inj = Cd_tot * A2 * sqrt(2*rho0*(P1-Pcc)/(1-(A2/A1)**2))
+        mdot_diff = Cd_diff * At * sqrt(2 * rho1 * (Pcc - Pt_actual) / (1 - (At / A2) ** 2))
+        mdot_inj = Cd_inj * A2 * sqrt(2 * rho1 * (P1 - Pcc))
 
         # Perform sense checks (by continuity, mdot_diff = mdot_inj)
         if round(mdot_diff, 6) != round(mdot_inj, 6):
-            raise ValueError("Continuity check failed on Waxman injector.")
+            raise Warning("Continuity check failed on Waxman injector.")
 
         if round(Pt_actual, 6) != round(Pt_target, 6):
-            raise ValueError("Target throat pressure was not acheived"
-                             " in Waxman injector.")
+            print("Target throat pressure was not acheived in Waxman injector.")
 
         return {"m_dot": mdot_inj,
-                "At": At}
+                "Dt": Dt}
