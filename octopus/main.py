@@ -21,10 +21,11 @@ from thermo import chemical
 from .utils import derivative
 
 STRAIGHT = 0
+CAVITATING = 1
 
 
 class Fluid(chemical.Chemical):
-    """Inherits the thermo Chemical class, and represents a fluid with a Helmholz EOS."""
+    """Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS."""
 
     def __init__(self, ID: str, T: float = 298.15, P: float = 101325, method='thermo'):
         """Initiate a Fluid instance.
@@ -35,6 +36,7 @@ class Fluid(chemical.Chemical):
         """
         super().__init__(ID, T, P)
         self.method = method.lower()
+
         if self.method == 'helmholz':
             with open(f'{dirname(__file__)}/data/{self.CAS}.json', 'r') as f:
                 data = load(f)
@@ -50,7 +52,7 @@ class Fluid(chemical.Chemical):
         elif self.method == 'thermo':
             pass
         else:
-            raise NotImplementedError(f'method cannot be: {method}')
+            raise NotImplementedError(f'method cannot be: {self.method}')
 
     @lru_cache(maxsize=1)
     def alpha_0(self, delta: float, tau: float):
@@ -397,22 +399,18 @@ class Fluid(chemical.Chemical):
 
 
 class Manifold:
-    """Organises Orifices into Elements, contains propellants"""
+    """Represent a propellant manifold, at least one Fluid input and one Element output."""
 
-    def __init__(self, fluid, T_inlet, p_inlet):
-        self.T_inlet = T_inlet  # Stagnation temperature, Kelvin
-        self.p_inlet = p_inlet  # Stagnation, Pa
-        self.fluid = fluid
+    def __init__(self, fluid: Fluid):
+        pass
 
-        if self.fluid.phase != 'l':
-            raise ValueError("Fluid is entering the manifold as a non-liquid!")
 
-        self.rho = self.fluid.rho
-        self.Cp = self.fluid.Cp
+class Element:
+    """Represent an injector element, at least one Manifold input and one Orifice output."""
 
 
 class Orifice:
-    """Model the thermodynamic changes as fluid moves through the orifice"""
+    """Represent a propellant orifice on the injector plate, at least one Manifold input."""
 
     def __init__(self, fluid: Fluid, L: float, D: float, chi0: float = 0, orifice_type: int = 0, Cd: float = 0.7):
         """Initiate an Orifice instance.
@@ -437,7 +435,7 @@ class Orifice:
 
     @lru_cache(maxsize=1)
     def m_dot_SPI(self, P_cc: float):
-        """Return single-phase-incompressible mass flow rate
+        """Return single-phase-incompressible mass flow rate.
 
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
@@ -459,14 +457,16 @@ class Orifice:
                 rho0, T0 = initial.x
             elif self.fluid.method == 'thermo':
                 rho0 = self.fluid.rhol
+            else:
+                raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
 
             return self.A * sqrt(2 * rho0 * (self.P_o - P_cc))
         else:
-            return NotImplementedError(f'Orifice type {self.orifice_type} not implemented')
+            raise NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
     @lru_cache(maxsize=1)
     def m_dot_HEM(self, P_cc: float):
-        """Return homogeneous-equilibrium-model mass flow rate
+        """Return homogeneous-equilibrium-model mass flow rate.
 
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
@@ -479,6 +479,9 @@ class Orifice:
 
             if p0 < P_cc:
                 return None
+
+            if self.fluid.method != 'helmholz':
+                raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
 
             u = ['p', 'chi']
             y = [p0, chi0]
@@ -505,11 +508,11 @@ class Orifice:
                 return None
             return self.A * rho1 * sqrt(h0 - h1)
         else:
-            return NotImplementedError(f'Orifice type {self.orifice_type} not implemented')
+            return NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
     @lru_cache(maxsize=1)
     def m_dot_dyer(self, P_cc: float):
-        """Return Dyer model mass flow rate
+        """Return Dyer model mass flow rate.
 
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
@@ -520,22 +523,75 @@ class Orifice:
             return None
         return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))
 
-    def Y(self, P_cc):
-        """Calculate the general compressibility correction factor for the orifice.
-        See Ref [2], section 2.1.1.2.
+    @lru_cache(maxsize=1)
+    def m_dot_waxman(self, Pcc: float, choke_margin: float = 0.8,
+                     Cd_inj: float = 0.65, Cd_diff: float = 0.99, suppress = False):
+        """Return estimate of cavitating injector mass flow rate and throat diameter.
 
-        """
-        T = self.fluid.T
-        P = P_cc
-        """
-        cpl =   # Saturated liquid Cp at this temperature
-        #  gamma = cpl/(cpl - R)  # Ratio of specific heats
-        rho_l = Fluid.rho_l(T)
+        See Ref [2], section 6.
 
-        # Isentropic power law exponent - equation 2.22 of Ref [2]
-        Z = P / (rho_l * R * T)  # Compressibiliy
-        #  dZdT_rho = None
+        D is used as the exit diameter.
+        Both discharge coefficients default to 1 if not specified.
+        Recommend 0.65 for Cd_total, 0.99 for Cd_diff.
 
-        #  n = gamma * (Z + T)/(Z+T)
+        To increase the probability of the onset of choking, the safety
+        factor should be increased.
+
+        To be used as a tool for informing cold flow tests, NOT accurate simulation.
+
+        :param Pcc: combustion chamber pressure (Pa)
+        :param choke_margin: rough margin to reduce the vapour pressure why
+        :param Cd_inj: injector discharge coefficient
+        :param Cd_diff: diffuser discharge coefficient
+        :return: mass flow rate (kg/s)
         """
-        return T, P
+        if self.orifice_type != 1:
+            raise NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented for Waxman orifice analysis')
+
+        if self.fluid.method != 'helmholz':
+            raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
+
+        P1 = self.P_o
+
+        P2 = Pcc
+        A2 = self.A
+
+        if Pcc > P1:
+            raise ValueError("Downstream pressure exceeeds upstream pressure")
+
+        u = ['p', 'chi']
+        y = [P1, self.chi0]
+
+        initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
+        rho1, T1 = initial.x
+
+        Pv = self.fluid.Psat
+
+        if Pv * choke_margin > Pcc and suppress is False:
+            print("Cannot choke flow: Chill propellant or increase downstream pressure.")
+
+        # allow for fluid cooling in injector
+        Pt_target = Pv * choke_margin
+
+        # Calculate the throat area from Ref [2], equation 6.33
+        At = A2 / sqrt(1 + (Cd_diff / Cd_inj) * (P2 - Pt_target) / (P1 - P2))
+        Dt = sqrt(4 * At / pi)
+
+        # Calculate actual throat pressure from Ref [2], equation 6.21
+        Pt_actual = P2 - (Cd_inj / Cd_diff) ** 2 * (A2 / At) ** 2 * (P1 - P2) * (1 - (At / A2) ** 2)
+
+        # mdot_diff is the choked mass flow through the diffuser section.
+        mdot_diff = Cd_diff * At * sqrt(2 * rho1 * (Pcc - Pt_actual) / (1 - (At / A2) ** 2))
+        mdot_inj = Cd_inj * A2 * sqrt(2 * rho1 * (P1 - Pcc))
+
+        # Perform sense checks (by continuity, mdot_diff = mdot_inj)
+        # Unless intentionally ignored
+        if suppress is False:
+            if round(mdot_diff, 6) != round(mdot_inj, 6):
+                raise Warning("Continuity check failed on Waxman injector.")
+
+            if round(Pt_actual, 6) != round(Pt_target, 6):
+                print("Target throat pressure was not acheived in Waxman injector.")
+
+        return {"m_dot": mdot_inj,
+                "Dt": Dt}

@@ -1,13 +1,6 @@
+import numpy as np
 from octopus import Fluid, Orifice
-
-"""LEGACY CPL CODE
-
-if not 183.15 <= T <= 303.15:
-    raise ValueError(f"Temperature ({T} K) out of range")
-Tr = 309.57  # Find the reduced temperature (T / T_crit)
-return 2.49973 * (1 + 0.023454 / (1 - Tr) - 3.80136 * (1 - Tr) +
-                  13.0945 * (1 - Tr) ** 2 - 14.5180 * (1 - Tr) ** 3)
-"""
+import matplotlib.pyplot as plt
 
 
 def main():
@@ -16,11 +9,34 @@ def main():
     nitrous_orifice = Orifice(nitrous, 1e-2, 1e-3)
     ipa_orifice = Orifice(isopropanol, 1e-2, 1e-3)
 
-    T = 193
-    rho = nitrous.rho_g(T)
+    print(nitrous.Tc)
 
-    print(nitrous.cp(rho, T) - nitrous.cv(rho, T),nitrous.MW,nitrous.R_specific)
-    print(nitrous.cp(rho, T) / nitrous.cv(rho, T))
+    # Used to check against the injector Waxman built
+    fluid2 = Fluid('nitrous oxide', P=48.4e5, T=256, method="helmholz")
+    check_orifice = Orifice(fluid2, 1e-2, 2.15e-3, orifice_type=1)
+
+    [print(f'{key}: {val}') for key, val in check_orifice.m_dot_waxman(37.1e5).items()]
+    print(f'D2: {check_orifice.D}')
+
+    P_cc = np.linspace(0, 19e5, 50)
+    SPI = []
+    SPIn=[]
+    HEM=[]
+    DYER = []
+    for Pcc in P_cc:
+        SPI.append(ipa_orifice.m_dot_SPI(Pcc))
+        SPIn.append(nitrous_orifice.m_dot_SPI(Pcc))
+        HEM.append(nitrous_orifice.m_dot_HEM(Pcc))
+        DYER.append(nitrous_orifice.m_dot_dyer(Pcc))
+
+    plt.plot(P_cc, SPI, label='IPA')
+    plt.plot(P_cc, SPIn, label='SPI nitrous')
+    plt.plot(P_cc, HEM, label='HEM nitrous')
+    plt.plot(P_cc, DYER, label='DYER nitrous')
+    plt.xlabel('Downstream pressure (Pa)')
+    plt.ylabel('Mass Flow Rate (kg/s)')
+    plt.legend()
+    plt.show()
 
 
 if __name__ == "__main__":
