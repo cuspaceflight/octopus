@@ -10,9 +10,11 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os,sys,sphinx_rtd_theme
-sys.path.insert(0, os.path.abspath('../..'))
+import os
+import sys
+import sphinx_rtd_theme
 
+sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
@@ -23,13 +25,17 @@ author = 'Ellis Collins, Henry Free'
 # The full version, including alpha/beta/rc tags
 release = '0.1'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc','sphinx.ext.autosummary','sphinx_rtd_theme']
+extensions = ["sphinx.ext.intersphinx",
+              "sphinx.ext.autodoc",
+              "sphinx.ext.mathjax",
+              "sphinx.ext.viewcode",
+              "sphinx.ext.autosummary",
+              "sphinx_rtd_theme"]
 autoclass_content = "both"
 autosummary_generate = True
 
@@ -40,7 +46,6 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
-
 
 # -- Options for HTML output -------------------------------------------------
 
