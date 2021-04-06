@@ -1,5 +1,9 @@
 """Implementation of injector classes.
 
+.. code-block:: python
+
+    octopus.main.Orifice(fluid,L,D)
+
 References:
     - [1] - Thermophyiscal properties of nitrous oxide,
             IHS ESDU, http://edge.rit.edu/edge/P07106/public/Nox.pdf
@@ -8,6 +12,7 @@ References:
             https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf
     - [3] - Short Fundamental Equations of State for 20 Industrial Fluids,
             Lemmon and Span, https://pubs.acs.org/doi/pdf/10.1021/je050186n
+
 """
 from functools import lru_cache
 from json import load
@@ -270,6 +275,7 @@ class Fluid(chemical.Chemical):
         :param rho: density
         :param T: temperature
         :return: specific enthalpy
+
         """
         if self.method != 'helmholz':
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
@@ -285,6 +291,7 @@ class Fluid(chemical.Chemical):
         :param rho: density
         :param T: temperature
         :return: specific entropy
+
         """
         if self.method != 'helmholz':
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
@@ -301,6 +308,7 @@ class Fluid(chemical.Chemical):
         :param rho: density
         :param T: temperature
         :return: specific gibbs free energy
+
         """
         if self.method != 'helmholz':
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
@@ -316,6 +324,7 @@ class Fluid(chemical.Chemical):
         :param rho: density
         :param T: temperature
         :return: compressibility, z
+
         """
         if self.method != 'helmholz':
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
@@ -330,6 +339,7 @@ class Fluid(chemical.Chemical):
         :param rho: density
         :param T: temperature
         :return: heat capacity at constant pressure
+
         """
         if self.method != 'helmholz':
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
@@ -343,6 +353,7 @@ class Fluid(chemical.Chemical):
         :param rho: density
         :param T: temperature
         :return: heat capacity at constant volume
+
         """
         if self.method != 'helmholz':
             raise NotImplementedError(f'Helmholz energy methods not available for EOS: {self.method}')
@@ -362,6 +373,7 @@ class Fluid(chemical.Chemical):
         :param u: object containing property names of properties to be returned and compared
         :param y: object containing property values to compare returned values to
         :return: object containing difference between calculated property values and those in y
+
         """
         return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
 
