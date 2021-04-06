@@ -364,10 +364,14 @@ class Fluid(chemical.Chemical):
         """Return a vectorised cost function to be used in a property solver.
 
         Usage:
-            fun_ps([rho, T], ['p', 's'], [p0, s0]) --> [p(rho, T) - p0, s(rho, T) - s0]
+            >>> x0=[rho,T]          # solve for density and temperature
+            >>> u=['p','s']         # known values of pressure and entropy
+            >>> y=[p0,s0]           # isentropic process with a known final pressure
+            >>> x = fun_ps(x0,u,y)
+            >>> print(x)
+            [p(rho,T)-p0,s(rho,T)-s0]
 
-            where [d(p),d(s)] is the difference between  [p,s] calculated from [rho,T] and [p0,s0]
-            i.e to be used as a non-linear solver's cost function.
+            i.e. x could be used as a vectorised cost funtion for a solver
 
         :param x: object containing arguments to be passed to get_properties
         :param u: object containing property names of properties to be returned and compared

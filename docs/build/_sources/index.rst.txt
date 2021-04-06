@@ -10,18 +10,8 @@ Welcome to octopus's documentation!
    :toctree: _autosummary
    :recursive:
 
-    bamboo.main
-    bamboo.cooling
-    bamboo.plot
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   octopus.main
+   octopus.utils
 
 Octopus.main module
 ===================
@@ -30,6 +20,7 @@ Octopus.main module
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource
 
 Octopus.utils module
 ====================
@@ -38,3 +29,11 @@ Octopus.utils module
    :members:
    :undoc-members:
    :show-inheritance:
+   :member-order: bysource
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`

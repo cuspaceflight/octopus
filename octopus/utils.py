@@ -5,7 +5,7 @@ from typing import Any, List, Union
 from numpy import array, nan_to_num, ndarray
 
 
-def derivative(f: callable, axis: int, *args: Any, dx: float = 0.01) -> ndarray:
+def derivative(f: callable, axis: int, *args: Any, dx: float = 0.01) -> float:
     """Calculate the  numerical derivative of a scalar funtion f(\*args) with respect to args[axis].
 
     :param f: vector function to find derivative of with the signature f(\*args) -> iterable
