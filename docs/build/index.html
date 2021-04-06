@@ -198,6 +198,27 @@
 </ul>
 </dd>
 </dl>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Element" title="octopus.main.Element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Element</span></code></a>()</p></td>
+<td><p>Represent an injector element, at least one Manifold input and one Orifice output.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluid</span></code></a>(ID, T, P[, method])</p></td>
+<td><p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manifold</span></code></a>(fluid)</p></td>
+<td><p>Represent a propellant manifold, at least one Fluid input and one Element output.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Orifice</span></code></a>(fluid, L, D, chi0, orifice_type, Cd)</p></td>
+<td><p>Represent a propellant orifice on the injector plate, at least one Manifold input.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py class">
 <dt id="octopus.main.Fluid">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Fluid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">298.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">101325</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'thermo'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid" title="Permalink to this definition">¶</a></dt>
@@ -721,6 +742,30 @@ factor should be increased.</p>
 </div>
 <div class="section" id="module-octopus.utils">
 <span id="octopus-utils-module"></span><h1>Octopus.utils module<a class="headerlink" href="#module-octopus.utils" title="Permalink to this headline">¶</a></h1>
+<p class="rubric">Functions</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.utils.derivative" title="octopus.utils.derivative"><code class="xref py py-obj docutils literal notranslate"><span class="pre">derivative</span></code></a>(f, axis, *args[, dx])</p></td>
+<td><p>Calculate the  numerical derivative of a scalar funtion f(*args) with respect to args[axis].</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Classes</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.utils.Nist" title="octopus.utils.Nist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Nist</span></code></a>(filename)</p></td>
+<td><p>Collection of tools for retrieving data from a NIST csv file.</p></td>
+</tr>
+</tbody>
+</table>
 <dl class="py function">
 <dt id="octopus.utils.derivative">
 <code class="sig-prename descclassname"><span class="pre">octopus.utils.</span></code><code class="sig-name descname"><span class="pre">derivative</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.01</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/utils.html#derivative"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.utils.derivative" title="Permalink to this definition">¶</a></dt>

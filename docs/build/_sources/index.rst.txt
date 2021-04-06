@@ -24,6 +24,15 @@ Octopus.main module
    :show-inheritance:
    :member-order: bysource
 
+   .. rubric:: Classes
+
+   .. autosummary::
+
+      Element
+      Fluid
+      Manifold
+      Orifice
+
 Octopus.utils module
 ====================
 
@@ -32,6 +41,22 @@ Octopus.utils module
    :undoc-members:
    :show-inheritance:
    :member-order: bysource
+
+   .. rubric:: Functions
+
+   .. autosummary::
+
+      derivative
+
+
+
+
+
+   .. rubric:: Classes
+
+   .. autosummary::
+
+      Nist
 
 Indices and tables
 ==================
