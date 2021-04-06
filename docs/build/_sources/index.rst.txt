@@ -6,6 +6,8 @@
 Welcome to octopus's documentation!
 ===================================
 
+Use the panel on the left to select a module, or use the search funtion.
+
 .. autosummary::
    :toctree: _autosummary
    :recursive:
