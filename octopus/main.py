@@ -1,8 +1,4 @@
-"""Implementation of injector classes.
-
-.. code-block:: python
-
-    octopus.main.Orifice(fluid,L,D)
+"""Implementation of injector fluid dynamics classes.
 
 References:
     - [1] - Thermophyiscal properties of nitrous oxide,
@@ -414,11 +410,29 @@ class Fluid(chemical.Chemical):
         return res
 
 
+class PTParent:
+    """An object to provide a constant pressure and temperature as a parent object for a `Manifold`."""
+
+    def __int__(self, p, T):
+        """Initialise `PTParent` object with constant pressure and temperature to supply."""
+        self.p = p
+        self.T = T
+
+    def __repr__(self):
+        print(f'PT_Parent: p = {self.p}, T = {self.T}')
+
+
 class Manifold:
     """Represent a propellant manifold, at least one Fluid input and one Element output."""
 
-    def __init__(self, fluid: Fluid):
-        pass
+    def __init__(self, fluid: Fluid, parent):
+        """Initialise Manifold with a working fluid and property parent.
+        20:param fluid:
+        :param parent:
+
+        """
+        self.fluid = fluid
+        self.parent = parent
 
 
 class Element:
@@ -469,7 +483,8 @@ class Orifice:
                 u = ['p', 'chi']
                 y = [p0, chi0]
 
-                initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
+                initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]),
+                                        args=[u, y])
                 rho0, T0 = initial.x
             elif self.fluid.method == 'thermo':
                 rho0 = self.fluid.rhol
@@ -497,7 +512,7 @@ class Orifice:
                 return None
 
             if self.fluid.method != 'helmholz':
-                raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
+                raise NotImplementedError(f'EOS method must be "helmholz", not "{self.fluid.method}" for HEM modelling')
 
             u = ['p', 'chi']
             y = [p0, chi0]
@@ -541,7 +556,7 @@ class Orifice:
 
     @lru_cache(maxsize=1)
     def m_dot_waxman(self, Pcc: float, choke_margin: float = 0.8,
-                     Cd_inj: float = 0.65, Cd_diff: float = 0.99, suppress = False):
+                     Cd_inj: float = 0.65, Cd_diff: float = 0.99, suppress=False):
         """Return estimate of cavitating injector mass flow rate and throat diameter.
 
         See Ref [2], section 6.

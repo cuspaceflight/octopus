@@ -1,3 +1,4 @@
+"""Implementation of data and mathematical utilities used in the `octopus.main` module"""
 from collections import OrderedDict
 from csv import reader
 from typing import Any, List, Union
