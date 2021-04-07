@@ -410,52 +410,76 @@ class Fluid(chemical.Chemical):
         return res
 
 
-class PTParent:
-    """An object to provide a constant pressure and temperature as a parent object for a `Manifold`."""
+class PropertySource:
+    """An object to provide a constant pressure and temperature as a parent object for a `Manifold`.
 
-    def __int__(self, p, T):
-        """Initialise `PTParent` object with constant pressure and temperature to supply."""
-        self.p = p
-        self.T = T
+    The user may create their own property source class, by extending `PropertySource`, and modifying the current
+    `p()` and `T()` functions."""
+
+    def __init__(self, p: float, T: float):
+        """Initialise `PTParent` object with constant pressure and temperature to supply to manifold fluid.
+        :param p: pressure (Pa)
+        :param T: temperature (K)
+        """
+        self._p = p
+        self._T = T
+
+    @property
+    def p(self):
+        return self._p
+
+    @property
+    def T(self):
+        return self._T
 
     def __repr__(self):
-        print(f'PT_Parent: p = {self.p}, T = {self.T}')
+        print(f'PropertySource: p = {self._p}, T = {self._T}')
 
 
 class Manifold:
-    """Represent a propellant manifold, at least one Fluid input and one Element output."""
+    """Represent a propellant manifold, at least one `Fluid` input and one `Orifice` output. If a user wishes to
+    model losses within the manifold, they may extend this class and add the required computing into the `p()` and
+    `T()` functions. """
 
-    def __init__(self, fluid: Fluid, parent):
-        """Initialise Manifold with a working fluid and property parent.
-        20:param fluid:
-        :param parent:
+    def __init__(self, fluid: Fluid, parent: PropertySource):
+        """Initialise manifold with a working fluid and property parent.
 
+        :param fluid: `Fluid` object to use EOS functions from
+        :param parent: `PropertySource` object to get p and T from
         """
         self.fluid = fluid
         self.parent = parent
+        self.chi = 0
+
+    @property
+    def p(self):
+        return self.parent.p
+
+    @property
+    def T(self):
+        return self.parent.T
 
 
 class Element:
-    """Represent an injector element, at least one Manifold input and one Orifice output."""
+    """Represent an injector element, at least one `Orifice` input"""
+
 
 
 class Orifice:
     """Represent a propellant orifice on the injector plate, at least one Manifold input."""
 
-    def __init__(self, fluid: Fluid, L: float, D: float, chi0: float = 0, orifice_type: int = 0, Cd: float = 0.7):
+    def __init__(self, manifold: Manifold, L: float, D: float, orifice_type: int = 0, Cd: float = 0.7):
         """Initiate an Orifice instance.
 
-        :param fluid: Fluid to use cost funtions and initial properties from
+        :param manifold: `Manifold` to get fluid EOS and properties from
         :param L: orifice length (m)
         :param D: orifice diameter (m)
-        :param chi0: initial vapour mass fraction = 0
-        :param orifice_type: only octopus.STRAIGHT = 0 supported
+        :param orifice_type: `octopus.STRAIGHT`(default) or `octopus.CAVTATING`
         :param Cd: discharge coefficient = 0.7
+
         """
-        # subscript o represents initial conditions at stagnation
-        self.fluid = fluid
-        self.P_o = fluid.P
-        self.chi0 = chi0
+        # manifold holds fluid info
+        self.manifold = manifold
 
         self.orifice_type = orifice_type
         self.L = L
@@ -464,80 +488,103 @@ class Orifice:
         self.Cd = Cd
 
     @lru_cache(maxsize=1)
-    def m_dot_SPI(self, P_cc: float):
+    def m_dot_SPI(self, p1: float):
         """Return single-phase-incompressible mass flow rate.
 
-        :param P_cc: combustion chamber pressure (Pa)
+        :param p1: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
+
         """
         if self.orifice_type == STRAIGHT:
             # find initial conditions
             # chi0,p0 known
-            p0 = self.P_o
-            chi0 = self.chi0
+            p0 = self.manifold.p
+            chi0 = self.manifold.chi
+            fluid = self.manifold.fluid
 
-            if p0 < P_cc:
+            # check pressure drop
+            if p0 < p1:
                 return None
 
-            if self.fluid.method == 'helmholz':
+            # use helmholz EOS if available
+            if fluid.method == 'helmholz':
                 u = ['p', 'chi']
                 y = [p0, chi0]
 
-                initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]),
-                                        args=[u, y])
+                # compute x resulting in y
+                initial = least_squares(fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, fluid.Tc]), args=[u, y])
                 rho0, T0 = initial.x
-            elif self.fluid.method == 'thermo':
-                rho0 = self.fluid.rhol
-            else:
-                raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
 
-            return self.A * sqrt(2 * rho0 * (self.P_o - P_cc))
+            elif fluid.method == 'thermo':
+                # TODO: integrate rho functions
+                rho0 = fluid.rhol
+            else:
+                raise NotImplementedError(f'EOS method "{fluid.method}" not implemented')
+
+            # compute mass flow
+            return self.A * sqrt(2 * rho0 * (p0 - p1))
         else:
             raise NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
     @lru_cache(maxsize=1)
-    def m_dot_HEM(self, P_cc: float):
+    def m_dot_HEM(self, p1: float):
         """Return homogeneous-equilibrium-model mass flow rate.
 
-        :param P_cc: combustion chamber pressure (Pa)
+        :param p1: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
+
         """
         if self.orifice_type == STRAIGHT:
+
             # find initial conditions
             # chi0,p0 known
-            p0 = self.P_o
-            chi0 = self.chi0
+            p0 = self.manifold.p
+            chi0 = self.manifold.chi
+            fluid = self.manifold.fluid
 
-            if p0 < P_cc:
+            # check for pressure drop
+            if p0 < p1:
                 return None
 
-            if self.fluid.method != 'helmholz':
-                raise NotImplementedError(f'EOS method must be "helmholz", not "{self.fluid.method}" for HEM modelling')
+            # check fluid has a helmholz eos
+            if fluid.method != 'helmholz':
+                raise NotImplementedError(f'EOS method must be "helmholz", not "{fluid.method}" for HEM modelling')
 
+            # set known values to iterate towards
             u = ['p', 'chi']
             y = [p0, chi0]
 
-            initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
+            # compute x resulting in y
+            initial = least_squares(fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, fluid.Tc]), args=[u, y])
             rho0, T0 = initial.x
 
-            h0 = self.fluid.get_properties(rho0, T0)['h']
-            s0 = self.fluid.get_properties(rho0, T0)['s']
+            # retrieve enthalpy and entropy
+            h0 = fluid.get_properties(rho0, T0)['h']
+            s0 = fluid.get_properties(rho0, T0)['s']
 
             # set final conditions
             # p1, s1 known
-            p1 = P_cc
+            p1 = p1
             s1 = s0
 
+            # set known values to iterate towards
             u = ['p', 's']
             y = [p1, s1]
 
-            final = least_squares(self.fluid.fun_ps, [500, 245], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
+            # compute x resulting in y
+            final = least_squares(fluid.fun_ps, [500, 245], bounds=([0, 0], [inf, fluid.Tc]), args=[u, y])
             rho1, T1 = final.x
 
-            h1 = self.fluid.get_properties(rho1, T1)['h']
+            # retrieve enthalpy
+            h1 = fluid.get_properties(rho1, T1)['h']
+
+            # check decrease in enthalpy
             if h1 > h0:
                 return None
+
+            # compute mass flow
             return self.A * rho1 * sqrt(h0 - h1)
+
         else:
             return NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
@@ -547,6 +594,7 @@ class Orifice:
 
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
+
         """
         kappa = 1  # fluid enters orifice at vapour pressure
         W = 1 / (1 + kappa)
@@ -555,7 +603,7 @@ class Orifice:
         return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))
 
     @lru_cache(maxsize=1)
-    def m_dot_waxman(self, Pcc: float, choke_margin: float = 0.8,
+    def m_dot_waxman(self, p1: float, choke_margin: float = 0.8,
                      Cd_inj: float = 0.65, Cd_diff: float = 0.99, suppress=False):
         """Return estimate of cavitating injector mass flow rate and throat diameter.
 
@@ -570,35 +618,39 @@ class Orifice:
 
         To be used as a tool for informing cold flow tests, NOT accurate simulation.
 
-        :param Pcc: combustion chamber pressure (Pa)
+        :param p1: combustion chamber pressure (Pa)
         :param choke_margin: rough margin to reduce the vapour pressure why
         :param Cd_inj: injector discharge coefficient
         :param Cd_diff: diffuser discharge coefficient
         :return: mass flow rate (kg/s)
+
         """
+        fluid = self.manifold.fluid
+        chi0 = self.manifold.chi
+
         if self.orifice_type != 1:
             raise NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented for Waxman orifice analysis')
 
-        if self.fluid.method != 'helmholz':
-            raise NotImplementedError(f'EOS method "{self.fluid.method}" not implemented')
+        if fluid.method != 'helmholz':
+            raise NotImplementedError(f'EOS method "{fluid.method}" not implemented')
 
-        P1 = self.P_o
+        P1 = self.manifold.p
 
-        P2 = Pcc
+        P2 = p1
         A2 = self.A
 
-        if Pcc > P1:
+        if p1 > P1:
             raise ValueError("Downstream pressure exceeeds upstream pressure")
 
         u = ['p', 'chi']
-        y = [P1, self.chi0]
+        y = [P1, chi0]
 
-        initial = least_squares(self.fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, self.fluid.Tc]), args=[u, y])
+        initial = least_squares(fluid.fun_ps, [800, 250], bounds=([0, 0], [inf, fluid.Tc]), args=[u, y])
         rho1, T1 = initial.x
 
-        Pv = self.fluid.Psat
+        Pv = fluid.Psat
 
-        if Pv * choke_margin > Pcc and suppress is False:
+        if Pv * choke_margin > p1 and suppress is False:
             print("Cannot choke flow: Chill propellant or increase downstream pressure.")
 
         # allow for fluid cooling in injector
@@ -612,8 +664,8 @@ class Orifice:
         Pt_actual = P2 - (Cd_inj / Cd_diff) ** 2 * (A2 / At) ** 2 * (P1 - P2) * (1 - (At / A2) ** 2)
 
         # mdot_diff is the choked mass flow through the diffuser section.
-        mdot_diff = Cd_diff * At * sqrt(2 * rho1 * (Pcc - Pt_actual) / (1 - (At / A2) ** 2))
-        mdot_inj = Cd_inj * A2 * sqrt(2 * rho1 * (P1 - Pcc))
+        mdot_diff = Cd_diff * At * sqrt(2 * rho1 * (p1 - Pt_actual) / (1 - (At / A2) ** 2))
+        mdot_inj = Cd_inj * A2 * sqrt(2 * rho1 * (P1 - p1))
 
         # Perform sense checks (by continuity, mdot_diff = mdot_inj)
         # Unless intentionally ignored
