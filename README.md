@@ -8,7 +8,7 @@
 `pip install git+https://github.com/cuspaceflight/octopus.git`
 
 ### Documentation:
-[Octopus Docs](https://cuspaceflight.github.io/octopus/build/)
+[Octopus Docs](https://cuspaceflight.github.io/octopus)
 
 ### Current features:
 *   Model flow through a simple straight orifice with a selection of 1- and 2-phase models.
