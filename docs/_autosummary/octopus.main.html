@@ -165,18 +165,22 @@
 <dl class="simple">
 <dt>References:</dt><dd><ul class="simple">
 <li><dl class="simple">
-<dt>[1] - Thermophyiscal properties of nitrous oxide,</dt><dd><p>IHS ESDU, <a class="reference external" href="http://edge.rit.edu/edge/P07106/public/Nox.pdf">http://edge.rit.edu/edge/P07106/public/Nox.pdf</a></p>
+<dt>[1]   Thermophyiscal properties of nitrous oxide,</dt><dd><p>IHS ESDU, <a class="reference external" href="http://edge.rit.edu/edge/P07106/public/Nox.pdf">http://edge.rit.edu/edge/P07106/public/Nox.pdf</a></p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>[2] - An investigation of injectors for use with high vapor pressure</dt><dd><p>propellants with applications to hybrid rockets, Benjamin S. Waxman
-<a class="reference external" href="https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf">https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf</a></p>
+<dt>[2]   An investigation of injectors for use with high vapor pressure propellants with applications to hybrid rockets,</dt><dd><p>Waxman B.S., <a class="reference external" href="https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf">https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf</a></p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>[3] - Short Fundamental Equations of State for 20 Industrial Fluids,</dt><dd><p>Lemmon and Span, <a class="reference external" href="https://pubs.acs.org/doi/pdf/10.1021/je050186n">https://pubs.acs.org/doi/pdf/10.1021/je050186n</a></p>
+<dt>[3]   Short Fundamental Equations of State for 20 Industrial Fluids,</dt><dd><p>Lemmon; Span, <a class="reference external" href="https://pubs.acs.org/doi/pdf/10.1021/je050186n">https://pubs.acs.org/doi/pdf/10.1021/je050186n</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[4]   Engineering Model to Calculate Mass Flow Rate of a Two-Phase Saturated Fluid Through An Injector Orifice,</dt><dd><p>Solomon B.J., <a class="reference external" href="https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1110&amp;context=gradreports">https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1110&amp;context=gradreports</a></p>
 </dd>
 </dl>
 </li>
@@ -191,19 +195,19 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../index.html#octopus.main.Element" title="octopus.main.Element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Element</span></code></a>()</p></td>
-<td><p>Represent an injector element, at least one <cite>Orifice</cite> input</p></td>
+<td><p>Represent an injector element, at least one <code class="docutils literal notranslate"><span class="pre">Orifice</span></code> input</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../index.html#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluid</span></code></a>(ID, T, P[, method])</p></td>
 <td><p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../index.html#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manifold</span></code></a>(fluid, parent)</p></td>
-<td><p>Represent a propellant manifold, at least one <cite>Fluid</cite> input and one <cite>Orifice</cite> output.</p></td>
+<td><p>Represent a propellant manifold, at least one <code class="docutils literal notranslate"><span class="pre">Fluid</span></code> input and one <code class="docutils literal notranslate"><span class="pre">Orifice</span></code> output.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="../index.html#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Orifice</span></code></a>(manifold, L, D, orifice_type, Cd)</p></td>
-<td><p>Represent a propellant orifice on the injector plate, at least one Manifold input.</p></td>
+<td><p>Represent a propellant orifice on the injector plate, at least one <code class="docutils literal notranslate"><span class="pre">Manifold</span></code> input.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../index.html#octopus.main.PropertySource" title="octopus.main.PropertySource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PropertySource</span></code></a>(p, T)</p></td>
-<td><p>An object to provide a constant pressure and temperature as a parent object for a <cite>Manifold</cite>.</p></td>
+<td><p>An object to provide a constant pressure and temperature as a parent object for a <code class="docutils literal notranslate"><span class="pre">Manifold</span></code>.</p></td>
 </tr>
 </tbody>
 </table>

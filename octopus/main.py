@@ -1,13 +1,14 @@
 """Implementation of injector fluid dynamics classes.
 
 References:
-    - [1] - Thermophyiscal properties of nitrous oxide,
+    - [1]   Thermophyiscal properties of nitrous oxide,
             IHS ESDU, http://edge.rit.edu/edge/P07106/public/Nox.pdf
-    - [2] - An investigation of injectors for use with high vapor pressure
-            propellants with applications to hybrid rockets, Benjamin S. Waxman
-            https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf
-    - [3] - Short Fundamental Equations of State for 20 Industrial Fluids,
-            Lemmon and Span, https://pubs.acs.org/doi/pdf/10.1021/je050186n
+    - [2]   An investigation of injectors for use with high vapor pressure propellants with applications to hybrid rockets,
+            Waxman B.S., https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf
+    - [3]   Short Fundamental Equations of State for 20 Industrial Fluids,
+            Lemmon; Span, https://pubs.acs.org/doi/pdf/10.1021/je050186n
+    - [4]   Engineering Model to Calculate Mass Flow Rate of a Two-Phase Saturated Fluid Through An Injector Orifice,
+            Solomon B.J., https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1110&context=gradreports
 
 """
 from functools import lru_cache
@@ -411,10 +412,10 @@ class Fluid(chemical.Chemical):
 
 
 class PropertySource:
-    """An object to provide a constant pressure and temperature as a parent object for a `Manifold`.
+    """An object to provide a constant pressure and temperature as a parent object for a ``Manifold``.
 
-    The user may create their own property source class, by extending `PropertySource`, and modifying the current
-    `p()` and `T()` functions."""
+    The user may create their own property source class, by extending ``PropertySource``, and modifying the current
+    ``p()`` and ``T()`` functions."""
 
     def __init__(self, p: float, T: float):
         """Initialise `PTParent` object with constant pressure and temperature to supply to manifold fluid.
@@ -437,15 +438,15 @@ class PropertySource:
 
 
 class Manifold:
-    """Represent a propellant manifold, at least one `Fluid` input and one `Orifice` output. If a user wishes to
-    model losses within the manifold, they may extend this class and add the required computing into the `p()` and
-    `T()` functions. """
+    """Represent a propellant manifold, at least one ``Fluid`` input and one ``Orifice`` output. If a user wishes to
+    model losses within the manifold, they may extend this class and add the required computing into the ``p()`` and
+    ``T()`` functions. """
 
     def __init__(self, fluid: Fluid, parent: PropertySource):
         """Initialise manifold with a working fluid and property parent.
 
-        :param fluid: `Fluid` object to use EOS functions from
-        :param parent: `PropertySource` object to get p and T from
+        :param fluid: ``Fluid`` object to use EOS functions from
+        :param parent: ``PropertySource`` object to get p and T from
         """
         self.fluid = fluid
         self.parent = parent
@@ -461,19 +462,19 @@ class Manifold:
 
 
 class Element:
-    """Represent an injector element, at least one `Orifice` input"""
+    """Represent an injector element, at least one ``Orifice`` input"""
 
 
 class Orifice:
-    """Represent a propellant orifice on the injector plate, at least one Manifold input."""
+    """Represent a propellant orifice on the injector plate, at least one ``Manifold`` input."""
 
     def __init__(self, manifold: Manifold, L: float, D: float, orifice_type: int = 0, Cd: float = 0.7):
         """Initiate an Orifice instance.
 
-        :param manifold: `Manifold` to get fluid EOS and properties from
+        :param manifold: ``Manifold`` to get fluid EOS and properties from
         :param L: orifice length (m)
         :param D: orifice diameter (m)
-        :param orifice_type: `octopus.STRAIGHT`(default) or `octopus.CAVTATING`
+        :param orifice_type: ``octopus.STRAIGHT``(default) or ``octopus.CAVTATING``
         :param Cd: discharge coefficient = 0.7
 
         """

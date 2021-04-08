@@ -182,18 +182,22 @@
 <dl class="simple">
 <dt>References:</dt><dd><ul class="simple">
 <li><dl class="simple">
-<dt>[1] - Thermophyiscal properties of nitrous oxide,</dt><dd><p>IHS ESDU, <a class="reference external" href="http://edge.rit.edu/edge/P07106/public/Nox.pdf">http://edge.rit.edu/edge/P07106/public/Nox.pdf</a></p>
+<dt>[1]   Thermophyiscal properties of nitrous oxide,</dt><dd><p>IHS ESDU, <a class="reference external" href="http://edge.rit.edu/edge/P07106/public/Nox.pdf">http://edge.rit.edu/edge/P07106/public/Nox.pdf</a></p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>[2] - An investigation of injectors for use with high vapor pressure</dt><dd><p>propellants with applications to hybrid rockets, Benjamin S. Waxman
-<a class="reference external" href="https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf">https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf</a></p>
+<dt>[2]   An investigation of injectors for use with high vapor pressure propellants with applications to hybrid rockets,</dt><dd><p>Waxman B.S., <a class="reference external" href="https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf">https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf</a></p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>[3] - Short Fundamental Equations of State for 20 Industrial Fluids,</dt><dd><p>Lemmon and Span, <a class="reference external" href="https://pubs.acs.org/doi/pdf/10.1021/je050186n">https://pubs.acs.org/doi/pdf/10.1021/je050186n</a></p>
+<dt>[3]   Short Fundamental Equations of State for 20 Industrial Fluids,</dt><dd><p>Lemmon; Span, <a class="reference external" href="https://pubs.acs.org/doi/pdf/10.1021/je050186n">https://pubs.acs.org/doi/pdf/10.1021/je050186n</a></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>[4]   Engineering Model to Calculate Mass Flow Rate of a Two-Phase Saturated Fluid Through An Injector Orifice,</dt><dd><p>Solomon B.J., <a class="reference external" href="https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1110&amp;context=gradreports">https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1110&amp;context=gradreports</a></p>
 </dd>
 </dl>
 </li>
@@ -208,16 +212,16 @@
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Element" title="octopus.main.Element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Element</span></code></a>()</p></td>
-<td><p>Represent an injector element, at least one <cite>Orifice</cite> input</p></td>
+<td><p>Represent an injector element, at least one <code class="docutils literal notranslate"><span class="pre">Orifice</span></code> input</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluid</span></code></a>(ID, T, P[, method])</p></td>
 <td><p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manifold</span></code></a>(fluid, parent)</p></td>
-<td><p>Represent a propellant manifold, at least one <cite>Fluid</cite> input and one <cite>Orifice</cite> output.</p></td>
+<td><p>Represent a propellant manifold, at least one <code class="docutils literal notranslate"><span class="pre">Fluid</span></code> input and one <code class="docutils literal notranslate"><span class="pre">Orifice</span></code> output.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Orifice</span></code></a>(manifold, L, D, orifice_type, Cd)</p></td>
-<td><p>Represent a propellant orifice on the injector plate, at least one Manifold input.</p></td>
+<td><p>Represent a propellant orifice on the injector plate, at least one <code class="docutils literal notranslate"><span class="pre">Manifold</span></code> input.</p></td>
 </tr>
 </tbody>
 </table>
@@ -643,9 +647,9 @@
 <dt id="octopus.main.PropertySource">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">PropertySource</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#PropertySource"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.PropertySource" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>An object to provide a constant pressure and temperature as a parent object for a <cite>Manifold</cite>.</p>
-<p>The user may create their own property source class, by extending <cite>PropertySource</cite>, and modifying the current
-<cite>p()</cite> and <cite>T()</cite> functions.</p>
+<p>An object to provide a constant pressure and temperature as a parent object for a <code class="docutils literal notranslate"><span class="pre">Manifold</span></code>.</p>
+<p>The user may create their own property source class, by extending <code class="docutils literal notranslate"><span class="pre">PropertySource</span></code>, and modifying the current
+<code class="docutils literal notranslate"><span class="pre">p()</span></code> and <code class="docutils literal notranslate"><span class="pre">T()</span></code> functions.</p>
 <p>Initialise <cite>PTParent</cite> object with constant pressure and temperature to supply to manifold fluid.
 :param p: pressure (Pa)
 :param T: temperature (K)</p>
@@ -665,15 +669,15 @@
 <dt id="octopus.main.Manifold">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Manifold</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fluid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><span class="pre">octopus.main.Fluid</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#octopus.main.PropertySource" title="octopus.main.PropertySource"><span class="pre">octopus.main.PropertySource</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Manifold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Manifold" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Represent a propellant manifold, at least one <cite>Fluid</cite> input and one <cite>Orifice</cite> output. If a user wishes to
-model losses within the manifold, they may extend this class and add the required computing into the <cite>p()</cite> and
-<cite>T()</cite> functions.</p>
+<p>Represent a propellant manifold, at least one <code class="docutils literal notranslate"><span class="pre">Fluid</span></code> input and one <code class="docutils literal notranslate"><span class="pre">Orifice</span></code> output. If a user wishes to
+model losses within the manifold, they may extend this class and add the required computing into the <code class="docutils literal notranslate"><span class="pre">p()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">T()</span></code> functions.</p>
 <p>Initialise manifold with a working fluid and property parent.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fluid</strong> – <cite>Fluid</cite> object to use EOS functions from</p></li>
-<li><p><strong>parent</strong> – <cite>PropertySource</cite> object to get p and T from</p></li>
+<li><p><strong>fluid</strong> – <code class="docutils literal notranslate"><span class="pre">Fluid</span></code> object to use EOS functions from</p></li>
+<li><p><strong>parent</strong> – <code class="docutils literal notranslate"><span class="pre">PropertySource</span></code> object to get p and T from</p></li>
 </ul>
 </dd>
 </dl>
@@ -693,22 +697,22 @@ model losses within the manifold, they may extend this class and add the require
 <dt id="octopus.main.Element">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Element</span></code><a class="reference internal" href="_modules/octopus/main.html#Element"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Element" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Represent an injector element, at least one <cite>Orifice</cite> input</p>
+<p>Represent an injector element, at least one <code class="docutils literal notranslate"><span class="pre">Orifice</span></code> input</p>
 </dd></dl>
 
 <dl class="py class">
 <dt id="octopus.main.Orifice">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Orifice</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">manifold</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><span class="pre">octopus.main.Manifold</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">L</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">D</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orifice_type</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cd</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.7</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Orifice"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Orifice" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Represent a propellant orifice on the injector plate, at least one Manifold input.</p>
+<p>Represent a propellant orifice on the injector plate, at least one <code class="docutils literal notranslate"><span class="pre">Manifold</span></code> input.</p>
 <p>Initiate an Orifice instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>manifold</strong> – <cite>Manifold</cite> to get fluid EOS and properties from</p></li>
+<li><p><strong>manifold</strong> – <code class="docutils literal notranslate"><span class="pre">Manifold</span></code> to get fluid EOS and properties from</p></li>
 <li><p><strong>L</strong> – orifice length (m)</p></li>
 <li><p><strong>D</strong> – orifice diameter (m)</p></li>
-<li><p><strong>orifice_type</strong> – <cite>octopus.STRAIGHT`(default) or `octopus.CAVTATING</cite></p></li>
+<li><p><strong>orifice_type</strong> – <code class="docutils literal notranslate"><span class="pre">octopus.STRAIGHT``(default)</span> <span class="pre">or</span> <span class="pre">``octopus.CAVTATING</span></code></p></li>
 <li><p><strong>Cd</strong> – discharge coefficient = 0.7</p></li>
 </ul>
 </dd>

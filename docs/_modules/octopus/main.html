@@ -159,13 +159,14 @@
 <span></span><span class="sd">&quot;&quot;&quot;Implementation of injector fluid dynamics classes.</span>
 
 <span class="sd">References:</span>
-<span class="sd">    - [1] - Thermophyiscal properties of nitrous oxide,</span>
+<span class="sd">    - [1]   Thermophyiscal properties of nitrous oxide,</span>
 <span class="sd">            IHS ESDU, http://edge.rit.edu/edge/P07106/public/Nox.pdf</span>
-<span class="sd">    - [2] - An investigation of injectors for use with high vapor pressure</span>
-<span class="sd">            propellants with applications to hybrid rockets, Benjamin S. Waxman</span>
-<span class="sd">            https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf</span>
-<span class="sd">    - [3] - Short Fundamental Equations of State for 20 Industrial Fluids,</span>
-<span class="sd">            Lemmon and Span, https://pubs.acs.org/doi/pdf/10.1021/je050186n</span>
+<span class="sd">    - [2]   An investigation of injectors for use with high vapor pressure propellants with applications to hybrid rockets,</span>
+<span class="sd">            Waxman B.S., https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf</span>
+<span class="sd">    - [3]   Short Fundamental Equations of State for 20 Industrial Fluids,</span>
+<span class="sd">            Lemmon; Span, https://pubs.acs.org/doi/pdf/10.1021/je050186n</span>
+<span class="sd">    - [4]   Engineering Model to Calculate Mass Flow Rate of a Two-Phase Saturated Fluid Through An Injector Orifice,</span>
+<span class="sd">            Solomon B.J., https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1110&amp;context=gradreports</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
@@ -569,10 +570,10 @@
 
 
 <div class="viewcode-block" id="PropertySource"><a class="viewcode-back" href="../../index.html#octopus.main.PropertySource">[docs]</a><span class="k">class</span> <span class="nc">PropertySource</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;An object to provide a constant pressure and temperature as a parent object for a `Manifold`.</span>
+    <span class="sd">&quot;&quot;&quot;An object to provide a constant pressure and temperature as a parent object for a ``Manifold``.</span>
 
-<span class="sd">    The user may create their own property source class, by extending `PropertySource`, and modifying the current</span>
-<span class="sd">    `p()` and `T()` functions.&quot;&quot;&quot;</span>
+<span class="sd">    The user may create their own property source class, by extending ``PropertySource``, and modifying the current</span>
+<span class="sd">    ``p()`` and ``T()`` functions.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialise `PTParent` object with constant pressure and temperature to supply to manifold fluid.</span>
@@ -595,15 +596,15 @@
 
 
 <div class="viewcode-block" id="Manifold"><a class="viewcode-back" href="../../index.html#octopus.main.Manifold">[docs]</a><span class="k">class</span> <span class="nc">Manifold</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Represent a propellant manifold, at least one `Fluid` input and one `Orifice` output. If a user wishes to</span>
-<span class="sd">    model losses within the manifold, they may extend this class and add the required computing into the `p()` and</span>
-<span class="sd">    `T()` functions. &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Represent a propellant manifold, at least one ``Fluid`` input and one ``Orifice`` output. If a user wishes to</span>
+<span class="sd">    model losses within the manifold, they may extend this class and add the required computing into the ``p()`` and</span>
+<span class="sd">    ``T()`` functions. &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fluid</span><span class="p">:</span> <span class="n">Fluid</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">PropertySource</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialise manifold with a working fluid and property parent.</span>
 
-<span class="sd">        :param fluid: `Fluid` object to use EOS functions from</span>
-<span class="sd">        :param parent: `PropertySource` object to get p and T from</span>
+<span class="sd">        :param fluid: ``Fluid`` object to use EOS functions from</span>
+<span class="sd">        :param parent: ``PropertySource`` object to get p and T from</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fluid</span> <span class="o">=</span> <span class="n">fluid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
@@ -619,19 +620,19 @@
 
 
 <div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../index.html#octopus.main.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Represent an injector element, at least one `Orifice` input&quot;&quot;&quot;</span></div>
+    <span class="sd">&quot;&quot;&quot;Represent an injector element, at least one ``Orifice`` input&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="Orifice"><a class="viewcode-back" href="../../index.html#octopus.main.Orifice">[docs]</a><span class="k">class</span> <span class="nc">Orifice</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Represent a propellant orifice on the injector plate, at least one Manifold input.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Represent a propellant orifice on the injector plate, at least one ``Manifold`` input.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">manifold</span><span class="p">:</span> <span class="n">Manifold</span><span class="p">,</span> <span class="n">L</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">D</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">orifice_type</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">Cd</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initiate an Orifice instance.</span>
 
-<span class="sd">        :param manifold: `Manifold` to get fluid EOS and properties from</span>
+<span class="sd">        :param manifold: ``Manifold`` to get fluid EOS and properties from</span>
 <span class="sd">        :param L: orifice length (m)</span>
 <span class="sd">        :param D: orifice diameter (m)</span>
-<span class="sd">        :param orifice_type: `octopus.STRAIGHT`(default) or `octopus.CAVTATING`</span>
+<span class="sd">        :param orifice_type: ``octopus.STRAIGHT``(default) or ``octopus.CAVTATING``</span>
 <span class="sd">        :param Cd: discharge coefficient = 0.7</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>

@@ -27,6 +27,7 @@ def derivative(f: callable, axis: int, *args: Any, dx: float = 0.01) -> float:
     return nan_to_num(array((f(*args_h) - f(*args_l)) / (2 * dx)))
 
 
+
 class Nist:
     """Collection of tools for retrieving data from a NIST csv file."""
 
