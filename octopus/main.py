@@ -23,8 +23,6 @@ from thermo import chemical
 from .utils import derivative
 
 
-
-
 class Fluid(chemical.Chemical):
     """Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS."""
 
@@ -416,7 +414,7 @@ class PropertySource:
     The user may create their own property source class, by extending :class`PropertySource`, and modifying the current
     :meth:`p` and :meth:`T` methods."""
 
-    def __init__(self, p: float, T: float):
+    def __init__(self, p: float = 101325, T: float = 298):
         """Initialise :class`PropertySource` object with constant pressure and temperature to supply to manifold fluid.
         :param p: pressure (Pa)
         :param T: temperature (K)

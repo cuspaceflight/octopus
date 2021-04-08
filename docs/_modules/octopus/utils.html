@@ -88,6 +88,10 @@
             
             
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../_static/installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../_static/usage.html">Usage</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/octopus.main.html">octopus.main</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/octopus.utils.html">octopus.utils</a></li>
 </ul>
@@ -165,9 +169,9 @@
 
 
 <div class="viewcode-block" id="derivative"><a class="viewcode-back" href="../../index.html#octopus.utils.derivative">[docs]</a><span class="k">def</span> <span class="nf">derivative</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">callable</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">dx</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the  numerical derivative of a scalar funtion f(*args) with respect to args[axis].</span>
+    <span class="sd">&quot;&quot;&quot;Calculate the  numerical derivative of a scalar funtion f(args) with respect to args[axis].</span>
 
-<span class="sd">    :param f: vector function to find derivative of with the signature f(*args) -&gt; iterable</span>
+<span class="sd">    :param f: vector function to find derivative of with the signature f(args) -&gt; iterable</span>
 <span class="sd">    :param axis: index of the parameter against which the derivative of f is to be taken</span>
 <span class="sd">    :param args: parameters to pass to f, including the one against which the derivative is to be taken</span>
 <span class="sd">    :param dx: differentiation step</span>

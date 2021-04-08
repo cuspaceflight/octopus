@@ -1,19 +1,23 @@
-.. octopus documentation master file, created by
-   sphinx-quickstart on Tue Apr  6 13:02:11 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+Octopus Documentation
+=====================
 
-Welcome to octopus's documentation!
-===================================
+Octopus is a software package designed primarily to model the flow of nitrous oxide (N2O) through a rocket engine
+injector. It has a built-in EOS based on a Helmholz energy method outlined in `[3]<main ref 3>`_, and includes the
+required coefficients to use it with nitrous oxide. 19 other chemicals are also available, but CO2 is not.
+:class:`Nist` contains methods that may be used, along with :mod:`scipy.optimise` and :func:`utils.derivative` to
+produce the required coefficients for the modelling of CO2, if required.
 
-Use the panel on the left to select a module, or use the search funtion.
+.. toctree::
+    installation
+    usage
+    _autosummary/octopus.main
+    _autosummary/octopus.utils
 
 .. autosummary::
-   :toctree: _autosummary
-   :recursive:
+    :recursive:
 
-   octopus.main
-   octopus.utils
+    octopus.main
+    octopus.utils
 
 Octopus.main module
 ===================
@@ -47,10 +51,6 @@ Octopus.utils module
    .. autosummary::
 
       derivative
-
-
-
-
 
    .. rubric:: Classes
 
