@@ -54,7 +54,7 @@ exclude_patterns = []
 #
 html_theme = "sphinx_rtd_theme"
 html_logo = "logo.png"
-html_favicon = "favicon.png"
+html_favicon = "favicon.ico"
 html_theme_options = {'logo_only': False}
 
 # Add any paths that contain custom static files (such as style sheets) here,
