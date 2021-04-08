@@ -576,7 +576,7 @@
 <span class="sd">    ``p()`` and ``T()`` functions.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">T</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Initialise `PTParent` object with constant pressure and temperature to supply to manifold fluid.</span>
+        <span class="sd">&quot;&quot;&quot;Initialise ``PropertySource`` object with constant pressure and temperature to supply to manifold fluid.</span>
 <span class="sd">        :param p: pressure (Pa)</span>
 <span class="sd">        :param T: temperature (K)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -596,15 +596,15 @@
 
 
 <div class="viewcode-block" id="Manifold"><a class="viewcode-back" href="../../index.html#octopus.main.Manifold">[docs]</a><span class="k">class</span> <span class="nc">Manifold</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Represent a propellant manifold, at least one ``Fluid`` input and one ``Orifice`` output. If a user wishes to</span>
-<span class="sd">    model losses within the manifold, they may extend this class and add the required computing into the ``p()`` and</span>
-<span class="sd">    ``T()`` functions. &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Represent a propellant manifold, at least one :class:`main.Fluid` input and one `:class:`main.Orifice` output. If a user wishes to</span>
+<span class="sd">    model losses within the manifold, they may extend this class and add the required computing into the :meth:`main.Fluid.p` and</span>
+<span class="sd">    :meth:`main.Fluid.T` functions. &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fluid</span><span class="p">:</span> <span class="n">Fluid</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">PropertySource</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialise manifold with a working fluid and property parent.</span>
 
-<span class="sd">        :param fluid: ``Fluid`` object to use EOS functions from</span>
-<span class="sd">        :param parent: ``PropertySource`` object to get p and T from</span>
+<span class="sd">        :param fluid: :class:`main.Fluid` object to use EOS functions from</span>
+<span class="sd">        :param parent: :class:`main.PropertySource` object to get p and T from</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fluid</span> <span class="o">=</span> <span class="n">fluid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>

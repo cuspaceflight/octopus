@@ -418,7 +418,7 @@ class PropertySource:
     ``p()`` and ``T()`` functions."""
 
     def __init__(self, p: float, T: float):
-        """Initialise `PTParent` object with constant pressure and temperature to supply to manifold fluid.
+        """Initialise ``PropertySource`` object with constant pressure and temperature to supply to manifold fluid.
         :param p: pressure (Pa)
         :param T: temperature (K)
         """
@@ -438,15 +438,15 @@ class PropertySource:
 
 
 class Manifold:
-    """Represent a propellant manifold, at least one ``Fluid`` input and one ``Orifice`` output. If a user wishes to
-    model losses within the manifold, they may extend this class and add the required computing into the ``p()`` and
-    ``T()`` functions. """
+    """Represent a propellant manifold, at least one :class:`main.Fluid` input and one `:class:`main.Orifice` output.
+    If a user wishes to model losses within the manifold, they may extend this class and add the required computing into
+    the :meth:`main.Fluid.p` and :meth:`main.Fluid.T` functions. """
 
     def __init__(self, fluid: Fluid, parent: PropertySource):
         """Initialise manifold with a working fluid and property parent.
 
-        :param fluid: ``Fluid`` object to use EOS functions from
-        :param parent: ``PropertySource`` object to get p and T from
+        :param fluid: :class:`main.Fluid` object to use EOS functions from
+        :param parent: :class:`main.PropertySource` object to get p and T from
         """
         self.fluid = fluid
         self.parent = parent

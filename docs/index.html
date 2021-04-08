@@ -218,7 +218,7 @@
 <td><p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manifold</span></code></a>(fluid, parent)</p></td>
-<td><p>Represent a propellant manifold, at least one <code class="docutils literal notranslate"><span class="pre">Fluid</span></code> input and one <code class="docutils literal notranslate"><span class="pre">Orifice</span></code> output.</p></td>
+<td><p>Represent a propellant manifold, at least one <code class="xref py py-class docutils literal notranslate"><span class="pre">main.Fluid</span></code> input and one <cite>:class:`main.Orifice</cite> output.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Orifice</span></code></a>(manifold, L, D, orifice_type, Cd)</p></td>
 <td><p>Represent a propellant orifice on the injector plate, at least one <code class="docutils literal notranslate"><span class="pre">Manifold</span></code> input.</p></td>
@@ -650,7 +650,7 @@
 <p>An object to provide a constant pressure and temperature as a parent object for a <code class="docutils literal notranslate"><span class="pre">Manifold</span></code>.</p>
 <p>The user may create their own property source class, by extending <code class="docutils literal notranslate"><span class="pre">PropertySource</span></code>, and modifying the current
 <code class="docutils literal notranslate"><span class="pre">p()</span></code> and <code class="docutils literal notranslate"><span class="pre">T()</span></code> functions.</p>
-<p>Initialise <cite>PTParent</cite> object with constant pressure and temperature to supply to manifold fluid.
+<p>Initialise <code class="docutils literal notranslate"><span class="pre">PropertySource</span></code> object with constant pressure and temperature to supply to manifold fluid.
 :param p: pressure (Pa)
 :param T: temperature (K)</p>
 <dl class="py method">
@@ -669,15 +669,15 @@
 <dt id="octopus.main.Manifold">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Manifold</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fluid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><span class="pre">octopus.main.Fluid</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#octopus.main.PropertySource" title="octopus.main.PropertySource"><span class="pre">octopus.main.PropertySource</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Manifold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Manifold" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>Represent a propellant manifold, at least one <code class="docutils literal notranslate"><span class="pre">Fluid</span></code> input and one <code class="docutils literal notranslate"><span class="pre">Orifice</span></code> output. If a user wishes to
-model losses within the manifold, they may extend this class and add the required computing into the <code class="docutils literal notranslate"><span class="pre">p()</span></code> and
-<code class="docutils literal notranslate"><span class="pre">T()</span></code> functions.</p>
+<p>Represent a propellant manifold, at least one <code class="xref py py-class docutils literal notranslate"><span class="pre">main.Fluid</span></code> input and one <cite>:class:`main.Orifice</cite> output. If a user wishes to
+model losses within the manifold, they may extend this class and add the required computing into the <code class="xref py py-meth docutils literal notranslate"><span class="pre">main.Fluid.p()</span></code> and
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">main.Fluid.T()</span></code> functions.</p>
 <p>Initialise manifold with a working fluid and property parent.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>fluid</strong> – <code class="docutils literal notranslate"><span class="pre">Fluid</span></code> object to use EOS functions from</p></li>
-<li><p><strong>parent</strong> – <code class="docutils literal notranslate"><span class="pre">PropertySource</span></code> object to get p and T from</p></li>
+<li><p><strong>fluid</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">main.Fluid</span></code> object to use EOS functions from</p></li>
+<li><p><strong>parent</strong> – <code class="xref py py-class docutils literal notranslate"><span class="pre">main.PropertySource</span></code> object to get p and T from</p></li>
 </ul>
 </dd>
 </dl>
