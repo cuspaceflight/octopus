@@ -30,7 +30,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Build docs
       run: |
-        sphinx-build docs/source docs
+        sphinx-build docs/source docs/build
     - name: Trigger GitHub pages rebuild
       run: |
         curl \
