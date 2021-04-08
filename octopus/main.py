@@ -464,7 +464,6 @@ class Element:
     """Represent an injector element, at least one `Orifice` input"""
 
 
-
 class Orifice:
     """Represent a propellant orifice on the injector plate, at least one Manifold input."""
 
