@@ -22,8 +22,7 @@ from thermo import chemical
 
 from .utils import derivative
 
-STRAIGHT = 0
-CAVITATING = 1
+
 
 
 class Fluid(chemical.Chemical):
@@ -412,13 +411,13 @@ class Fluid(chemical.Chemical):
 
 
 class PropertySource:
-    """An object to provide a constant pressure and temperature as a parent object for a ``Manifold``.
+    """An object to provide a constant pressure and temperature as a parent object for a :class:`Manifold`.
 
-    The user may create their own property source class, by extending ``PropertySource``, and modifying the current
-    ``p()`` and ``T()`` functions."""
+    The user may create their own property source class, by extending :class`PropertySource`, and modifying the current
+    :meth:`p` and :meth:`T` methods."""
 
     def __init__(self, p: float, T: float):
-        """Initialise ``PropertySource`` object with constant pressure and temperature to supply to manifold fluid.
+        """Initialise :class`PropertySource` object with constant pressure and temperature to supply to manifold fluid.
         :param p: pressure (Pa)
         :param T: temperature (K)
         """
@@ -438,15 +437,16 @@ class PropertySource:
 
 
 class Manifold:
-    """Represent a propellant manifold, at least one :class:`main.Fluid` input and one `:class:`main.Orifice` output.
-    If a user wishes to model losses within the manifold, they may extend this class and add the required computing into
-    the :meth:`main.Fluid.p` and :meth:`main.Fluid.T` functions. """
+    """Represent a propellant manifold, at least one :class:`Fluid` input and one
+    :class:`Orifice` output. If a user wishes to model losses within the manifold, they may extend this
+    class and add the required computing into the :meth:`Manifold.p` and :meth:`Manifold.T`
+    functions. """
 
     def __init__(self, fluid: Fluid, parent: PropertySource):
-        """Initialise manifold with a working fluid and property parent.
+        """Initialise :class:`Manifold` object with a working fluid and property parent.
 
-        :param fluid: :class:`main.Fluid` object to use EOS functions from
-        :param parent: :class:`main.PropertySource` object to get p and T from
+        :param fluid: :class:`Fluid` object to use EOS functions from
+        :param parent: :class:`PropertySource` object to get p and T from
         """
         self.fluid = fluid
         self.parent = parent
@@ -462,19 +462,22 @@ class Manifold:
 
 
 class Element:
-    """Represent an injector element, at least one ``Orifice`` input"""
+    """Represent an injector element, at least one :class:`Orifice` input"""
 
 
 class Orifice:
-    """Represent a propellant orifice on the injector plate, at least one ``Manifold`` input."""
+    """Represent a propellant orifice on the injector plate, at least one :class:`Manifold` input."""
+
+    STRAIGHT = 0
+    CAVITATING = 1
 
     def __init__(self, manifold: Manifold, L: float, D: float, orifice_type: int = 0, Cd: float = 0.7):
-        """Initiate an Orifice instance.
+        """Initialise :class:`Orifice` object.
 
-        :param manifold: ``Manifold`` to get fluid EOS and properties from
+        :param manifold: :class:`Manifold` to get fluid EOS and properties from
         :param L: orifice length (m)
         :param D: orifice diameter (m)
-        :param orifice_type: ``octopus.STRAIGHT``(default) or ``octopus.CAVTATING``
+        :param orifice_type: :attr:`STRAIGHT` (default) or :attr:`CAVITATING`
         :param Cd: discharge coefficient = 0.7
 
         """
@@ -495,7 +498,7 @@ class Orifice:
         :return: mass flow rate (kg/s)
 
         """
-        if self.orifice_type == STRAIGHT:
+        if self.orifice_type == self.STRAIGHT:
             # find initial conditions
             # chi0,p0 known
             p0 = self.manifold.p
@@ -534,7 +537,7 @@ class Orifice:
         :return: mass flow rate (kg/s)
 
         """
-        if self.orifice_type == STRAIGHT:
+        if self.orifice_type == self.STRAIGHT:
 
             # find initial conditions
             # chi0,p0 known
