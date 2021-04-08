@@ -28,7 +28,13 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Run examples
+    - name: Build docs
       run: |
-        python examples/dev.py
+        sphinx-build docs/source docs
+    - name: Trigger GitHub pages rebuild
+      run: |
+        curl \
+          -X POST \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/cuspaceflight/octopus/pages/builds
 
