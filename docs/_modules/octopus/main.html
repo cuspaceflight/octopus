@@ -88,10 +88,8 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../_static/installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../_static/usage.html">Usage</a></li>
-</ul>
-<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/octopus.main.html">octopus.main</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../_autosummary/octopus.utils.html">octopus.utils</a></li>
 </ul>
@@ -621,10 +619,6 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">T</span></div>
 
 
-<div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../index.html#octopus.main.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Represent an injector element, at least one :class:`Orifice` input&quot;&quot;&quot;</span></div>
-
-
 <div class="viewcode-block" id="Orifice"><a class="viewcode-back" href="../../index.html#octopus.main.Orifice">[docs]</a><span class="k">class</span> <span class="nc">Orifice</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Represent a propellant orifice on the injector plate, at least one :class:`Manifold` input.&quot;&quot;&quot;</span>
 
@@ -649,6 +643,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="n">D</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">A</span> <span class="o">=</span> <span class="mf">0.2</span> <span class="o">*</span> <span class="n">pi</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">**</span> <span class="mi">2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Cd</span> <span class="o">=</span> <span class="n">Cd</span>
+
+        <span class="c1"># defines default Orifice.m_dot(p1) function</span>
+        <span class="k">if</span> <span class="n">manifold</span><span class="o">.</span><span class="n">fluid</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;helmholz&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">m_dot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_dot_dyer</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">m_dot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">m_dot_SPI</span>
 
 <div class="viewcode-block" id="Orifice.m_dot_SPI"><a class="viewcode-back" href="../../index.html#octopus.main.Orifice.m_dot_SPI">[docs]</a>    <span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">m_dot_SPI</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
@@ -839,8 +839,34 @@
             <span class="k">if</span> <span class="nb">round</span><span class="p">(</span><span class="n">Pt_actual</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">round</span><span class="p">(</span><span class="n">Pt_target</span><span class="p">,</span> <span class="mi">6</span><span class="p">):</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Target throat pressure was not acheived in Waxman injector.&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;m_dot&quot;</span><span class="p">:</span> <span class="n">mdot_inj</span><span class="p">,</span>
-                <span class="s2">&quot;Dt&quot;</span><span class="p">:</span> <span class="n">Dt</span><span class="p">}</span></div></div>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;m_dot&quot;</span><span class="p">:</span> <span class="n">mdot_inj</span><span class="p">,</span> <span class="s2">&quot;Dt&quot;</span><span class="p">:</span> <span class="n">Dt</span><span class="p">}</span></div></div>
+
+
+<div class="viewcode-block" id="Element"><a class="viewcode-back" href="../../index.html#octopus.main.Element">[docs]</a><span class="k">class</span> <span class="nc">Element</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Represent an injector element, at least one :class:`Orifice` input&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o_orifices</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Orifice</span><span class="p">],</span> <span class="n">f_orifices</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Orifice</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">o_orifices</span> <span class="o">=</span> <span class="n">o_orifices</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">f_orifices</span> <span class="o">=</span> <span class="n">f_orifices</span>
+
+<div class="viewcode-block" id="Element.of_ratio"><a class="viewcode-back" href="../../index.html#octopus.main.Element.of_ratio">[docs]</a>    <span class="k">def</span> <span class="nf">of_ratio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="n">m_dot_o</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">o_orifices</span><span class="p">:</span>
+            <span class="n">m</span><span class="o">=</span><span class="n">o</span><span class="o">.</span><span class="n">m_dot</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                <span class="n">m_dot_o</span><span class="o">+=</span><span class="n">m</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">m_dot_f</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">f_orifices</span><span class="p">:</span>
+            <span class="n">m</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">m_dot</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+                <span class="n">m_dot_f</span> <span class="o">+=</span> <span class="n">m</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">m_dot_o</span><span class="o">/</span><span class="n">m_dot_f</span></div></div>
+
+
 </pre></div>
 
            </div>

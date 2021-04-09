@@ -459,10 +459,6 @@ class Manifold:
         return self.parent.T
 
 
-class Element:
-    """Represent an injector element, at least one :class:`Orifice` input"""
-
-
 class Orifice:
     """Represent a propellant orifice on the injector plate, at least one :class:`Manifold` input."""
 
@@ -487,6 +483,12 @@ class Orifice:
         self.D = D
         self.A = 0.2 * pi * self.D ** 2
         self.Cd = Cd
+
+        # defines default Orifice.m_dot(p1) function
+        if manifold.fluid.method == 'helmholz':
+            self.m_dot = self.m_dot_dyer
+        else:
+            self.m_dot = self.m_dot_SPI
 
     @lru_cache(maxsize=1)
     def m_dot_SPI(self, p1: float):
@@ -677,5 +679,31 @@ class Orifice:
             if round(Pt_actual, 6) != round(Pt_target, 6):
                 print("Target throat pressure was not acheived in Waxman injector.")
 
-        return {"m_dot": mdot_inj,
-                "Dt": Dt}
+        return {"m_dot": mdot_inj, "Dt": Dt}
+
+
+class Element:
+    """Represent an injector element, at least one :class:`Orifice` input"""
+
+    def __init__(self, o_orifices: Sequence[Orifice], f_orifices: Sequence[Orifice]):
+        self.o_orifices = o_orifices
+        self.f_orifices = f_orifices
+
+    def of_ratio(self, p: float):
+        m_dot_o=0
+        for o in self.o_orifices:
+            m=o.m_dot(p)
+            if m:
+                m_dot_o+=m
+            else:
+                return None
+        m_dot_f = 0
+        for f in self.f_orifices:
+            m = f.m_dot(p)
+            if m:
+                m_dot_f += m
+            else:
+                return None
+        return m_dot_o/m_dot_f
+
+

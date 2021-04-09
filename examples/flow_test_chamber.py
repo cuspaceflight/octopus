@@ -9,9 +9,10 @@ def main():
 
     T_N2O = 257  # K
 
-    nitrous = octo.Fluid('nitrous oxide', P=25e5, T=T_N2O, method='helmholz')
+    nitrous = octo.Fluid('nitrous oxide', method='helmholz')
+    nitrous_manifold = octo.Manifold(nitrous, octo.PropertySource(p=25e5, T=T_N2O))
 
-    test_orifice = octo.Orifice(nitrous, 1e-2, 1e-3, orifice_type=0)
+    test_orifice = octo.Orifice(nitrous_manifold, 1e-2, 1e-3, orifice_type=0)
 
     # Nitrous oxide is injected into the lower chamber, initially at 1 bar, no nitrous oxide.
     # The introduction of nitrous is assumed to be quasi-equlibrium and adiabatic (so isentropic).
@@ -19,16 +20,11 @@ def main():
 
     # State 0: p0 = 1 bar, m_N2O = 0.
 
-    R = 8.31446  # J/mol/K
-    M_N2O = 0.04401  # Kg/mol
-
     D_in = 0.05  # m
     L = 1  # m
     P0 = 1E5  # Pa
     P = [P0]
     V_chamber = np.pi * L * D_in ** 2 / 4
-
-    R_N2O = R / M_N2O
 
     # For each timestep, the downstream pressure is reevlauated for the next mass flow rate calculation
     # The nitrous is assumed to quickly reach a pure vapour form in the lower chamber, with the same
@@ -61,7 +57,7 @@ def main():
         m_N2O.append(m_N2O[-1] + dm)
 
         # Dalton's law of partial pressures
-        P.append(P0 + m_N2O[-1] * R_N2O * T_N2O / V_chamber)
+        P.append(P0 + m_N2O[-1] * nitrous.R_specific * T_N2O / V_chamber)
 
         if i % 100 == 0:
             print(f"Iteration {i}, t = {t[-1]:.2f} s, last nitrous mass increase {dm:.7f} kg")
