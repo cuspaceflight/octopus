@@ -373,6 +373,13 @@ class Fluid(chemical.Chemical):
         :return: object containing difference between calculated property values and those in y
 
         """
+        if len(x) > 2:
+            raise ValueError('can only solve for 2 variables, from 2 knowns')
+        if len(u) != len(x) or len(y) != len(x):
+            raise ValueError(f'all inputs must be the same shape, not: {len(x)}, {len(u)}, {len(y)}')
+        if 'T' in u or 'rho' in u:
+            raise NotImplementedError('Solver cannot currently solve for rho or T, restate problem')
+
         return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
 
     @lru_cache(maxsize=1)
@@ -690,11 +697,11 @@ class Element:
         self.f_orifices = f_orifices
 
     def of_ratio(self, p: float):
-        m_dot_o=0
+        m_dot_o = 0
         for o in self.o_orifices:
-            m=o.m_dot(p)
+            m = o.m_dot(p)
             if m:
-                m_dot_o+=m
+                m_dot_o += m
             else:
                 return None
         m_dot_f = 0
@@ -704,6 +711,4 @@ class Element:
                 m_dot_f += m
             else:
                 return None
-        return m_dot_o/m_dot_f
-
-
+        return m_dot_o / m_dot_f

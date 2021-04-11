@@ -13,11 +13,16 @@ def main():
     ipa_orifice = Orifice(ipa_manifold, 1e-2, 1e-3)
     element = Element([nitrous_orifice, nitrous_orifice], [ipa_orifice, ipa_orifice])
 
-    pp = linspace(16.7e5 - 1e5, 16.7e5 + 1e5, 40)
-    of = [element.of_ratio(p) for p in pp]
-
-    plt.plot(pp, of, label='O/F')
-    plt.xlabel('chamber pressure (Pa)')
+    T = 250
+    rhol_s = nitrous.rho_l(T)
+    rhog_s = nitrous.rho_g(T)
+    rho_range = linspace(rhog_s * 0.95, rhol_s * 1.05, 100)
+    pv = [nitrous.get_properties(r, T)['p'] for r in rho_range]
+    pp = [nitrous.p(r, T) for r in rho_range]
+    plt.plot(rho_range, pv, color='green')
+    plt.plot(rho_range, pp, color='red')
+    plt.scatter(nitrous.rho_l(T), nitrous.p(nitrous.rho_l(T), T))
+    plt.scatter(nitrous.rho_l(T), nitrous.VaporPressure(T), )
     plt.show()
 
 

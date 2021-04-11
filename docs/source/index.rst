@@ -4,7 +4,7 @@ Octopus Documentation
 Octopus is a software package designed primarily to model the flow of nitrous oxide (N2O) through a rocket engine
 injector. It has a built-in EOS based on a Helmholz energy method outlined in `[3]<main ref 3>`_, and includes the
 required coefficients to use it with nitrous oxide. 19 other chemicals are also available, but CO2 is not.
-:class:`octopus.main.Nist` contains methods that may be used, along with :mod:`scipy.optimize` and
+:class:`octopus.utils.Nist` contains methods that may be used, along with :mod:`scipy.optimize` and
 :func:`octopus.utils.derivative` to produce the required coefficients for the modelling of CO2, if required.
 
 .. toctree::
