@@ -54,15 +54,6 @@ To get ``[rho,T]`` as a funtion of two of ``p,chi,h,s`` (see :meth:`octopus.main
 >>> u = ['p','chi'] # names of dependent variables we know
 >>> y = [p,chi]     # values of dependent variables we know (same order)
 >>> properties = least_squares(nitrous.fun_ps,x0,args=(u,y))
->>> rho,T = properties.xps,x0,args=(u,y))
->>> rho,T = properties.x
-
->>> p=18e5          # pressure we want
->>> chi=0           # vapour fraction we want (all liquid)
->>> x0 = [800,250]  # initial values of rho and T near to the answer
->>> u = ['p','chi'] # names of dependent variables we know
->>> y = [p,chi]     # values of dependent variables we know (same order)
->>> properties = least_squares(nitrous.fun_ps,x0,args=(u,y))
 >>> rho,T = properties.x
 
 The above code is used in :meth:`octopus.main.Orifice.m_dot_HEM` to calculate the inital and final conditions, and hence
