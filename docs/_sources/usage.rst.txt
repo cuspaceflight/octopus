@@ -68,7 +68,8 @@ To get ``[rho,T]`` as a funtion of two of ``p,chi,h,s`` (see :meth:`octopus.main
 The above code is used in :meth:`octopus.main.Orifice.m_dot_HEM` to calculate the inital and final conditions, and hence
 that is a good example to look to for further context.
 
-## DOES NOT WORK - SHOWN AS A TODO
+DOES NOT WORK - SHOWN AS A TODO
+===============================
 To get density and vapour fraction as a function of T and one of ``p,chi,h,s``, i.e. average density and vapour fraction
 in a 5MPa tank at ambient temperature:
 
