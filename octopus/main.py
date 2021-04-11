@@ -357,15 +357,7 @@ class Fluid(chemical.Chemical):
     def fun_ps(self, x: Sequence[float], u: Sequence[str], y: Sequence[float]) -> List[float]:
         """Return a vectorised cost function to be used in a property solver.
 
-        Usage:
-            >>> x0=[rho,T]          # solve for density and temperature
-            >>> u=['p','s']         # known values of pressure and entropy
-            >>> y=[p0,s0]           # isentropic process with a known final pressure
-            >>> x = fun_ps(x0,u,y)
-            >>> print(x)
-            [p(rho,T)-p0,s(rho,T)-s0]
-
-            i.e. x could be used as a vectorised cost funtion for a solver
+        See Usage for more info.
 
         :param x: object containing arguments to be passed to get_properties
         :param u: object containing property names of properties to be returned and compared
@@ -373,14 +365,29 @@ class Fluid(chemical.Chemical):
         :return: object containing difference between calculated property values and those in y
 
         """
-        if len(x) > 2:
+        if len(x) != len(u) != len(y) != 2:
             raise ValueError('can only solve for 2 variables, from 2 knowns')
-        if len(u) != len(x) or len(y) != len(x):
-            raise ValueError(f'all inputs must be the same shape, not: {len(x)}, {len(u)}, {len(y)}')
-        if 'T' in u or 'rho' in u:
-            raise NotImplementedError('Solver cannot currently solve for rho or T, restate problem')
+        if 'rho' in u and 'T' in u:
+            return [0, 0]
 
-        return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
+        if 'rho' in u:
+            i = u.index('rho')
+            var = u[i - 1]
+            val = y[i - 1]
+            res = [self.get_properties(x[0], x[1])[var] - val]
+            res.insert(i, x[0] - y[i])
+            return res
+
+        elif 'T' in u:
+            i = u.index('T')
+            var = u[i - 1]
+            val = y[i - 1]
+            res = [self.get_properties(x[0], x[1])[var] - val]
+            res.insert(i, x[1] - y[i])
+            return res
+
+        else:
+            return [self.get_properties(x[0], x[1])[var] - val for var, val in zip(u, y)]
 
     @lru_cache(maxsize=1)
     def get_properties(self, rho: float, T: float) -> Dict[str, float]:

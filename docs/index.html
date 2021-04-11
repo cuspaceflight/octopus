@@ -225,17 +225,20 @@ required coefficients to use it with nitrous oxide. 19 other chemicals are also 
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Element" title="octopus.main.Element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Element</span></code></a>(o_orifices, f_orifices)</p></td>
-<td><p>Represent an injector element, at least one <a class="reference internal" href="#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Orifice</span></code></a> input</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluid</span></code></a>(ID, T, P[, method])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluid</span></code></a>(ID, T, P[, method])</p></td>
 <td><p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.PropertySource" title="octopus.main.PropertySource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PropertySource</span></code></a>(p, T)</p></td>
+<td><p>An object to provide a constant pressure and temperature as a parent object for a <a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-class docutils literal notranslate"><span class="pre">Manifold</span></code></a>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manifold</span></code></a>(fluid, parent)</p></td>
 <td><p>Represent a propellant manifold, at least one <a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fluid</span></code></a> input and one <a class="reference internal" href="#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Orifice</span></code></a> output.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Orifice</span></code></a>(manifold, L, D, orifice_type, Cd)</p></td>
 <td><p>Represent a propellant orifice on the injector plate, at least one <a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-class docutils literal notranslate"><span class="pre">Manifold</span></code></a> input.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Element" title="octopus.main.Element"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Element</span></code></a>(o_orifices, f_orifices)</p></td>
+<td><p>Represent an injector element, at least one <a class="reference internal" href="#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Orifice</span></code></a> input</p></td>
 </tr>
 </tbody>
 </table>
@@ -612,18 +615,7 @@ required coefficients to use it with nitrous oxide. 19 other chemicals are also 
 <dt id="octopus.main.Fluid.fun_ps">
 <code class="sig-name descname"><span class="pre">fun_ps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/octopus/main.html#Fluid.fun_ps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.fun_ps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a vectorised cost function to be used in a property solver.</p>
-<dl>
-<dt>Usage:</dt><dd><div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span><span class="o">=</span><span class="p">[</span><span class="n">rho</span><span class="p">,</span><span class="n">T</span><span class="p">]</span>          <span class="c1"># solve for density and temperature</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">,</span><span class="s1">&#39;s&#39;</span><span class="p">]</span>         <span class="c1"># known values of pressure and entropy</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span><span class="o">=</span><span class="p">[</span><span class="n">p0</span><span class="p">,</span><span class="n">s0</span><span class="p">]</span>           <span class="c1"># isentropic process with a known final pressure</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">fun_ps</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span><span class="n">u</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="go">[p(rho,T)-p0,s(rho,T)-s0]</span>
-</pre></div>
-</div>
-<p>i.e. x could be used as a vectorised cost funtion for a solver</p>
-</dd>
-</dl>
+<p>See Usage for more info.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

@@ -32,10 +32,11 @@ Octopus.main module
 
    .. autosummary::
 
-      Element
       Fluid
+      PropertySource
       Manifold
       Orifice
+      Element
 
 Octopus.utils module
 ====================

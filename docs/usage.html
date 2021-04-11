@@ -193,14 +193,54 @@ connect the two.</p>
 </div>
 <p>If we simply want to use the EOS from the <code class="xref py py-class docutils literal notranslate"><span class="pre">Fluid</span></code> class, there are many methods available if
 <code class="docutils literal notranslate"><span class="pre">method='helmholz'</span></code> is set. The next example will show how to get the saturation properties at 250K. We assume an all-
-liquid state, and never use the bare property methods (<code class="docutils literal notranslate"><span class="pre">Fluid.p()</span></code>) as they may return invalid results.</p>
+liquid state, and never use the bare property methods (<code class="xref py py-meth docutils literal notranslate"><span class="pre">Fluid.p()</span></code>) as they may return invalid results.</p>
+<p>To get one of <code class="docutils literal notranslate"><span class="pre">p,chi,h,s</span></code> as a function of <code class="docutils literal notranslate"><span class="pre">[rho,T]</span></code>:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="mi">250</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span> <span class="o">=</span> <span class="n">nitrous</span><span class="o">.</span><span class="n">rho_l</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">nitrous</span><span class="o">.</span><span class="n">get_properties</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>To access a property, we can use the properties dictionary to return it using its name as a key.</p>
+<p>To access a property, we can use the properties dictionary to return it using its name as a key. In order to compute rho
+or T, we need a non-linear solver:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span>
+</pre></div>
+</div>
+<p>To get <code class="docutils literal notranslate"><span class="pre">[rho,T]</span></code> as a funtion of two of <code class="docutils literal notranslate"><span class="pre">p,chi,h,s</span></code> (see <a class="reference internal" href="index.html#octopus.main.Fluid.fun_ps" title="octopus.main.Fluid.fun_ps"><code class="xref py py-meth docutils literal notranslate"><span class="pre">octopus.main.Fluid.fun_ps()</span></code></a>):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="mf">18e5</span>          <span class="c1"># pressure we want</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chi</span><span class="o">=</span><span class="mi">0</span>           <span class="c1"># vapour fraction we want (all liquid)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">800</span><span class="p">,</span><span class="mi">250</span><span class="p">]</span>  <span class="c1"># initial values of rho and T near to the answer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">,</span><span class="s1">&#39;chi&#39;</span><span class="p">]</span> <span class="c1"># names of dependent variables we know</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">,</span><span class="n">chi</span><span class="p">]</span>     <span class="c1"># values of dependent variables we know (same order)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="n">nitrous</span><span class="o">.</span><span class="n">fun_ps</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span><span class="p">,</span><span class="n">T</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">xps</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span><span class="p">,</span><span class="n">T</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">x</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="mf">18e5</span>          <span class="c1"># pressure we want</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chi</span><span class="o">=</span><span class="mi">0</span>           <span class="c1"># vapour fraction we want (all liquid)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">800</span><span class="p">,</span><span class="mi">250</span><span class="p">]</span>  <span class="c1"># initial values of rho and T near to the answer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">,</span><span class="s1">&#39;chi&#39;</span><span class="p">]</span> <span class="c1"># names of dependent variables we know</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">,</span><span class="n">chi</span><span class="p">]</span>     <span class="c1"># values of dependent variables we know (same order)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="n">nitrous</span><span class="o">.</span><span class="n">fun_ps</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span><span class="p">,</span><span class="n">T</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">x</span>
+</pre></div>
+</div>
+<p>The above code is used in <a class="reference internal" href="index.html#octopus.main.Orifice.m_dot_HEM" title="octopus.main.Orifice.m_dot_HEM"><code class="xref py py-meth docutils literal notranslate"><span class="pre">octopus.main.Orifice.m_dot_HEM()</span></code></a> to calculate the inital and final conditions, and hence
+that is a good example to look to for further context.</p>
+<p>## DOES NOT WORK - SHOWN AS A TODO
+To get density and vapour fraction as a function of T and one of <code class="docutils literal notranslate"><span class="pre">p,chi,h,s</span></code>, i.e. average density and vapour fraction
+in a 5MPa tank at ambient temperature:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="mi">293</span>         <span class="c1"># temperature we want</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="mf">50e5</span>      <span class="c1"># vapour fraction we want</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">800</span><span class="p">,</span><span class="n">T</span><span class="p">]</span>    <span class="c1"># guess of density, and known temperature</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">]</span> <span class="c1"># T and chi are known</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">T</span><span class="p">,</span><span class="n">p</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="n">nitrous</span><span class="o">.</span><span class="n">fun_ps</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chi</span> <span class="o">=</span> <span class="n">nitrous</span><span class="o">.</span><span class="n">get_properties</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span><span class="n">T</span><span class="p">)[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
 </div>
 
 

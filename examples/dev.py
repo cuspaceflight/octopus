@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from numpy import linspace
+from scipy.optimize import least_squares
 
 from octopus import Fluid, Orifice, PropertySource, Manifold, Element
 
@@ -13,16 +13,21 @@ def main():
     ipa_orifice = Orifice(ipa_manifold, 1e-2, 1e-3)
     element = Element([nitrous_orifice, nitrous_orifice], [ipa_orifice, ipa_orifice])
 
-    T = 250
-    rhol_s = nitrous.rho_l(T)
-    rhog_s = nitrous.rho_g(T)
-    rho_range = linspace(rhog_s * 0.95, rhol_s * 1.05, 100)
-    pv = [nitrous.get_properties(r, T)['p'] for r in rho_range]
-    pp = [nitrous.p(r, T) for r in rho_range]
-    plt.plot(rho_range, pv, color='green')
-    plt.plot(rho_range, pp, color='red')
-    plt.scatter(nitrous.rho_l(T), nitrous.p(nitrous.rho_l(T), T))
-    plt.scatter(nitrous.rho_l(T), nitrous.VaporPressure(T), )
+    T = 293
+    p = 55e5
+
+    x0 = [600, T]
+
+    u = ['chi', 'p']
+    y = [0, p]
+
+    properties = least_squares(nitrous.fun_ps, x0, args=(u, y))
+    rho, T = properties.x
+
+    p = nitrous.get_properties(rho, T)['p']
+    chi = nitrous.get_properties(rho, T)['chi']
+
+    print(rho, p, T, chi)
     plt.show()
 
 

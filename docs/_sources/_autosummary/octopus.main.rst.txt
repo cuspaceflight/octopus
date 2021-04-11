@@ -2,26 +2,16 @@
 ============
 
 .. automodule:: octopus.main
-
-   
-   
-   
-
-   
-   
-   
-
-   
    
    .. rubric:: Classes
 
    .. autosummary::
-   
-      Element
+
       Fluid
+      PropertySource
       Manifold
       Orifice
-      PropertySource
+      Element
    
    
 
