@@ -13,8 +13,6 @@ def main():
     ipa_orifice = Orifice(ipa_manifold, 1e-2, 1e-3)
     element = Element([nitrous_orifice, nitrous_orifice], [ipa_orifice, ipa_orifice])
 
-    print(element.of_ratio(16e5))
-
     T = 293
     p = 55e5
 
