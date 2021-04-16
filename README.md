@@ -20,10 +20,11 @@
 *   Example code showing some features of the `octopus` module, most documentation is in docstrings on source code.
 
 ### Currently in progress:
-- [ ] Improving class heirarchy
+- [ ] Improving class hierarchy, including a Plate class
 - [ ] Adding venturi calculations
 - [ ] Making nitrous data easier to access
 - [ ] Improving documentation
+- [ ] GUI for creating candidate injector patterns and analysing their mass flow distribution, including a graphical visualisation
 
 ### Eventual planned features:
 *   Orifice types - Waxman cavitating
