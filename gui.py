@@ -13,11 +13,13 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-# Variables for tracking ID numbers of objects 
+# Global variables
 last_plate_id = 0
-plate_id_array = []
+plate_id_list = []
 last_manifold_id = 0
-manifold_id_array = []
+manifold_id_list = []
+manifold_mdot_list = [0] 
+# Initial 0 is so manifold_mdot_list[manifold_id] behaves intuitively
 
 fluids = {"Nitrous oxide": "nitrous oxide", "Isopropyl alcohol": "isopropyl alcohol"}
 methods = {"Octopus Helmholtz (recommended)": "helmholz", "Python Thermo": "thermo"}
@@ -79,15 +81,15 @@ def new_plate():
         tk.messagebox.showerror("New plate error", "Invalid plate parameters")
         return None
 
-    global last_plate_id, plate_id_array, selected_plate
+    global last_plate_id, plate_id_list, selected_plate
 
     # Increment the ID value and update the list of IDs
     last_plate_id += 1
-    plate_id_array = list(range(1, last_plate_id+1))
+    plate_id_list = list(range(1, last_plate_id+1))
 
     # Update the option menu in the add orifice tab with the new ID list and
     # remove the warning that there are no plates - one has just been added
-    plate_select_dropdown = tk.OptionMenu(select_plate_frame, selected_plate, *plate_id_array)
+    plate_select_dropdown = tk.OptionMenu(select_plate_frame, selected_plate, *plate_id_list)
     plate_select_dropdown.grid(row=0, column=1)
     plate_select_label["text"] = "Plate ID: "
 
@@ -121,6 +123,8 @@ def new_plate():
     plate_window.mainloop()
 
 
+# Function for new manifold, like the above has to update
+# some elements of the GUI
 def new_manifold():
     try:
         fluid_id = str(fluids[selected_fluid.get()])
@@ -137,21 +141,45 @@ def new_manifold():
         tk.messagebox.showerror("New manifold error", "Invalid manifold parameters")
         return None
 
-    global last_manifold_id, manifold_id_array, selected_manifold
+    global last_manifold_id, manifold_id_list, selected_manifold, manifold_mdot_list
 
     # Increment the ID value and update the list of IDs
     last_manifold_id += 1
-    manifold_id_array = list(range(1, last_manifold_id+1))
+    id = last_manifold_id
+    manifold_id_list = list(range(1, id+1))
 
     # Update the option menu in the add orifice tab with the new ID list and
     # remove the warning that there are no plates - one has just been added
-    manifold_select_dropdown = tk.OptionMenu(select_manifold_frame, selected_manifold, *manifold_id_array)
+    manifold_select_dropdown = tk.OptionMenu(select_manifold_frame, selected_manifold, *manifold_id_list)
     manifold_select_dropdown.grid(row=0, column=1)
     manifold_select_label["text"] = "Manifold ID: "
 
     # Create the fluid and manifold objects
     fluid = Fluid(ID=fluid_id, T=T, P=p, method=method_id)
     manifold = Manifold(fluid, PropertySource(p=p, T=T))
+    manifold_mdot_list.append(0)
+
+    # Create the window for this manifold
+    manifold_window = tk.Tk()
+    manifold_window.resizable(False, False)
+    manifold_window.title(f"Manifold ID {id}")
+
+    # Frame for the plate title and parameter list
+    manifold_top_frame = tk.Frame(master=manifold_window, height=30, padx=5, pady=5)
+    manifold_top_frame.grid(row=0, column=0)
+
+    # Label for the fixed parameters
+    plate_static_label = tk.Label(master=manifold_top_frame, height=4, text= \
+        f"Manifold ID: {id}\n Manifold fluid: {manifold.fluid.ID}\n"
+        f"Manifold pressure: {manifold.p*1E5} Pa\n Manifold temperature: {manifold.T} K")
+    plate_static_label.grid(row=0, column=0, sticky="w")
+    
+    # Label for the masss flow rate, updated when orifices are added
+    plate_massflow_label = tk.Label(master=manifold_top_frame, text= \
+        f"Manifold mass flow rate: {manifold_mdot_list[id]} kg/s")
+    plate_massflow_label.grid(row=1, column=0, sticky="w")
+
+    manifold_window.mainloop()
 
 # Initialise the configuration window
 window_cfg = tk.Tk()
