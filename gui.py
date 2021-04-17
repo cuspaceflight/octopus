@@ -13,8 +13,11 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 
-id = 0
-id_array = []
+# Variables for tracking ID numbers of objects 
+last_plate_id = 0
+plate_id_array = []
+last_manifold_id = 0
+manifold_id_array = []
 
 fluids = {"Nitrous oxide": "nitrous oxide", "Isopropyl alcohol": "isopropyl alcohol"}
 methods = {"Octopus Helmholtz (recommended)": "helmholz", "Python Thermo": "thermo"}
@@ -66,46 +69,72 @@ class Plate:
 # Function for new injector plate, also has to update some elements of the GUI
 # as this may be the first plate for this execution
 def new_plate():
+    # Attempt to retrieve the needed parameters
     try:
         diameter = float(diameter_entry.get())
         if diameter == 0:
-            tk.messagebox.showerror("Error", "Plate diameter must be non-zero")
+            tk.messagebox.showerror("New plate error", "Plate diameter must be non-zero")
             return None
-    except ValueError:
-        tk.messagebox.showerror("Error", "Invalid type for plate diameter")
+    except Exception:
+        tk.messagebox.showerror("New plate error", "Invalid plate parameters")
         return None
 
-    global id, id_array, selected_plate
-    id += 1
-    id_array = list(range(1, id+1))
+    global last_plate_id, plate_id_array, selected_plate
 
-    plate_select_dropdown = tk.OptionMenu(frame_select_plate, selected_plate, *id_array)
+    # Increment the ID value and update the list of IDs
+    last_plate_id += 1
+    plate_id_array = list(range(1, last_plate_id+1))
+
+    # Update the option menu in the add orifice tab with the new ID list and
+    # remove the warning that there are no plates - one has just been added
+    plate_select_dropdown = tk.OptionMenu(select_plate_frame, selected_plate, *plate_id_array)
     plate_select_dropdown.grid(row=0, column=1)
     plate_select_label["text"] = "Plate ID: "
 
-    plate = Plate(id, diameter)
+    # Create the plate object
+    plate = Plate(last_plate_id, diameter)
 
+    # Create the window for this plate
     plate_window = tk.Tk()
+    plate_window.resizable(False, False)
     plate_window.title(f"Plate ID {plate.id}")
-    plate_window.columnconfigure(0, weight=1)
-    plate_window.rowconfigure([0, 1], weight=1)
 
+    # Frame for the plate title and parameter list
     plate_top_frame = tk.Frame(master=plate_window, height=30, padx=5, pady=5)
     plate_top_frame.grid(row=0, column=0)
 
+    # Label for the parameters
     plate_parameters = tk.Label(master=plate_top_frame, height=3, text= \
-        f"Injector ID: {id}\n Plate diameter: {plate.diameter} m")
-    plate_parameters.pack()
+        f"Plate ID: {plate.id}\n Plate diameter: {plate.diameter} m")
+    plate_parameters.grid(row=0, column=0)
 
+    # Frame for the plate canvas
     face_frame = tk.Frame(master=plate_window, width=300, height=300, padx=5, pady=5)
     face_frame.grid(row=1, column=0)
 
+    # Create the canvas for representing the plate and its orifices
     face = tk.Canvas(master=face_frame, bg="white", height=600, width=600)
     face_outline = face.create_oval(50, 50, 550, 550, fill="black")
     Plate.x_centre, Plate.y_centre = 300, 300
     face.grid()
     
     plate_window.mainloop()
+
+
+def new_manifold():
+    try:
+        fluid = str(fluids[selected_fluid.get()])
+        method = str(methods[selected_method.get()])
+        p = float(manifold_pressure_entry.get())
+        T = float(manifold_temp_entry.get())
+        if p == 0 or T == 0:
+            tk.messagebox.showerror("New manifold error", "Manifold temperature and pressure must be greater than 0")
+            return None
+    except Exception:
+        tk.messagebox.showerror("New manifold error", "Invalid manifold parameters")
+        return None
+
+    global last_manifold_id, manifold_id_array, selected_manifold
 
 # Initialise the plate configuration window
 window_cfg = tk.Tk()
@@ -119,12 +148,12 @@ window_cfg.rowconfigure([2, 3], weight=0)
 # Tabs for different interfaces
 tab_parent = ttk.Notebook(window_cfg)
 tab_plate = ttk.Frame(tab_parent)
-tab_manfiold = ttk.Frame(tab_parent)
+tab_manifold = ttk.Frame(tab_parent)
 tab_orifices = ttk.Frame(tab_parent)
 tab_IO = ttk.Frame(tab_parent)
 
 tab_parent.add(tab_plate, text="New plate")
-tab_parent.add(tab_manfiold, text="New manifold")
+tab_parent.add(tab_manifold, text="New manifold")
 tab_parent.add(tab_orifices, text="Add orifices")
 tab_parent.add(tab_IO, text="Save/load")
 tab_parent.grid(row=0, column=0, sticky="w")
@@ -150,7 +179,7 @@ diameter_entry.grid(row=0, column=0, sticky="w")
 diameter_entry_label = tk.Label(master=frame_manage_diameter, text="plate diameter, m")
 diameter_entry_label.grid(row=0, column=1, sticky="e")
 
-# Button to create a new plate with above parameters
+# Button to create a new plate with above parameters (opens in new window)
 new_plate_button = tk.Button(master=tab_plate, text="Create injector plate", command=new_plate, width=30, height=3)
 new_plate_button.grid(row=3, column=0)
 
@@ -181,14 +210,18 @@ orifice_config_frame.grid(row=3, column = 0, sticky="w")
 # Label for orifice type selection
 orifice_config_label1 = tk.Label(master=orifice_config_frame, text="Orifice type:")
 orifice_config_label1.grid(row=0, column=0, sticky="e")
+
+# Label for orifice diameter
 orifice_config_label2 = tk.Label(master=orifice_config_frame, text="Orifice diameter:")
 orifice_config_label2.grid(row=1, column=0, sticky="e")
-orifice_config_label3 = tk.Label(master=orifice_config_frame, text="Manifold:")
+
+# Label for selection of orifice parent manifold
+orifice_config_label3 = tk.Label(master=orifice_config_frame, text="Manifold: (Add or load a manifold first)")
 orifice_config_label3.grid(row=2, column=0, sticky="e")
 
 # Details of the second tab, manifold creation
 # Frame for title, possibly description in future
-frame_manifold_top = tk.Frame(master=tab_manfiold, width=50, height=5, padx=5, pady=5)
+frame_manifold_top = tk.Frame(master=tab_manifold, width=50, height=5, padx=5, pady=5)
 frame_manifold_top.grid(row=1, column=0)
 
 # Tab title
@@ -198,7 +231,7 @@ title_manifold.config(font=(96))
 title_manifold.grid(row=0, column=0)
 
 # Frame for configuiring all manifold properties
-manifold_frame = tk.Frame(master=tab_manfiold, width=50, height=5, padx=5, pady=5)
+manifold_frame = tk.Frame(master=tab_manifold, width=50, height=5, padx=5, pady=5)
 manifold_frame.grid(row=2, column = 0, sticky="w")
 
 # Frame for selecting a fluid for the new manifold
@@ -224,8 +257,8 @@ manifold_label2.grid(row=0, column=0, sticky="w")
 
 # Fluid property method select menu
 selected_method = tk.StringVar()
-manifold_fluid_select = tk.OptionMenu(method_select_frame, selected_method, *methods.keys())
-manifold_fluid_select.grid(row=0, column=1)
+manifold_method_select = tk.OptionMenu(method_select_frame, selected_method, *methods.keys())
+manifold_method_select.grid(row=0, column=1)
 
 # Frame for setting fluid temperature in manifold
 fluid_temp_frame = tk.Frame(master=manifold_frame, height=5, padx=5, pady=5)
@@ -258,5 +291,9 @@ manifold_pressure_entry.grid(row=0, column=1)
 # Manifold pressure unit label
 manifold_label6 = tk.Label(master=fluid_pressure_frame, text="bar")
 manifold_label6.grid(row=0, column=3)
+
+# Button to create a new manifold with above parameters (opens in new window)
+manifold_button = tk.Button(master=manifold_frame, text="Create manifold", command=new_manifold, width=30, height=3)
+manifold_button.grid(row=4, column=0)
 
 window_cfg.mainloop()
