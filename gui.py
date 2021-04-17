@@ -123,12 +123,15 @@ def new_plate():
 
 def new_manifold():
     try:
-        fluid = str(fluids[selected_fluid.get()])
-        method = str(methods[selected_method.get()])
+        fluid_id = str(fluids[selected_fluid.get()])
+        method_id = str(methods[selected_method.get()])
         p = float(manifold_pressure_entry.get())
         T = float(manifold_temp_entry.get())
         if p == 0 or T == 0:
             tk.messagebox.showerror("New manifold error", "Manifold temperature and pressure must be greater than 0")
+            return None
+        if fluid_id != "nitrous oxide" and method_id == "helmholz":
+            tk.messagebox.showerror("New manifold error", "Currently, Helmholtz EOS only supports nitrous oxide")
             return None
     except Exception:
         tk.messagebox.showerror("New manifold error", "Invalid manifold parameters")
@@ -136,7 +139,21 @@ def new_manifold():
 
     global last_manifold_id, manifold_id_array, selected_manifold
 
-# Initialise the plate configuration window
+    # Increment the ID value and update the list of IDs
+    last_manifold_id += 1
+    manifold_id_array = list(range(1, last_manifold_id+1))
+
+    # Update the option menu in the add orifice tab with the new ID list and
+    # remove the warning that there are no plates - one has just been added
+    manifold_select_dropdown = tk.OptionMenu(select_manifold_frame, selected_manifold, *manifold_id_array)
+    manifold_select_dropdown.grid(row=0, column=1)
+    manifold_select_label["text"] = "Manifold ID: "
+
+    # Create the fluid and manifold objects
+    fluid = Fluid(ID=fluid_id, T=T, P=p, method=method_id)
+    manifold = Manifold(fluid, PropertySource(p=p, T=T))
+
+# Initialise the configuration window
 window_cfg = tk.Tk()
 window_cfg.iconphoto(True, tk.PhotoImage(file="img/favicon.png"))
 window_cfg.title("Octopus injector pattern analysis")
@@ -173,9 +190,11 @@ title_plate.grid(row=0, column=0)
 frame_manage_diameter = tk.Frame(master=tab_plate, width=50, height=50, padx=5, pady=5)
 frame_manage_diameter.grid(row=2, column=0)
 
+# Plate diameter entry field
 diameter_entry = tk.Entry(master=frame_manage_diameter, width=10)
 diameter_entry.grid(row=0, column=0, sticky="w")
 
+# Label for plate diameter entry field
 diameter_entry_label = tk.Label(master=frame_manage_diameter, text="plate diameter, m")
 diameter_entry_label.grid(row=0, column=1, sticky="e")
 
@@ -194,30 +213,37 @@ title_orifices = tk.Label(master=frame_orifice_top, text="Add and remove orifice
 title_orifices.config(font=(96))
 title_orifices.grid(row=0, column=0)
 
-# Frame for plate selection option menu and associated labels
-select_plate_frame = tk.Frame(master=tab_orifices, width=50, height=50, padx=5, pady=5)
-select_plate_frame.grid(row=2, column=0)
-
-# Option menu to choose from available plates
-selected_plate = tk.IntVar()
-plate_select_label = tk.Label(master=select_plate_frame, text="Plate ID: (Add or load a plate first)")
-plate_select_label.grid(row=0, column=0)
-
 # Frame for configuring a new orifice, which can be added one at a time or as part of a series
 orifice_config_frame = tk.Frame(master=tab_orifices, width=50, height=5, padx=5, pady=5)
 orifice_config_frame.grid(row=3, column = 0, sticky="w")
 
+# Frame for plate selection option menu and associated labels
+select_plate_frame = tk.Frame(master=orifice_config_frame, width=50, height=50, padx=5, pady=5)
+select_plate_frame.grid(row=2, column=0, sticky="w")
+
+# Option menu to choose from available plates. OptionMenu widget is added / updated
+# by new_plate() / import_manifold()
+selected_plate = tk.IntVar()
+plate_select_label = tk.Label(master=select_plate_frame, text="Plate ID: (Add or load a plate first)")
+plate_select_label.grid(row=0, column=0)
+
 # Label for orifice type selection
 orifice_config_label1 = tk.Label(master=orifice_config_frame, text="Orifice type:")
-orifice_config_label1.grid(row=0, column=0, sticky="e")
+orifice_config_label1.grid(row=0, column=0, sticky="w")
 
 # Label for orifice diameter
 orifice_config_label2 = tk.Label(master=orifice_config_frame, text="Orifice diameter:")
-orifice_config_label2.grid(row=1, column=0, sticky="e")
+orifice_config_label2.grid(row=1, column=0, sticky="w")
 
-# Label for selection of orifice parent manifold
-orifice_config_label3 = tk.Label(master=orifice_config_frame, text="Manifold: (Add or load a manifold first)")
-orifice_config_label3.grid(row=2, column=0, sticky="e")
+# Frame for selection of orifice parent manifold
+select_manifold_frame = tk.Frame(master=orifice_config_frame, width=50, height=50, padx=5, pady=5)
+select_manifold_frame.grid(row=3, column=0, sticky="w")
+
+# Option menu to choose from available manifolds. OptionMenu widget is added / updated
+# by new_manifold() / import_manifold()
+selected_manifold = tk.StringVar()
+manifold_select_label = tk.Label(master=select_manifold_frame, text="Manifold ID: (Add or load a manifold first)")
+manifold_select_label.grid(row=0, column=0, sticky="w")
 
 # Details of the second tab, manifold creation
 # Frame for title, possibly description in future
