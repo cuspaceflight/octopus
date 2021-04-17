@@ -11,6 +11,7 @@ Need to check on changing coords from int to float
 from octopus import Fluid, Orifice, PropertySource, Manifold, Element
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 id = 0
 id_array = []
@@ -63,10 +64,10 @@ def new_plate():
     try:
         diameter = float(diameter_entry.get())
         if diameter == 0:
-            print("Invalid diameter for injector plate")
+            tk.messagebox.showerror("Error", "Plate diameter must be non-zero")
             return None
     except ValueError:
-        print("Invalid diameter for injector plate")
+        tk.messagebox.showerror("Error", "Invalid type for plate diameter")
         return None
 
     global id, id_array, selected_plate
@@ -155,7 +156,7 @@ element = Element([nitrous_orifice, nitrous_orifice], [ipa_orifice, ipa_orifice]
 frame_orifice_top = tk.Frame(master=tab_orifices, width=50, height=5, padx=5, pady=5)
 frame_orifice_top.grid(row=1, column=0)
 
-title_orifices = tk.Label(master=frame_orifice_top, text="Add and remove orifices to an injector plate", \
+title_orifices = tk.Label(master=frame_orifice_top, text="Add and remove orifices", \
                         borderwidth=2, relief="groove", height=1, width=50)
 title_orifices.config(font=(96))
 title_orifices.grid(row=0, column=0)
@@ -166,5 +167,16 @@ frame_select_plate.grid(row=2, column=0)
 selected_plate = tk.IntVar(frame_select_plate)
 plate_select_label = tk.Label(master=frame_select_plate, text="Plate ID: (Add or load a plate first)")
 plate_select_label.grid(row=0, column=0)
+
+single_orifice_frame = tk.Frame(master=tab_orifices, width=50, height=5, padx=5, pady=5)
+single_orifice_frame.grid(row=3, column = 0, sticky="w")
+
+single_orifice_label1 = tk.Label(master=single_orifice_frame, text="Orifice type:")
+single_orifice_label1.grid(row=0, column=0, sticky="e")
+single_orifice_label2 = tk.Label(master=single_orifice_frame, text="Orifice diameter:")
+single_orifice_label2.grid(row=1, column=0, sticky="e")
+single_orifice_label3 = tk.Label(master=single_orifice_frame, text="Manifold:")
+single_orifice_label3.grid(row=2, column=0, sticky="e")
+
 
 window_cfg.mainloop()
