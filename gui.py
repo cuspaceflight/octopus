@@ -78,7 +78,7 @@ def new_plate():
     try:
         diameter = float(diameter_entry.get())
         pc = float(chamber_pressure_entry.get())
-        if diameter == 0 or pc == 0:
+        if diameter <= 0 or pc <= 0:
             tk.messagebox.showerror("New plate error", "Plate diameter and chamber pressure must be greater than zero")
             return None
     except Exception:
@@ -149,7 +149,7 @@ def new_manifold():
     # Increment the ID value and update the list of IDs
     last_manifold_id += 1
     id = last_manifold_id
-    manifold_id_list = list(range(1, id+1))
+    manifold_id_list = list(range(1, last_manifold_id+1))
 
     # Update the option menu in the add orifice tab with the new ID list and
     # remove the warning that there are no plates - one has just been added
@@ -243,11 +243,34 @@ def method_update():
 # confirmed. This makes it easier to draw the plate preview.
 # This also enables all the orifice creation options.
 def orifice_confirm():
-    if type(selected_plate.get()) is not int:
+    # Slightly clumsy error handling
+
+    try:
+        float(orifice_diameter_entry.get())
+        if float(orifice_diameter_entry.get()) <= 0:
+            tk.messagebox.showerror("Orifice settings error", "Orifice diameter must be greater than zero")
+            return None
+    except Exception:
+        tk.messagebox.showerror("Orifice settings error", "Invalid orifice diameter")
+        return None
+
+    try:
+        int(selected_plate.get())
+        if selected_plate.get() == 0:
+            tk.messagebox.showerror("Orifice settings error", "No plate selected")
+            return None
+    except Exception:
         tk.messagebox.showerror("Orifice settings error", "No plate selected")
-    if type(selected_manifold.get()) is not int:
+        return None
+
+    try:
+        int(selected_manifold.get())
+        if selected_manifold.get() == 0:
+            tk.messagebox.showerror("Orifice settings error", "No manifold selected")
+            return None
+    except Exception:
         tk.messagebox.showerror("Orifice settings error", "No manifold selected")
-        
+        return None
 
     orifice_type_straight.config(state="disabled")
     orifice_type_waxman.config(state="disabled")
