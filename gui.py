@@ -85,7 +85,7 @@ def new_plate():
         tk.messagebox.showerror("New plate error", "Invalid plate parameters")
         return None
 
-    global last_plate_id, plate_id_list, selected_plate
+    global last_plate_id, plate_id_list, selected_plate, plate_select_dropdown
 
     # Increment the ID value and update the list of IDs
     last_plate_id += 1
@@ -144,7 +144,7 @@ def new_manifold():
         tk.messagebox.showerror("New manifold error", "Invalid manifold parameters")
         return None
 
-    global last_manifold_id, manifold_id_list, selected_manifold, manifold_mdot_list
+    global last_manifold_id, manifold_id_list, selected_manifold, manifold_mdot_list, manifold_select_dropdown
 
     # Increment the ID value and update the list of IDs
     last_manifold_id += 1
@@ -243,6 +243,7 @@ def method_update():
 # confirmed. This makes it easier to draw the plate preview.
 # This also enables all the orifice creation options.
 def orifice_confirm():
+    global plate_select_dropdown, manifold_select_dropdown
     # Slightly clumsy error handling
 
     try:
@@ -282,29 +283,47 @@ def orifice_confirm():
     orifice_model_DYER.config(state="disabled")
     orifice_model_WAXMAN.config(state="disabled")
 
-    #plate_sele
-
+    plate_select_dropdown.config(state="disabled")
+    manifold_select_dropdown.config(state="disabled")
 
     orifice_add_single.config(state="normal")
     orifice_add_series.config(state="normal")
+
+    orifice_config_edit.config(state="normal")
+    orifice_config_confirm.config(state="disabled")
+
+    tab_parent.tab(0, state="disabled")
+    tab_parent.tab(1, state="disabled")
+    tab_parent.tab(3, state="disabled")
 
 
 # Enable all the orifice configuration options again if the user
 # wants to abort creating a new orifice. This disables all the
 # orifice creation options again.
 def orifice_edit():
+    global plate_select_dropdown, manifold_select_dropdown
+
+    type_update()
     orifice_type_straight.config(state="normal")
     orifice_type_waxman.config(state="normal")
 
     orifice_diameter_entry.config(state="normal")
 
-    orifice_model_SPI.config(state="normal")
-    orifice_model_HEM.config(state="normal")
-    orifice_model_DYER.config(state="normal")
-    orifice_model_WAXMAN.config(state="normal")
+    model_update()
+
+    plate_select_dropdown.config(state="normal")
+    manifold_select_dropdown.config(state="normal")
 
     orifice_add_single.config(state="disabled")
     orifice_add_series.config(state="disabled")
+
+    orifice_config_confirm.config(state="normal")
+    orifice_config_edit.config(state="disabled")
+
+    tab_parent.tab(0, state="normal")
+    tab_parent.tab(1, state="normal")
+    tab_parent.tab(3, state="normal")
+
 
 # Update menus for either a single orifice or series of orifices
 # in the orifice tab when a radio button is clicked
@@ -499,6 +518,8 @@ orifice_config_confirm = tk.Button(master=orifice_config_buttons, text="Confirm 
 orifice_config_confirm.grid(row=0, column=0)
 orifice_config_edit = tk.Button(master=orifice_config_buttons, text="Edit settings", command=orifice_edit)
 orifice_config_edit.grid(row=0, column=1)
+# Disable this initially as config need to be confirmed first
+orifice_config_edit.config(state="disabled")
 
 # Frame for orifice creation options
 orifice_create_frame = tk.Frame(master=tab_orifices, padx=5, pady=5, relief="sunken", bd=2)
@@ -523,8 +544,10 @@ orifice_add_series = tk.Radiobutton(master=orifice_add_type, variable=orifice_si
                                    text="Series of orifices",\
                                    value="pattern", command=single_series_update)
 orifice_add_series.grid(row=1, column=1, sticky="w")
-# Call single_series_update to setup default values
+# Call these to setup default states / values
 single_series_update()
+orifice_add_single.config(state="disabled")
+orifice_add_series.config(state="disabled")
 
 
 # Details of the second tab, manifold creation
