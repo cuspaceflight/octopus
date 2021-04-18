@@ -15,18 +15,15 @@ from tkinter import messagebox
 
 # Global variables
 last_plate_id = 0
+Omodel = None
+Otype = None
+Mfluid = None
+Mmethod = None
 plate_id_list = []
 last_manifold_id = 0
 manifold_id_list = []
 manifold_mdot_list = [0] 
 # Initial 0 is so manifold_mdot_list[manifold_id] behaves intuitively
-
-fluids = {"Nitrous oxide": "nitrous oxide", "Isopropyl alcohol": "isopropyl alcohol"}
-methods = {"Octopus Helmholtz (recommended)": "helmholz", "Python Thermo": "thermo"}
-orifice_types = {"Classic": 0, "Waxman cavitating": 1}
-models = {"Single phase incompressible (SPI)": "SPI", "Homogenous equilibrium model (HEM)": "HEM",
-          "Solomon-corrected Dyer (DYER)": "DYER", "Choked (cavitating type only)": "WAXMAN"}
-# As dicts in case we add items that have awkward names
 
 class Plate:
     """Class for representing the faceplate of an injector"""
@@ -133,9 +130,10 @@ def new_plate():
 # Function for new manifold, like the above has to update
 # some elements of the GUI
 def new_manifold():
+    global Mfluid, Mmethod
     try:
-        fluid_id = str(fluids[selected_fluid.get()])
-        method_id = str(methods[selected_method.get()])
+        fluid_id = Mfluid
+        method_id = Mmethod
         p = float(manifold_pressure_entry.get())
         T = float(manifold_temp_entry.get())
         if p == 0 or T == 0:
@@ -187,6 +185,57 @@ def new_manifold():
     plate_massflow_label.grid(row=1, column=0, sticky="w")
 
     manifold_window.mainloop()
+
+
+# Update the mass flow model when a radio button is clicked in the orifice tab
+def model_update():
+    global Omodel
+    Omodel = selected_model.get()
+
+
+# Update the orifice type when a radio button is clicked in the orifice tab
+# If the type is not Waxman, disable that mass flow model
+# If the type is Waxman, select that as the mass flow model and disable
+# the other mass flow models. At some point, should add the other models for
+# a Waxman injector, using the throat as the diameter.
+def type_update():
+    global Otype
+    Otype = orifice_type.get()
+
+    if Otype == 0: # (Straight orifice)
+        orifice_model_WAXMAN.config(state="disabled")
+        orifice_model_SPI.config(state="normal")
+        orifice_model_SPI.select()
+        orifice_model_HEM.config(state="normal")
+        orifice_model_DYER.config(state="normal")
+    
+    if Otype == 1: # (cavitating orifice)
+        orifice_model_WAXMAN.config(state="normal")
+        orifice_model_WAXMAN.select()
+        orifice_model_SPI.config(state="disabled")
+        orifice_model_HEM.config(state="disabled")
+        orifice_model_DYER.config(state="disabled")
+
+
+# Update the fluid when a radio button is clicked in the manifold tab
+# If the fluid is IPA, disable the Octopus Helmholtz EOS option
+def fluid_update():
+    global Mfluid
+    Mfluid = selected_fluid.get()
+
+    if Mfluid == "nitrous oxide":
+        manifold_method_Helmholtz.select()
+        manifold_method_Helmholtz.config(state="normal")
+
+    if Mfluid == "isopropyl alcohol":
+        manifold_method_thermo.select()
+        manifold_method_Helmholtz.config(state="disabled")
+
+
+def method_update():
+    global Mmethod
+    Mmethod = selected_method.get()
+
 
 # Initialise the configuration window
 window_cfg = tk.Tk()
@@ -279,10 +328,15 @@ orifice_type_frame.grid(row=0, column=0, sticky="w")
 orifice_type_label = tk.Label(master=orifice_type_frame, text="Orifice type:")
 orifice_type_label.grid(row=0, column=0, sticky="w")
 
-# Option menu for orifice type selection
-orifice_type = tk.StringVar()
-orifice_type_menu = tk.OptionMenu(orifice_type_frame, orifice_type, *orifice_types.keys())
-orifice_type_menu.grid(row=0, column=1, sticky="w")
+# Radio buttons for orifice type selection
+orifice_type = tk.IntVar(value=0)
+orifice_type_straight = tk.Radiobutton(master=orifice_type_frame, variable=orifice_type,\
+                                       text="Classic (straight)", value=0, command=type_update)
+orifice_type_straight.grid(row=1, column=0, sticky="w")
+
+orifice_type_waxman = tk.Radiobutton(master=orifice_type_frame, variable=orifice_type,\
+                                       text="Cavitating (Waxman) ", value=1, command=type_update)
+orifice_type_waxman.grid(row=1, column=1, sticky="w")
 
 # Frame for orifice diameter entry field and associated labels
 orifice_diameter_frame = tk.Frame(master=orifice_config_frame, width=50, height=50, padx=5, pady=5)
@@ -308,10 +362,29 @@ orifice_model_frame.grid(row=2, column=0, sticky="w")
 orifice_model_label = tk.Label(master=orifice_model_frame, text="Mass flow model:")
 orifice_model_label.grid(row=0, column=0, sticky="w")
 
-# Option menu for mass flow model selection
-selected_model = tk.StringVar()
-orifice_model_menu = tk.OptionMenu(orifice_model_frame, selected_model, *models.keys())
-orifice_model_menu.grid(row=0, column=1, stick="w")
+# Radio buttons for mass flow model selection
+selected_model = tk.StringVar(value="SPI")
+orifice_model_SPI = tk.Radiobutton(master=orifice_model_frame, variable=selected_model,\
+                                   text="Single phase incompressible",\
+                                   value="SPI", command=model_update)
+orifice_model_SPI.grid(row=1, column=0, sticky="w")
+
+orifice_model_HEM = tk.Radiobutton(master=orifice_model_frame, variable=selected_model,\
+                                   text="Homogenous equlibrium",\
+                                   value="HEM", command=model_update)
+orifice_model_HEM.grid(row=1, column=1, sticky="w")
+
+orifice_model_DYER = tk.Radiobutton(master=orifice_model_frame, variable=selected_model,\
+                                   text="Dyer (Solomon corrected)",\
+                                   value="DYER", command=model_update)
+orifice_model_DYER.grid(row=2, column=0, sticky="w")
+
+orifice_model_WAXMAN = tk.Radiobutton(master=orifice_model_frame, variable=selected_model,\
+                                      text="Cavitating (Waxman)",\
+                                      value="WAXMAN", command=model_update)
+orifice_model_WAXMAN.grid(row=2, column=1, sticky="w")
+# Disable Waxman by default as the default orifice type is traight
+orifice_model_WAXMAN.config(state="disabled")
 
 # Frame for plate selection option menu and associated labels
 select_plate_frame = tk.Frame(master=orifice_config_frame, width=50, height=50, padx=5, pady=5)
@@ -357,10 +430,16 @@ fluid_select_frame.grid(row=0, column = 0, sticky="w")
 manifold_fluid_label = tk.Label(master=fluid_select_frame, text="Manifold fluid:")
 manifold_fluid_label.grid(row=0, column=0, sticky="w")
 
-# Fluid select menu
-selected_fluid = tk.StringVar()
-manifold_fluid_select = tk.OptionMenu(fluid_select_frame, selected_fluid, *fluids.keys())
-manifold_fluid_select.grid(row=0, column=1, sticky="w")
+# Fluid select radio buttons
+selected_fluid = tk.StringVar(value="nitrous oxide")
+manifold_fluid_N2O = tk.Radiobutton(master=fluid_select_frame, variable=selected_fluid,\
+                                    text="Nitrous oxide", value="nitrous oxide",\
+                                    command=fluid_update)
+manifold_fluid_N2O.grid(row=1, column=0, sticky="w")
+manifold_fluid_IPA = tk.Radiobutton(master=fluid_select_frame, variable=selected_fluid,\
+                                    text="Isopropyl alcohol", value="isopropyl alcohol",\
+                                    command=fluid_update)
+manifold_fluid_IPA.grid(row=1, column=1, sticky="w")
 
 # Frame for selecting a fluid property method
 method_select_frame = tk.Frame(master=manifold_frame, height=5, padx=5, pady=5)
@@ -370,10 +449,16 @@ method_select_frame.grid(row=1, column=0, sticky="w")
 manifold_method_label = tk.Label(master=method_select_frame, text="Fluid method:")
 manifold_method_label.grid(row=0, column=0, sticky="w")
 
-# Fluid property method select menu
-selected_method = tk.StringVar()
-manifold_method_select = tk.OptionMenu(method_select_frame, selected_method, *methods.keys())
-manifold_method_select.grid(row=0, column=1)
+# Fluid property method radio buttons
+selected_method = tk.StringVar(value="helmholz")
+manifold_method_thermo = tk.Radiobutton(master=method_select_frame, variable=selected_method,\
+                                        text="Python Thermo", value="thermo",\
+                                        command=method_update)
+manifold_method_thermo.grid(row=1, column=0, sticky="w")
+manifold_method_Helmholtz = tk.Radiobutton(master=method_select_frame, variable=selected_method,\
+                                          text="Octopus Helmholtz", value="helmholz",\
+                                          command=method_update)
+manifold_method_Helmholtz.grid(row=1, column=1, sticky="w")
 
 # Frame for setting fluid temperature in manifold
 fluid_temp_frame = tk.Frame(master=manifold_frame, height=5, padx=5, pady=5)
