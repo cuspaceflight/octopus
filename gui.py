@@ -17,6 +17,7 @@ from tkinter import messagebox
 last_plate_id = 0
 Omodel = None
 Otype = None
+Oseries = None
 Mfluid = None
 Mmethod = None
 plate_id_list = []
@@ -134,13 +135,10 @@ def new_manifold():
     try:
         fluid_id = Mfluid
         method_id = Mmethod
-        p = float(manifold_pressure_entry.get())
+        p = float(manifold_pressure_entry.get())*1E5
         T = float(manifold_temp_entry.get())
         if p == 0 or T == 0:
             tk.messagebox.showerror("New manifold error", "Manifold temperature and pressure must be greater than 0")
-            return None
-        if fluid_id != "nitrous oxide" and method_id == "helmholz":
-            tk.messagebox.showerror("New manifold error", "Currently, Helmholtz EOS only supports nitrous oxide")
             return None
     except Exception:
         tk.messagebox.showerror("New manifold error", "Invalid manifold parameters")
@@ -206,12 +204,14 @@ def type_update():
         orifice_model_WAXMAN.config(state="disabled")
         orifice_model_SPI.config(state="normal")
         orifice_model_SPI.select()
+        Omodel = "SPI"
         orifice_model_HEM.config(state="normal")
         orifice_model_DYER.config(state="normal")
     
     if Otype == 1: # (cavitating orifice)
         orifice_model_WAXMAN.config(state="normal")
         orifice_model_WAXMAN.select()
+        Omodel = "WAXMAN"
         orifice_model_SPI.config(state="disabled")
         orifice_model_HEM.config(state="disabled")
         orifice_model_DYER.config(state="disabled")
@@ -225,16 +225,75 @@ def fluid_update():
 
     if Mfluid == "nitrous oxide":
         manifold_method_Helmholtz.select()
+        Mmethod = "helmholtz"
         manifold_method_Helmholtz.config(state="normal")
 
     if Mfluid == "isopropyl alcohol":
         manifold_method_thermo.select()
+        Mmethod = "thermo"
         manifold_method_Helmholtz.config(state="disabled")
 
 
 def method_update():
     global Mmethod
     Mmethod = selected_method.get()
+
+
+# Disable all the orifice configuration options once the settings are
+# confirmed. This makes it easier to draw the plate preview.
+# This also enables all the orifice creation options.
+def orifice_confirm():
+    if type(selected_plate.get()) is not int:
+        tk.messagebox.showerror("Orifice settings error", "No plate selected")
+    if type(selected_manifold.get()) is not int:
+        tk.messagebox.showerror("Orifice settings error", "No manifold selected")
+        
+
+    orifice_type_straight.config(state="disabled")
+    orifice_type_waxman.config(state="disabled")
+
+    orifice_diameter_entry.config(state="disabled")
+
+    orifice_model_SPI.config(state="disabled")
+    orifice_model_HEM.config(state="disabled")
+    orifice_model_DYER.config(state="disabled")
+    orifice_model_WAXMAN.config(state="disabled")
+
+    #plate_sele
+
+
+    orifice_add_single.config(state="normal")
+    orifice_add_series.config(state="normal")
+
+
+# Enable all the orifice configuration options again if the user
+# wants to abort creating a new orifice. This disables all the
+# orifice creation options again.
+def orifice_edit():
+    orifice_type_straight.config(state="normal")
+    orifice_type_waxman.config(state="normal")
+
+    orifice_diameter_entry.config(state="normal")
+
+    orifice_model_SPI.config(state="normal")
+    orifice_model_HEM.config(state="normal")
+    orifice_model_DYER.config(state="normal")
+    orifice_model_WAXMAN.config(state="normal")
+
+    orifice_add_single.config(state="disabled")
+    orifice_add_series.config(state="disabled")
+
+# Update menus for either a single orifice or series of orifices
+# in the orifice tab when a radio button is clicked
+def single_series_update():
+    global Oseries
+    Oseries = orifice_single_series.get()
+
+    if Oseries == "single":
+        pass
+
+    if Oseries == "series":
+        pass
 
 
 # Initialise the configuration window
@@ -317,7 +376,8 @@ title_orifices.config(font=(96))
 title_orifices.grid(row=0, column=0)
 
 # Frame for configuring a new orifice
-orifice_config_frame = tk.Frame(master=tab_orifices, width=50, height=5, padx=5, pady=5)
+orifice_config_frame = tk.Frame(master=tab_orifices, width=50, height=5, padx=5, pady=5,\
+                                relief="sunken", bd=2)
 orifice_config_frame.grid(row=3, column = 0, sticky="w")
 
 # Frame for selection of orifice type
@@ -383,8 +443,9 @@ orifice_model_WAXMAN = tk.Radiobutton(master=orifice_model_frame, variable=selec
                                       text="Cavitating (Waxman)",\
                                       value="WAXMAN", command=model_update)
 orifice_model_WAXMAN.grid(row=2, column=1, sticky="w")
-# Disable Waxman by default as the default orifice type is traight
-orifice_model_WAXMAN.config(state="disabled")
+# Call model_update and type_update to setup with default values
+model_update()
+type_update()
 
 # Frame for plate selection option menu and associated labels
 select_plate_frame = tk.Frame(master=orifice_config_frame, width=50, height=50, padx=5, pady=5)
@@ -405,6 +466,42 @@ select_manifold_frame.grid(row=4, column=0, sticky="w")
 selected_manifold = tk.StringVar()
 manifold_select_label = tk.Label(master=select_manifold_frame, text="Manifold ID: (Add or load a manifold first)")
 manifold_select_label.grid(row=0, column=0, sticky="w")
+
+# Frame for buttons to confirm / edit orifice settings
+orifice_config_buttons = tk.Frame(master=orifice_config_frame, width=50, height=50, padx=5, pady=5)
+orifice_config_buttons.grid(row=5, column=0)
+
+# Buttons for confirming, editing orifice settings
+orifice_config_confirm = tk.Button(master=orifice_config_buttons, text="Confirm settings", command=orifice_confirm)
+orifice_config_confirm.grid(row=0, column=0)
+orifice_config_edit = tk.Button(master=orifice_config_buttons, text="Edit settings", command=orifice_edit)
+orifice_config_edit.grid(row=0, column=1)
+
+# Frame for orifice creation options
+orifice_create_frame = tk.Frame(master=tab_orifices, padx=5, pady=5, relief="sunken", bd=2)
+orifice_create_frame.grid(row=6, column=0, sticky="w")
+
+# Frame for choosing whether to add an orifice as a series or on its own
+orifice_add_type = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
+orifice_add_type.grid(row=0, column=0, sticky="w")
+
+# Label for single / series orifice
+orifice_single_label = tk.Label(master=orifice_add_type, text="Orifices to add:")
+orifice_single_label.grid(row=0, column=0, sticky="w")
+
+# Radio buttons for new orifice individual / series selection
+orifice_single_series = tk.StringVar(value="single")
+orifice_add_single = tk.Radiobutton(master=orifice_add_type, variable=orifice_single_series,\
+                                   text="Single orifice",\
+                                   value="single", command=single_series_update)
+orifice_add_single.grid(row=1, column=0, sticky="w")
+
+orifice_add_series = tk.Radiobutton(master=orifice_add_type, variable=orifice_single_series,\
+                                   text="Series of orifices",\
+                                   value="pattern", command=single_series_update)
+orifice_add_series.grid(row=1, column=1, sticky="w")
+# Call single_series_update to setup default values
+single_series_update()
 
 
 # Details of the second tab, manifold creation
@@ -459,6 +556,9 @@ manifold_method_Helmholtz = tk.Radiobutton(master=method_select_frame, variable=
                                           text="Octopus Helmholtz", value="helmholz",\
                                           command=method_update)
 manifold_method_Helmholtz.grid(row=1, column=1, sticky="w")
+# Call method_update and fluid_update to setup default values
+method_update()
+fluid_update()
 
 # Frame for setting fluid temperature in manifold
 fluid_temp_frame = tk.Frame(master=manifold_frame, height=5, padx=5, pady=5)
