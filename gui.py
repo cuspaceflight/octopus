@@ -292,6 +292,9 @@ def orifice_confirm():
     orifice_config_edit.config(state="normal")
     orifice_config_confirm.config(state="disabled")
 
+    orifice_position_xentry.config(state="normal")
+    orifice_position_yentry.config(state="normal")
+
     tab_parent.tab(0, state="disabled")
     tab_parent.tab(1, state="disabled")
     tab_parent.tab(3, state="disabled")
@@ -319,6 +322,9 @@ def orifice_edit():
 
     orifice_config_confirm.config(state="normal")
     orifice_config_edit.config(state="disabled")
+
+    orifice_position_xentry.config(state="disabled")
+    orifice_position_yentry.config(state="disabled")
 
     tab_parent.tab(0, state="normal")
     tab_parent.tab(1, state="normal")
@@ -549,6 +555,33 @@ single_series_update()
 orifice_add_single.config(state="disabled")
 orifice_add_series.config(state="disabled")
 
+# Frame for orifice position (for first in series if a series is elected)
+orifice_position_frame = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
+orifice_position_frame.grid(row=7, column=0, sticky="w")
+
+# Label for orifice position description
+orifice_position_label = tk.Label(master=orifice_position_frame, text="Position relative to plate centre, pixels:")
+orifice_position_label.grid(row=0, column=0, sticky="w")
+
+# x position entry field label
+orifice_position_xlabel = tk.Label(master=orifice_position_frame, text="x:")
+orifice_position_xlabel.grid(row=0, column=1, sticky="w")
+
+# x position entry field
+orifice_position_xentry = tk.Entry(master=orifice_position_frame, width=5)
+orifice_position_xentry.grid(row=0, column=2, sticky="w")
+
+# y position entry field label
+orifice_position_ylabel = tk.Label(master=orifice_position_frame, text="y:")
+orifice_position_ylabel.grid(row=0, column=3, sticky="w")
+
+# y position entry field
+orifice_position_yentry = tk.Entry(master=orifice_position_frame, width=5)
+orifice_position_yentry.grid(row=0, column=4, sticky="w")
+
+# Setup deefault states
+orifice_position_xentry.config(state="disabled")
+orifice_position_yentry.config(state="disabled")
 
 # Details of the second tab, manifold creation
 # Frame for title, possibly description in future
