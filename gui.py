@@ -174,7 +174,7 @@ def new_manifold():
     # Label for the fixed parameters
     plate_static_label = tk.Label(master=manifold_top_frame, height=4, text= \
         f"Manifold ID: {id}\n Manifold fluid: {manifold.fluid.ID}\n"
-        f"Manifold pressure: {manifold.p} bar\n Manifold temperature: {manifold.T} K")
+        f"Manifold pressure: {manifold.p/1E5} bar\n Manifold temperature: {manifold.T} K")
     plate_static_label.grid(row=0, column=0, sticky="w")
     
     # Label for the masss flow rate, updated when orifices are added
@@ -197,7 +197,7 @@ def model_update():
 # the other mass flow models. At some point, should add the other models for
 # a Waxman injector, using the throat as the diameter.
 def type_update():
-    global Otype
+    global Otype, Omodel
     Otype = orifice_type.get()
 
     if Otype == 0: # (Straight orifice)
@@ -220,12 +220,12 @@ def type_update():
 # Update the fluid when a radio button is clicked in the manifold tab
 # If the fluid is IPA, disable the Octopus Helmholtz EOS option
 def fluid_update():
-    global Mfluid
+    global Mfluid, Mmethod
     Mfluid = selected_fluid.get()
 
     if Mfluid == "nitrous oxide":
         manifold_method_Helmholtz.select()
-        Mmethod = "helmholtz"
+        Mmethod = "helmholz"
         manifold_method_Helmholtz.config(state="normal")
 
     if Mfluid == "isopropyl alcohol":
