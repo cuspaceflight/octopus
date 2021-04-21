@@ -16,14 +16,14 @@ from json import load
 from os.path import dirname
 from typing import List, Dict, Sequence
 
+import thermo.chemical
 from numpy import pi, sqrt, array, log, exp, nan_to_num, inf
 from scipy.optimize import least_squares
-from thermo import chemical
 
 from .utils import derivative
 
 
-class Fluid(chemical.Chemical):
+class Fluid:
     """Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS."""
 
     def __init__(self, ID: str, T: float = 298.15, P: float = 101325, method='thermo'):
@@ -33,11 +33,11 @@ class Fluid(chemical.Chemical):
         :param T: Temperature (K)
         :param P: Pressure (Pa)
         """
-        super().__init__(ID, T, P)
+        chem = thermo.chemical.Chemical(ID, T, P)
         self.method = method.lower()
 
         if self.method == 'helmholz':
-            with open(f'{dirname(__file__)}/data/{self.CAS}.json', 'r') as f:
+            with open(f'{dirname(__file__)}/data/{chem.CAS}.json', 'r') as f:
                 data = load(f)
 
             self.a = data['a']
@@ -48,6 +48,11 @@ class Fluid(chemical.Chemical):
             self.Ag = data['Ag']
             self.Al = data['Al']
             self.polar = bool(data['polar'])
+            self.Tc = data['Tc']
+            self.rhoc = data['rhoc']
+            self.R_specific = data['R_specific']
+            self.VaporPressure = chem.VaporPressure
+
         elif self.method == 'thermo':
             pass
         else:
@@ -92,10 +97,10 @@ class Fluid(chemical.Chemical):
                        + self.n[5] * delta * tau ** 2.375 * exp(-delta)
                        + self.n[6] * delta ** 2 * tau ** 2 * exp(-delta)
                        + self.n[7] * delta ** 5 * tau ** 2.125 * exp(-delta)
-                       + self.n[8] * delta * tau * 3.5 * exp(-delta ** 2)
-                       + self.n[9] * delta * tau ** 6.5 * exp(-delta ** 2)
-                       + self.n[10] * delta ** 4 * tau ** 4.75 * exp(-delta ** 2)
-                       + self.n[11] * delta ** 2 * tau ** 12.5 * exp(-delta ** 3))
+                       + self.n[8] * delta * tau * 3.5 * exp(-(delta ** 2))
+                       + self.n[9] * delta * tau ** 6.5 * exp(-(delta ** 2))
+                       + self.n[10] * delta ** 4 * tau ** 4.75 * exp(-(delta ** 2))
+                       + self.n[11] * delta ** 2 * tau ** 12.5 * exp(-(delta ** 3)))
             return alpha_r
         else:
             raise NotImplementedError
