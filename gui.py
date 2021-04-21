@@ -78,6 +78,7 @@ def new_plate():
     try:
         diameter = float(diameter_entry.get())
         pc = float(chamber_pressure_entry.get())
+        diameter_px = float(canvas_size_entry.get())
         if diameter <= 0 or pc <= 0:
             tk.messagebox.showerror("New plate error", "Plate diameter and chamber pressure must be greater than zero")
             return None
@@ -120,9 +121,9 @@ def new_plate():
     face_frame.grid(row=1, column=0)
 
     # Create the canvas for representing the plate and its orifices
-    face = tk.Canvas(master=face_frame, bg="white", height=600, width=600)
-    face_outline = face.create_oval(50, 50, 550, 550, fill="black")
-    Plate.x_centre, Plate.y_centre = 300, 300
+    face = tk.Canvas(master=face_frame, bg="white", height=diameter_px+10, width=diameter_px+10)
+    face_outline = face.create_oval(6, 6, diameter_px+6, diameter_px+6, fill="black")
+    Plate.x_centre, Plate.y_centre = (diameter_px+10)/2, (diameter_px+10)/2
     face.grid()
     
     plate_window.mainloop()
@@ -384,7 +385,7 @@ diameter_entry_label = tk.Label(master=manage_diameter_frame, text="Plate diamet
 diameter_entry_label.grid(row=0, column=0, sticky="w")
 
 # Plate diameter entry field
-diameter_entry = tk.Entry(master=manage_diameter_frame, width=10)
+diameter_entry = tk.Entry(master=manage_diameter_frame, width=5)
 diameter_entry.grid(row=0, column=1, sticky="w")
 
 # Label for plate diameter unit
@@ -400,16 +401,32 @@ chamber_pressure_label = tk.Label(master=chamber_pressure_frame, text="Combustio
 chamber_pressure_label.grid(row=0, column=0, sticky="w")
 
 # Chamber pressure entry field
-chamber_pressure_entry = tk.Entry(master=chamber_pressure_frame, width=10)
+chamber_pressure_entry = tk.Entry(master=chamber_pressure_frame, width=5)
 chamber_pressure_entry.grid(row=0, column=1, sticky="w")
 
 # Label for chamber pressure unit
 chamber_pressure_unit = tk.Label(master=chamber_pressure_frame, text="bar")
 chamber_pressure_unit.grid(row=0, column=2, sticky="w")
 
+# Frame for setting canvas size
+canvas_size_frame = tk.Frame(master=tab_plate, width=50, height=50, padx=5, pady=5)
+canvas_size_frame.grid(row=4, column=0, sticky="w")
+
+# Canvas size label
+canvas_size_label = tk.Label(master=canvas_size_frame, text="Injector display diameter:")
+canvas_size_label.grid(row=0, column=0, sticky="w")
+
+# Canvas size entry field
+canvas_size_entry = tk.Entry(master=canvas_size_frame, width=5)
+canvas_size_entry.grid(row=0, column=1, sticky="w")
+
+# Canvas size unit label
+canvas_size_unit = tk.Label(master=canvas_size_frame, text="px")
+canvas_size_unit.grid(row=0, column=2, sticky="w")
+
 # Button to create a new plate with above parameters (opens in new window)
 new_plate_button = tk.Button(master=tab_plate, text="Create injector plate", command=new_plate, width=30, height=3)
-new_plate_button.grid(row=4, column=0)
+new_plate_button.grid(row=5, column=0)
 
 
 # Details of the third tab, add orifices
