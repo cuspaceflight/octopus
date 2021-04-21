@@ -21,20 +21,21 @@ Oseries = None
 Mfluid = None
 Mmethod = None
 plate_id_list = []
+plates = [0] # Initial 0 is so plates[plate_id] behaves intuitively
 last_manifold_id = 0
 manifold_id_list = []
-manifold_mdot_list = [0] 
-# Initial 0 is so manifold_mdot_list[manifold_id] behaves intuitively
+manifold_mdot_list = [0] # Initial 0 is so manifold_mdot_list[manifold_id] behaves intuitively
 
 class Plate:
     """Class for representing the faceplate of an injector"""
 
-    def __init__(self, id: int, diameter: float, pc: float):
+    def __init__(self, id: int, diameter: float, pc: float, diameter_px: int):
         """Initialise :class:`Plate` object.
         
         :param id: Plate ID (int)
         :param diameter: Plate diameter (m)
         :param pc: Combustion chamber pressure (Pa)
+        :param diameter_x: Injector plate display diameter (pixels)
         
         """
         self.id = id
@@ -44,6 +45,7 @@ class Plate:
         self.orifice_count = 0
         self.x_centre = None
         self.y_centre = None
+        self.diameter_px = diameter_px
 
     def add_orifice(self, orifice: Orifice, x: int, y: int, arrayID="Z"):
         """Add a singular :class:'Orifice' object to the plate.
@@ -70,6 +72,43 @@ class Plate:
                 self.orifices[arrayID].append((orifice, self.orifice_count))
                 print(f"Orifice array {self.orifices[arrayID]} already exists")
                 print(self.orifices[arrayID])
+
+    def add_window(self):
+        # Create the display window for this plate
+        self.window = tk.Tk()
+        self.window.resizable(False, False)
+        self.window.title(f"Plate ID {self.id}")
+
+        # Frame for the plate title and parameter list
+        self.plate_top_frame = tk.Frame(master=self.window, height=30, padx=5, pady=5)
+        self.plate_top_frame.grid(row=0, column=0)
+
+        # Label for the parameters
+        self.plate_parameters = tk.Label(master=self.plate_top_frame, height=3, text= \
+            f"Plate ID: {self.id}\n Plate diameter: {self.diameter} m\n"
+            f"Chamber pressure: {self.pc/1E5} bar")
+        self.plate_parameters.grid(row=0, column=0)
+
+        # Frame for the plate canvas
+        self.face_frame = tk.Frame(master=self.window, width=300, height=300, padx=5, pady=5)
+        self.face_frame.grid(row=1, column=0)
+
+        # Create the canvas for representing the plate and its orifices
+        self.face = tk.Canvas(master=self.face_frame, bg="white", \
+                              height=self.diameter_px+10, width=self.diameter_px+10)
+        self.face_outline = self.face.create_oval(6, 6, self.diameter_px+6, self.diameter_px+6, fill="black")
+        self.x_centre, self.y_centre = (self.diameter_px+10)/2, (self.diameter_px+10)/2
+
+        # Sneakily create a preview at the centre so it can be updated later, without creating a new object
+        # hence there is only ever one preview and we don't need to track if one has been created
+        # (not sure how best to do this for a series)
+        self.preview = self.face.create_oval(self.x_centre, self.y_centre, \
+                                             self.x_centre, self.y_centre, fill="white")
+        self.face.itemconfigure(self.preview, state="hidden")
+        self.face.grid()
+        
+        self.window.mainloop()
+
 
 # Function for new injector plate, also has to update some elements of the GUI
 # as this may be the first plate for this execution
@@ -98,35 +137,15 @@ def new_plate():
     plate_select_dropdown.grid(row=0, column=1)
     plate_select_label["text"] = "Plate ID: "
 
-    # Create the plate object
-    plate = Plate(last_plate_id, diameter, pc*1E5)
+    # Create the plate object, append it to the list
+    # for access by indexing with plate id
+    # (should change this to use a dict)
+    plates.append(Plate(last_plate_id, diameter, pc*1E5, diameter_px))
 
-    # Create the window for this plate
-    plate_window = tk.Tk()
-    plate_window.resizable(False, False)
-    plate_window.title(f"Plate ID {plate.id}")
-
-    # Frame for the plate title and parameter list
-    plate_top_frame = tk.Frame(master=plate_window, height=30, padx=5, pady=5)
-    plate_top_frame.grid(row=0, column=0)
-
-    # Label for the parameters
-    plate_parameters = tk.Label(master=plate_top_frame, height=3, text= \
-        f"Plate ID: {plate.id}\n Plate diameter: {plate.diameter} m\n"
-        f"Chamber pressure: {plate.pc/1E5} bar")
-    plate_parameters.grid(row=0, column=0)
-
-    # Frame for the plate canvas
-    face_frame = tk.Frame(master=plate_window, width=300, height=300, padx=5, pady=5)
-    face_frame.grid(row=1, column=0)
-
-    # Create the canvas for representing the plate and its orifices
-    face = tk.Canvas(master=face_frame, bg="white", height=diameter_px+10, width=diameter_px+10)
-    face_outline = face.create_oval(6, 6, diameter_px+6, diameter_px+6, fill="black")
-    Plate.x_centre, Plate.y_centre = (diameter_px+10)/2, (diameter_px+10)/2
-    face.grid()
-    
-    plate_window.mainloop()
+    # Create and display the plate's window
+    # This is handled within the object, so other methods can reference
+    # specific plate IDs appropriately
+    plates[last_plate_id].add_window()
 
 
 # Function for new manifold, like the above has to update
@@ -303,7 +322,7 @@ def orifice_confirm():
 
 # Enable all the orifice configuration options again if the user
 # wants to abort creating a new orifice. This disables all the
-# orifice creation options again.
+# orifice creation options again, and clears the preview.
 def orifice_edit():
     global plate_select_dropdown, manifold_select_dropdown
 
@@ -327,6 +346,10 @@ def orifice_edit():
     orifice_position_xentry.config(state="disabled")
     orifice_position_yentry.config(state="disabled")
 
+    # Find the old plate ID, hide its preview
+    plate = plates[selected_plate.get()]
+    plate.face.itemconfigure(plate.preview, state="hidden")
+
     tab_parent.tab(0, state="normal")
     tab_parent.tab(1, state="normal")
     tab_parent.tab(3, state="normal")
@@ -343,6 +366,33 @@ def single_series_update():
 
     if Oseries == "series":
         pass
+
+
+# Whenever the x position field is updated, try and update
+# the canvas preview.
+def orifice_preview_update(*args):
+    try:
+        x = float(new_orifice_x.get())
+        y = float(new_orifice_y.get())
+        od = float(orifice_diameter_entry.get())
+    except Exception:
+        return None
+    
+    # Get the plate we're working with
+    plate_id = selected_plate.get()
+    plate = plates[plate_id]
+
+    # Show the preview
+    plate.face.itemconfigure(plate.preview, state="normal")
+
+    # Find the mm per pixel
+    mmpp = 1000*plate.diameter/plate.diameter_px
+    # Find the orifice diameter in pixels
+    odpx = od/mmpp
+    
+    # Update the preview, with appropriately scaled size
+    plate.face.coords(plate.preview, plate.x_centre+x, plate.y_centre-y, plate.x_centre+x-odpx, plate.y_centre-y-odpx)
+    plate.face.grid()
 
 
 # Initialise the configuration window
@@ -577,7 +627,7 @@ orifice_position_frame = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
 orifice_position_frame.grid(row=7, column=0, sticky="w")
 
 # Label for orifice position description
-orifice_position_label = tk.Label(master=orifice_position_frame, text="Position relative to plate centre, pixels:")
+orifice_position_label = tk.Label(master=orifice_position_frame, text="Position relative to plate centre, mm:")
 orifice_position_label.grid(row=0, column=0, sticky="w")
 
 # x position entry field label
@@ -585,7 +635,10 @@ orifice_position_xlabel = tk.Label(master=orifice_position_frame, text="x:")
 orifice_position_xlabel.grid(row=0, column=1, sticky="w")
 
 # x position entry field
-orifice_position_xentry = tk.Entry(master=orifice_position_frame, width=5)
+# Use a DoubleVar so we know when this is updated
+new_orifice_x = tk.DoubleVar()
+new_orifice_x.trace_add("write", orifice_preview_update)
+orifice_position_xentry = tk.Entry(master=orifice_position_frame, textvariable=new_orifice_x, width=5)
 orifice_position_xentry.grid(row=0, column=2, sticky="w")
 
 # y position entry field label
@@ -593,10 +646,13 @@ orifice_position_ylabel = tk.Label(master=orifice_position_frame, text="y:")
 orifice_position_ylabel.grid(row=0, column=3, sticky="w")
 
 # y position entry field
-orifice_position_yentry = tk.Entry(master=orifice_position_frame, width=5)
+# Use a DoubleVar so we know when this is updated
+new_orifice_y = tk.DoubleVar()
+new_orifice_y.trace("w", orifice_preview_update)
+orifice_position_yentry = tk.Entry(master=orifice_position_frame, textvariable=new_orifice_y, width=5)
 orifice_position_yentry.grid(row=0, column=4, sticky="w")
 
-# Setup deefault states
+# Setup default states
 orifice_position_xentry.config(state="disabled")
 orifice_position_yentry.config(state="disabled")
 
