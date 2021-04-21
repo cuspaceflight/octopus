@@ -1,287 +1,405 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" >
+<html class="writer-html5" lang="en">
 <head>
-  <meta charset="utf-8" />
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Usage &mdash; octopus 0.1 documentation</title>
-  
+    <meta charset="utf-8"/>
 
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  
-  
+    <title>Usage &mdash; octopus 0.1 documentation</title>
+
+
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css"/>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css"/>
+
+
     <link rel="shortcut icon" href="_static/favicon.ico"/>
-  
 
-  
-  
 
-  
-
-  
-  <!--[if lt IE 9]>
+    <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
-        <script src="_static/doctools.js"></script>
-    
+    <![endif]-->
+
+
+    <script type="text/javascript" id="documentation_options" data-url_root="./"
+            src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
-    
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="octopus.main" href="_autosummary/octopus.main.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+
+    <link rel="index" title="Index" href="genindex.html"/>
+    <link rel="search" title="Search" href="search.html"/>
+    <link rel="next" title="octopus.main" href="_autosummary/octopus.main.html"/>
+    <link rel="prev" title="Installation" href="installation.html"/>
 </head>
 
 <body class="wy-body-for-nav">
 
-   
-  <div class="wy-grid-for-nav">
-    
+
+<div class="wy-grid-for-nav">
+
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-          
+        <div class="wy-side-scroll">
+            <div class="wy-side-nav-search">
 
-          
-            <a href="index.html" class="icon icon-home"> octopus
-          
 
-          
-            
-            <img src="_static/logo.png" class="logo" alt="Logo"/>
-          
-          </a>
+                <a href="index.html" class="icon icon-home"> octopus
 
-          
-            
-            
-          
 
-          
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
+                    <img src="_static/logo.png" class="logo" alt="Logo"/>
 
-          
+                </a>
+
+
+                <div role="search">
+                    <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+                        <input type="text" name="q" placeholder="Search docs"/>
+                        <input type="hidden" name="check_keywords" value="yes"/>
+                        <input type="hidden" name="area" value="default"/>
+                    </form>
+                </div>
+
+
+            </div>
+
+
+            <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+
+
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+                    <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a></li>
+                    <li class="toctree-l1"><a class="reference internal" href="#does-not-work-shown-as-a-todo">DOES NOT
+                        WORK - SHOWN AS A TODO</a></li>
+                    <li class="toctree-l1"><a class="reference internal" href="_autosummary/octopus.main.html">octopus.main</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="_autosummary/octopus.utils.html">octopus.utils</a>
+                    </li>
+                </ul>
+
+
+            </div>
+
         </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#does-not-work-shown-as-a-todo">DOES NOT WORK - SHOWN AS A TODO</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_autosummary/octopus.main.html">octopus.main</a></li>
-<li class="toctree-l1"><a class="reference internal" href="_autosummary/octopus.utils.html">octopus.utils</a></li>
-</ul>
-
-            
-          
-        </div>
-        
-      </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">octopus</a>
-        
-      </nav>
+
+        <nav class="wy-nav-top" aria-label="top navigation">
+
+            <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+            <a href="index.html">octopus</a>
+
+        </nav>
 
 
-      <div class="wy-nav-content">
-        
-        <div class="rst-content">
-        
-          
+        <div class="wy-nav-content">
+
+            <div class="rst-content">
 
 
+                <div role="navigation" aria-label="breadcrumbs navigation">
+
+                    <ul class="wy-breadcrumbs">
+
+                        <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+
+                        <li>Usage</li>
 
 
+                        <li class="wy-breadcrumbs-aside">
 
 
+                            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
 
 
+                        </li>
+
+                    </ul>
 
 
+                    <hr/>
+                </div>
+                <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+                    <div itemprop="articleBody">
+
+                        <div class="section" id="usage">
+                            <h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
+                            <p>Octopus was designed primarily to model nitrous oxide (N2O) flow through a rocket
+                                injector. To start working with the
+                                module, a <a class="reference internal" href="index.html#octopus.main.Fluid"
+                                             title="octopus.main.Fluid"><code
+                                        class="xref py py-class docutils literal notranslate"><span class="pre">octopus.main.Fluid</span></code></a>
+                                must be initiated. Throughout this example we will be using nitrous oxide, with a
+                                Helmholz
+                                EOS, and IPA, using <code class="xref py py-mod docutils literal notranslate"><span
+                                        class="pre">thermo</span></code>’s EOS as it is a better-behaved fluid.</p>
+                            <div class="doctest highlight-default notranslate">
+                                <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span
+                                        class="kn">from</span> <span class="nn">octopus</span> <span
+                                        class="kn">import</span> <span class="n">Fluid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nitrous_oxide</span> <span class="o">=</span> <span
+                                            class="n">Fluid</span><span class="p">(</span><span
+                                            class="s1">&#39;N2O&#39;</span><span class="p">,</span><span class="n">method</span><span
+                                            class="o">=</span><span class="s1">&#39;helmholz&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">isopropanol</span> <span class="o">=</span> <span
+                                            class="n">Fluid</span><span class="p">(</span><span class="s1">&#39;isopropanol&#39;</span><span
+                                            class="p">,</span><span class="n">P</span><span class="o">=</span><span
+                                            class="mf">18e5</span><span class="p">,</span><span class="n">T</span><span
+                                            class="o">=</span><span class="mi">293</span><span class="p">)</span>
+</pre>
+                                </div>
+                            </div>
+                            <p>If using the helmholz EOS, P and T may not be specified (they are not used, as they are
+                                thermo-inherited properties,
+                                however the <code class="docutils literal notranslate"><span
+                                        class="pre">method</span></code> parameter must be specified as “helmholz” as
+                                “thermo” is the default. Currently, “helmholz” is
+                                only available for N2O, but it will not throw an error if you add your own data for
+                                another fluid.</p>
+                            <p>Next, we can define a <a class="reference internal"
+                                                        href="index.html#octopus.main.PropertySource"
+                                                        title="octopus.main.PropertySource"><code
+                                    class="xref py py-class docutils literal notranslate"><span class="pre">octopus.main.PropertySource</span></code></a>
+                                object to represent the initial properties of <code
+                                        class="docutils literal notranslate"><span
+                                        class="pre">nitrous_oxide</span></code>. A
+                                PropertySource is simply an object that has <code
+                                        class="docutils literal notranslate"><span class="pre">p</span></code> and <code
+                                        class="docutils literal notranslate"><span class="pre">T</span></code>
+                                properties (note: lowercase p), which the <a class="reference internal"
+                                                                             href="index.html#octopus.main.Manifold"
+                                                                             title="octopus.main.Manifold"><code
+                                        class="xref py py-class docutils literal notranslate"><span class="pre">octopus.main.Manifold</span></code></a>
+                                class uses to define its inlet conditions. The <a class="reference internal"
+                                                                                  href="index.html#octopus.main.Fluid"
+                                                                                  title="octopus.main.Fluid"><code
+                                        class="xref py py-class docutils literal notranslate"><span class="pre">octopus.main.Fluid</span></code></a>
+                                object itself is not used, as its properties change
+                                throughout the system, yet the same object is passed to all classes.</p>
+                            <div class="doctest highlight-default notranslate">
+                                <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span
+                                        class="kn">from</span> <span class="nn">octopus</span> <span
+                                        class="kn">import</span> <span class="n">PropertySource</span><span
+                                        class="p">,</span> <span class="n">Manifold</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nitrous_manifold</span> <span class="o">=</span> <span class="n">Manifold</span><span
+                                            class="p">(</span><span class="n">nitrous_oxide</span><span
+                                            class="p">,</span><span class="n">PropertySource</span><span
+                                            class="p">(</span><span class="n">p</span><span class="o">=</span><span
+                                            class="mf">18e5</span><span class="p">,</span><span class="n">T</span><span
+                                            class="o">=</span><span class="mi">250</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ipa_manifold</span> <span class="o">=</span> <span class="n">Manifold</span><span
+                                            class="p">(</span><span class="n">isopropanol</span><span class="p">,</span><span
+                                            class="n">PropertySource</span><span class="p">(</span><span
+                                            class="n">p</span><span class="o">=</span><span class="mf">18e5</span><span
+                                            class="p">,</span><span class="n">T</span><span class="o">=</span><span
+                                            class="mi">293</span><span class="p">))</span>
+</pre>
+                                </div>
+                            </div>
+                            <p>Next we can define :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>octopus.main.Orifice`s
+                                that draw fluid from the manifolds defined above, and an Element to
+                                connect the two.</p>
+                            <div class="doctest highlight-default notranslate">
+                                <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span
+                                        class="kn">from</span> <span class="nn">octopus</span> <span
+                                        class="kn">import</span> <span class="n">Orifice</span><span
+                                        class="p">,</span><span class="n">Element</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nitrous_orifice</span> <span class="o">=</span> <span class="n">Orifice</span><span
+                                            class="p">(</span><span class="n">nitrous_manifold</span><span
+                                            class="p">,</span><span class="n">L</span><span class="o">=</span><span
+                                            class="mf">1e-2</span><span class="p">,</span><span class="n">D</span><span
+                                            class="o">=</span><span class="mf">2e-3</span><span class="p">,</span><span
+                                            class="n">orifice_type</span><span class="o">=</span><span
+                                            class="n">Orifice</span><span class="o">.</span><span
+                                            class="n">STRAIGHT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ipa_orifice</span> <span class="o">=</span> <span
+                                            class="n">Orifice</span><span class="p">(</span><span
+                                            class="n">ipa_manifold</span><span class="p">,</span><span
+                                            class="n">L</span><span class="o">=</span><span class="mf">1e-2</span><span
+                                            class="p">,</span><span class="n">D</span><span class="o">=</span><span
+                                            class="mf">1e-3</span><span class="p">,</span><span
+                                            class="n">orifice_type</span><span class="o">=</span><span
+                                            class="n">Orifice</span><span class="o">.</span><span
+                                            class="n">STRAIGHT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n2o_ipa_element</span> <span class="o">=</span> <span class="n">Element</span><span
+                                            class="p">([</span><span class="n">nitrous_orifice</span><span
+                                            class="p">],[</span><span class="n">ipa_orifice</span><span
+                                            class="p">])</span> <span class="c1"># in progress</span>
+</pre>
+                                </div>
+                            </div>
+                            <p>If we simply want to use the EOS from the <code
+                                    class="xref py py-class docutils literal notranslate"><span class="pre">Fluid</span></code>
+                                class, there are many methods available if
+                                <code class="docutils literal notranslate"><span
+                                        class="pre">method='helmholz'</span></code> is set. The next example will show
+                                how to get the saturation properties at 250K. We assume an all-
+                                liquid state, and never use the bare property methods (<code
+                                        class="xref py py-meth docutils literal notranslate"><span
+                                        class="pre">Fluid.p()</span></code>) as they may return invalid results.</p>
+                            <p>To get one of <code class="docutils literal notranslate"><span
+                                    class="pre">p,chi,h,s</span></code> as a function of <code
+                                    class="docutils literal notranslate"><span class="pre">[rho,T]</span></code>:</p>
+                            <div class="doctest highlight-default notranslate">
+                                <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span
+                                        class="n">T</span> <span class="o">=</span> <span class="mi">250</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span> <span class="o">=</span> <span
+                                            class="n">nitrous</span><span class="o">.</span><span class="n">rho_l</span><span
+                                            class="p">(</span><span class="n">T</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span
+                                            class="n">nitrous</span><span class="o">.</span><span class="n">get_properties</span><span
+                                            class="p">(</span><span class="n">rho</span><span class="p">,</span><span
+                                            class="n">T</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">properties</span><span
+                                            class="p">[</span><span class="s1">&#39;p&#39;</span><span
+                                            class="p">]</span>
+</pre>
+                                </div>
+                            </div>
+                            <p>To access a property, we can use the properties dictionary to return it using its name as
+                                a key. In order to compute rho
+                                or T, we need a non-linear solver:</p>
+                            <div class="doctest highlight-default notranslate">
+                                <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span
+                                        class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span
+                                        class="n">least_squares</span>
+</pre>
+                                </div>
+                            </div>
+                            <p>To get <code class="docutils literal notranslate"><span class="pre">[rho,T]</span></code>
+                                as a funtion of two of <code class="docutils literal notranslate"><span class="pre">p,chi,h,s</span></code>
+                                (see <a class="reference internal" href="index.html#octopus.main.Fluid.fun_ps"
+                                        title="octopus.main.Fluid.fun_ps"><code
+                                        class="xref py py-meth docutils literal notranslate"><span class="pre">octopus.main.Fluid.fun_ps()</span></code></a>):
+                            </p>
+                            <div class="doctest highlight-default notranslate">
+                                <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span
+                                        class="n">p</span><span class="o">=</span><span class="mf">18e5</span>          <span
+                                        class="c1"># pressure we want</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chi</span><span class="o">=</span><span class="mi">0</span>           <span
+                                            class="c1"># vapour fraction we want (all liquid)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span
+                                            class="mi">800</span><span class="p">,</span><span
+                                            class="mi">250</span><span class="p">]</span>  <span class="c1"># initial values of rho and T near to the answer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span
+                                            class="s1">&#39;p&#39;</span><span class="p">,</span><span class="s1">&#39;chi&#39;</span><span
+                                            class="p">]</span> <span
+                                            class="c1"># names of dependent variables we know</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span
+                                            class="n">p</span><span class="p">,</span><span class="n">chi</span><span
+                                            class="p">]</span>     <span class="c1"># values of dependent variables we know (same order)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">least_squares</span><span
+                                            class="p">(</span><span class="n">nitrous</span><span
+                                            class="o">.</span><span class="n">fun_ps</span><span class="p">,</span><span
+                                            class="n">x0</span><span class="p">,</span><span class="n">args</span><span
+                                            class="o">=</span><span class="p">(</span><span class="n">u</span><span
+                                            class="p">,</span><span class="n">y</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span><span class="p">,</span><span class="n">T</span> <span
+                                            class="o">=</span> <span class="n">properties</span><span class="o">.</span><span
+                                            class="n">x</span>
+</pre>
+                                </div>
+                            </div>
+                            <p>The above code is used in <a class="reference internal"
+                                                            href="index.html#octopus.main.Orifice.m_dot_HEM"
+                                                            title="octopus.main.Orifice.m_dot_HEM"><code
+                                    class="xref py py-meth docutils literal notranslate"><span class="pre">octopus.main.Orifice.m_dot_HEM()</span></code></a>
+                                to calculate the inital and final conditions, and hence
+                                that is a good example to look to for further context.</p>
+                        </div>
+                        <div class="section" id="does-not-work-shown-as-a-todo">
+                            <h1>DOES NOT WORK - SHOWN AS A TODO<a class="headerlink"
+                                                                  href="#does-not-work-shown-as-a-todo"
+                                                                  title="Permalink to this headline">¶</a></h1>
+                            <p>To get density and vapour fraction as a function of T and one of <code
+                                    class="docutils literal notranslate"><span class="pre">p,chi,h,s</span></code>, i.e.
+                                average density and vapour fraction
+                                in a 5MPa tank at ambient temperature:</p>
+                            <div class="doctest highlight-default notranslate">
+                                <div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span
+                                        class="n">T</span> <span class="o">=</span> <span class="mi">293</span>         <span
+                                        class="c1"># temperature we want</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="mf">50e5</span>      <span
+                                            class="c1"># vapour fraction we want</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span
+                                            class="mi">800</span><span class="p">,</span><span class="n">T</span><span
+                                            class="p">]</span>    <span class="c1"># guess of density, and known temperature</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span
+                                            class="s1">&#39;T&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span
+                                            class="p">]</span> <span class="c1"># T and chi are known</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span
+                                            class="n">T</span><span class="p">,</span><span class="n">p</span><span
+                                            class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">least_squares</span><span
+                                            class="p">(</span><span class="n">nitrous</span><span
+                                            class="o">.</span><span class="n">fun_ps</span><span class="p">,</span><span
+                                            class="n">x0</span><span class="p">,</span><span class="n">args</span><span
+                                            class="o">=</span><span class="p">(</span><span class="n">u</span><span
+                                            class="p">,</span><span class="n">y</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span> <span class="o">=</span> <span
+                                            class="n">properties</span><span class="o">.</span><span
+                                            class="n">x</span><span class="p">[</span><span class="mi">0</span><span
+                                            class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">chi</span> <span class="o">=</span> <span
+                                            class="n">nitrous</span><span class="o">.</span><span class="n">get_properties</span><span
+                                            class="p">(</span><span class="n">rho</span><span class="p">,</span><span
+                                            class="n">T</span><span class="p">)[</span><span
+                                            class="s1">&#39;p&#39;</span><span class="p">]</span>
+</pre>
+                                </div>
+                            </div>
+                        </div>
 
 
+                    </div>
+
+                </div>
+                <footer>
+                    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+                        <a href="_autosummary/octopus.main.html" class="btn btn-neutral float-right"
+                           title="octopus.main" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"
+                                                                                    aria-hidden="true"></span></a>
+                        <a href="installation.html" class="btn btn-neutral float-left" title="Installation"
+                           accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span>
+                            Previous</a>
+                    </div>
+
+                    <hr/>
+
+                    <div role="contentinfo">
+                        <p>
+                            &#169; Copyright 2021, Ellis Collins, Henry Free.
+
+                        </p>
+                    </div>
 
 
+                    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
 
+                    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
 
+                    provided by <a href="https://readthedocs.org">Read the Docs</a>.
 
-<div role="navigation" aria-label="breadcrumbs navigation">
-
-  <ul class="wy-breadcrumbs">
-    
-      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-        
-      <li>Usage</li>
-    
-    
-      <li class="wy-breadcrumbs-aside">
-        
-          
-            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
-          
-        
-      </li>
-    
-  </ul>
-
-  
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-            
-  <div class="section" id="usage">
-<h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h1>
-<p>Octopus was designed primarily to model nitrous oxide (N2O) flow through a rocket injector. To start working with the
-module, a <a class="reference internal" href="index.html#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-class docutils literal notranslate"><span class="pre">octopus.main.Fluid</span></code></a> must be initiated. Throughout this example we will be using nitrous oxide, with a Helmholz
-EOS, and IPA, using <code class="xref py py-mod docutils literal notranslate"><span class="pre">thermo</span></code>’s EOS as it is a better-behaved fluid.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">octopus</span> <span class="kn">import</span> <span class="n">Fluid</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">nitrous_oxide</span> <span class="o">=</span> <span class="n">Fluid</span><span class="p">(</span><span class="s1">&#39;N2O&#39;</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;helmholz&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">isopropanol</span> <span class="o">=</span> <span class="n">Fluid</span><span class="p">(</span><span class="s1">&#39;isopropanol&#39;</span><span class="p">,</span><span class="n">P</span><span class="o">=</span><span class="mf">18e5</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>If using the helmholz EOS, P and T may not be specified (they are not used, as they are thermo-inherited properties,
-however the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter must be specified as “helmholz” as “thermo” is the default. Currently, “helmholz” is
-only available for N2O, but it will not throw an error if you add your own data for another fluid.</p>
-<p>Next, we can define a <a class="reference internal" href="index.html#octopus.main.PropertySource" title="octopus.main.PropertySource"><code class="xref py py-class docutils literal notranslate"><span class="pre">octopus.main.PropertySource</span></code></a> object to represent the initial properties of <code class="docutils literal notranslate"><span class="pre">nitrous_oxide</span></code>. A
-PropertySource is simply an object that has <code class="docutils literal notranslate"><span class="pre">p</span></code> and <code class="docutils literal notranslate"><span class="pre">T</span></code> properties (note: lowercase p), which the <a class="reference internal" href="index.html#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-class docutils literal notranslate"><span class="pre">octopus.main.Manifold</span></code></a>
-class uses to define its inlet conditions. The <a class="reference internal" href="index.html#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-class docutils literal notranslate"><span class="pre">octopus.main.Fluid</span></code></a> object itself is not used, as its properties change
-throughout the system, yet the same object is passed to all classes.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">octopus</span> <span class="kn">import</span> <span class="n">PropertySource</span><span class="p">,</span> <span class="n">Manifold</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">nitrous_manifold</span> <span class="o">=</span> <span class="n">Manifold</span><span class="p">(</span><span class="n">nitrous_oxide</span><span class="p">,</span><span class="n">PropertySource</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">18e5</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="mi">250</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ipa_manifold</span> <span class="o">=</span> <span class="n">Manifold</span><span class="p">(</span><span class="n">isopropanol</span><span class="p">,</span><span class="n">PropertySource</span><span class="p">(</span><span class="n">p</span><span class="o">=</span><span class="mf">18e5</span><span class="p">,</span><span class="n">T</span><span class="o">=</span><span class="mi">293</span><span class="p">))</span>
-</pre></div>
-</div>
-<p>Next we can define :class:<a href="#id1"><span class="problematic" id="id2">`</span></a>octopus.main.Orifice`s that draw fluid from the manifolds defined above, and an Element to
-connect the two.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">octopus</span> <span class="kn">import</span> <span class="n">Orifice</span><span class="p">,</span><span class="n">Element</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">nitrous_orifice</span> <span class="o">=</span> <span class="n">Orifice</span><span class="p">(</span><span class="n">nitrous_manifold</span><span class="p">,</span><span class="n">L</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span><span class="n">D</span><span class="o">=</span><span class="mf">2e-3</span><span class="p">,</span><span class="n">orifice_type</span><span class="o">=</span><span class="n">Orifice</span><span class="o">.</span><span class="n">STRAIGHT</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ipa_orifice</span> <span class="o">=</span> <span class="n">Orifice</span><span class="p">(</span><span class="n">ipa_manifold</span><span class="p">,</span><span class="n">L</span><span class="o">=</span><span class="mf">1e-2</span><span class="p">,</span><span class="n">D</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span><span class="n">orifice_type</span><span class="o">=</span><span class="n">Orifice</span><span class="o">.</span><span class="n">STRAIGHT</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">n2o_ipa_element</span> <span class="o">=</span> <span class="n">Element</span><span class="p">([</span><span class="n">nitrous_orifice</span><span class="p">],[</span><span class="n">ipa_orifice</span><span class="p">])</span> <span class="c1"># in progress</span>
-</pre></div>
-</div>
-<p>If we simply want to use the EOS from the <code class="xref py py-class docutils literal notranslate"><span class="pre">Fluid</span></code> class, there are many methods available if
-<code class="docutils literal notranslate"><span class="pre">method='helmholz'</span></code> is set. The next example will show how to get the saturation properties at 250K. We assume an all-
-liquid state, and never use the bare property methods (<code class="xref py py-meth docutils literal notranslate"><span class="pre">Fluid.p()</span></code>) as they may return invalid results.</p>
-<p>To get one of <code class="docutils literal notranslate"><span class="pre">p,chi,h,s</span></code> as a function of <code class="docutils literal notranslate"><span class="pre">[rho,T]</span></code>:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="mi">250</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span> <span class="o">=</span> <span class="n">nitrous</span><span class="o">.</span><span class="n">rho_l</span><span class="p">(</span><span class="n">T</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">nitrous</span><span class="o">.</span><span class="n">get_properties</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span><span class="n">T</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">properties</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span>
-</pre></div>
-</div>
-<p>To access a property, we can use the properties dictionary to return it using its name as a key. In order to compute rho
-or T, we need a non-linear solver:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">least_squares</span>
-</pre></div>
-</div>
-<p>To get <code class="docutils literal notranslate"><span class="pre">[rho,T]</span></code> as a funtion of two of <code class="docutils literal notranslate"><span class="pre">p,chi,h,s</span></code> (see <a class="reference internal" href="index.html#octopus.main.Fluid.fun_ps" title="octopus.main.Fluid.fun_ps"><code class="xref py py-meth docutils literal notranslate"><span class="pre">octopus.main.Fluid.fun_ps()</span></code></a>):</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">=</span><span class="mf">18e5</span>          <span class="c1"># pressure we want</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">chi</span><span class="o">=</span><span class="mi">0</span>           <span class="c1"># vapour fraction we want (all liquid)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">800</span><span class="p">,</span><span class="mi">250</span><span class="p">]</span>  <span class="c1"># initial values of rho and T near to the answer</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">,</span><span class="s1">&#39;chi&#39;</span><span class="p">]</span> <span class="c1"># names of dependent variables we know</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="p">,</span><span class="n">chi</span><span class="p">]</span>     <span class="c1"># values of dependent variables we know (same order)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="n">nitrous</span><span class="o">.</span><span class="n">fun_ps</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span><span class="p">,</span><span class="n">T</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">x</span>
-</pre></div>
-</div>
-<p>The above code is used in <a class="reference internal" href="index.html#octopus.main.Orifice.m_dot_HEM" title="octopus.main.Orifice.m_dot_HEM"><code class="xref py py-meth docutils literal notranslate"><span class="pre">octopus.main.Orifice.m_dot_HEM()</span></code></a> to calculate the inital and final conditions, and hence
-that is a good example to look to for further context.</p>
-</div>
-<div class="section" id="does-not-work-shown-as-a-todo">
-<h1>DOES NOT WORK - SHOWN AS A TODO<a class="headerlink" href="#does-not-work-shown-as-a-todo" title="Permalink to this headline">¶</a></h1>
-<p>To get density and vapour fraction as a function of T and one of <code class="docutils literal notranslate"><span class="pre">p,chi,h,s</span></code>, i.e. average density and vapour fraction
-in a 5MPa tank at ambient temperature:</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">T</span> <span class="o">=</span> <span class="mi">293</span>         <span class="c1"># temperature we want</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="mf">50e5</span>      <span class="c1"># vapour fraction we want</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">800</span><span class="p">,</span><span class="n">T</span><span class="p">]</span>    <span class="c1"># guess of density, and known temperature</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">u</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;T&#39;</span><span class="p">,</span><span class="s1">&#39;p&#39;</span><span class="p">]</span> <span class="c1"># T and chi are known</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">T</span><span class="p">,</span><span class="n">p</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">properties</span> <span class="o">=</span> <span class="n">least_squares</span><span class="p">(</span><span class="n">nitrous</span><span class="o">.</span><span class="n">fun_ps</span><span class="p">,</span><span class="n">x0</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">u</span><span class="p">,</span><span class="n">y</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">rho</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">chi</span> <span class="o">=</span> <span class="n">nitrous</span><span class="o">.</span><span class="n">get_properties</span><span class="p">(</span><span class="n">rho</span><span class="p">,</span><span class="n">T</span><span class="p">)[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span>
-</pre></div>
-</div>
-</div>
-
-
-           </div>
-           
-          </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="_autosummary/octopus.main.html" class="btn btn-neutral float-right" title="octopus.main" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Ellis Collins, Henry Free.
-
-    </p>
-  </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
-
-</footer>
+                </footer>
+            </div>
         </div>
-      </div>
 
     </section>
 
-  </div>
-  
+</div>
 
-  <script type="text/javascript">
+
+<script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
 
-  
-  
-    
-   
+</script>
+
 
 </body>
 </html>

@@ -24,7 +24,7 @@ from .utils import derivative
 
 
 class Fluid:
-    """Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS."""
+    """Represents a fluid with a choice of Helmholz or thermo EOS methods"""
 
     def __init__(self, ID: str, T: float = 298.15, P: float = 101325, method='thermo'):
         """Initiate a Fluid instance.

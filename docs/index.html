@@ -228,7 +228,7 @@ required coefficients to use it with nitrous oxide. 19 other chemicals are also 
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluid</span></code></a>(ID, T, P[, method])</p></td>
-<td><p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p></td>
+<td><p>Represents a fluid with a choice of Helmholz or thermo EOS methods</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.PropertySource" title="octopus.main.PropertySource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PropertySource</span></code></a>(p, T)</p></td>
 <td><p>An object to provide a constant pressure and temperature as a parent object for a <a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-class docutils literal notranslate"><span class="pre">Manifold</span></code></a>.</p></td>
@@ -247,8 +247,8 @@ required coefficients to use it with nitrous oxide. 19 other chemicals are also 
 <dl class="py class">
 <dt id="octopus.main.Fluid">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Fluid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">298.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">101325</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'thermo'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">thermo.chemical.Chemical</span></code></p>
-<p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a fluid with a choice of Helmholz or thermo EOS methods</p>
 <p>Initiate a Fluid instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
