@@ -311,8 +311,6 @@ def orifice_confirm():
     plate_select_dropdown.config(state="disabled")
     manifold_select_dropdown.config(state="disabled")
 
-    """orifice_add_single.config(state="normal")
-    orifice_add_series.config(state="normal")"""
     orifice_count_entry.config(state="normal")
 
     orifice_config_edit.config(state="normal")
@@ -345,8 +343,6 @@ def orifice_edit():
     plate_select_dropdown.config(state="normal")
     manifold_select_dropdown.config(state="normal")
 
-    """orifice_add_single.config(state="disabled")
-    orifice_add_series.config(state="disabled")"""
     orifice_count_entry.config(state="disabled")
 
     orifice_config_confirm.config(state="normal")
@@ -389,10 +385,6 @@ def orifice_preview_update(*args):
     if radius < 0:
         return None
 
-    # Polar to Cartesian for the first orifice
-    x = np.sin(angle*np.pi/180)*radius
-    y = np.cos(angle*np.pi/180)*radius
-
     # Get the plate we're working with
     plate_id = int(selected_plate.get())
     plate = plates[plate_id]
@@ -400,7 +392,18 @@ def orifice_preview_update(*args):
     # And the manifold
     manifold_id = int(selected_manifold.get())
     manifold = manifolds[manifold_id]
-    
+
+    # Find the mm per pixel
+    mmpp = 1000*plate.diameter/plate.diameter_px
+    # Find the orifice diameter in pixels
+    odpx = od/mmpp
+
+    # Polar to Cartesian for the first orifice
+    # and convert from mm radius to pixels
+    x = np.sin(angle*np.pi/180)*radius/mmpp
+    y = np.cos(angle*np.pi/180)*radius/mmpp
+
+   
     # For IPA (fuel), set red preview colour, for N2O (ox), set blue
     # else leave it white
     if manifold.fluid.ID == "nitrous oxide":
@@ -414,11 +417,7 @@ def orifice_preview_update(*args):
     # Show the preview
     plate.face.itemconfigure(plate.preview, state="normal")
 
-    # Find the mm per pixel
-    mmpp = 1000*plate.diameter/plate.diameter_px
-    # Find the orifice diameter in pixels
-    odpx = od/mmpp
-    
+   
     # Update the preview, with appropriately scaled size
     plate.face.coords(plate.preview, plate.x_centre+x+(odpx/2),\
                       plate.y_centre-y+(odpx/2), plate.x_centre+x-(odpx/2),\
