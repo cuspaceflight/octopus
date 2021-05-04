@@ -263,7 +263,7 @@ def method_update():
 
 # Disable all the orifice configuration options once the settings are
 # confirmed. This makes it easier to draw the plate preview.
-# This also enables all the orifice creation options
+# This also enables all the orifice creation options, updates preview
 def orifice_confirm():
     global plate_select_dropdown, manifold_select_dropdown
     # Slightly clumsy error handling
@@ -320,6 +320,8 @@ def orifice_confirm():
     tab_parent.tab(0, state="disabled")
     tab_parent.tab(1, state="disabled")
     tab_parent.tab(3, state="disabled")
+
+    orifice_preview_update()
 
 
 # Enable all the orifice configuration options again if the user
