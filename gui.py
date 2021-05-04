@@ -10,6 +10,7 @@ Need to check on changing coords from int to float
 
 from octopus import Fluid, Orifice, PropertySource, Manifold, Element
 import tkinter as tk
+import numpy as np
 from tkinter import ttk
 from tkinter import messagebox
 
@@ -308,14 +309,15 @@ def orifice_confirm():
     plate_select_dropdown.config(state="disabled")
     manifold_select_dropdown.config(state="disabled")
 
-    orifice_add_single.config(state="normal")
-    orifice_add_series.config(state="normal")
+    """orifice_add_single.config(state="normal")
+    orifice_add_series.config(state="normal")"""
+    orifice_count_entry.config(state="normal")
 
     orifice_config_edit.config(state="normal")
     orifice_config_confirm.config(state="disabled")
 
-    orifice_position_xentry.config(state="normal")
-    orifice_position_yentry.config(state="normal")
+    new_orifice_aentry.config(state="normal")
+    new_orifice_rentry.config(state="normal")
 
     tab_parent.tab(0, state="disabled")
     tab_parent.tab(1, state="disabled")
@@ -341,14 +343,15 @@ def orifice_edit():
     plate_select_dropdown.config(state="normal")
     manifold_select_dropdown.config(state="normal")
 
-    orifice_add_single.config(state="disabled")
-    orifice_add_series.config(state="disabled")
+    """orifice_add_single.config(state="disabled")
+    orifice_add_series.config(state="disabled")"""
+    orifice_count_entry.config(state="disabled")
 
     orifice_config_confirm.config(state="normal")
     orifice_config_edit.config(state="disabled")
 
-    orifice_position_xentry.config(state="disabled")
-    orifice_position_yentry.config(state="disabled")
+    new_orifice_aentry.config(state="disabled")
+    new_orifice_rentry.config(state="disabled")
 
     # Find the old plate ID, hide its preview
     plate = plates[selected_plate.get()]
@@ -376,12 +379,18 @@ def single_series_update():
 # the canvas preview.
 def orifice_preview_update(*args):
     try:
-        x = float(new_orifice_x.get())
-        y = float(new_orifice_y.get())
+        angle = float(new_orifice_ang.get())
+        radius = float(new_orifice_r.get())
         od = float(orifice_diameter_entry.get())
+        x = np.sin(angle)*radius
+        y = np.cos(angle)*radius
     except Exception:
         return None
-    
+
+    # Polar to Cartesian for the first orifice
+    x = np.sin(angle*np.pi/180)*radius
+    y = np.cos(angle*np.pi/180)*radius
+
     # Get the plate we're working with
     plate_id = int(selected_plate.get())
     plate = plates[plate_id]
@@ -616,6 +625,7 @@ orifice_config_edit.config(state="disabled")
 orifice_create_frame = tk.Frame(master=tab_orifices, padx=5, pady=5, relief="sunken", bd=2)
 orifice_create_frame.grid(row=6, column=0, sticky="w")
 
+"""
 # Frame for choosing whether to add an orifice as a series or on its own
 orifice_add_type = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
 orifice_add_type.grid(row=0, column=0, sticky="w")
@@ -639,40 +649,65 @@ orifice_add_series.grid(row=1, column=1, sticky="w")
 single_series_update()
 orifice_add_single.config(state="disabled")
 orifice_add_series.config(state="disabled")
+"""
+
+# Frame for choosing number of orifices to add
+orifice_count_frame = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
+orifice_count_frame.grid(row=0, column=0, sticky="w")
+
+# Label for orifice count
+orifice_count_label = tk.Label(master=orifice_count_frame, text="Number of new orifices:")
+orifice_count_label.grid(row=0, column=0, sticky="w")
+
+# Entry field for orifice count
+orifice_new_count = tk.StringVar()
+orifice_count_entry = tk.Entry(master=orifice_count_frame, textvariable=orifice_new_count, width=5)
+orifice_count_entry.grid(row=0, column=1, sticky="w")
+# Disable initially
+orifice_count_entry.config(state="disabled")
+
 
 # Frame for orifice position (for first in series if a series is elected)
 orifice_position_frame = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
 orifice_position_frame.grid(row=7, column=0, sticky="w")
 
 # Label for orifice position description
-orifice_position_label = tk.Label(master=orifice_position_frame, text="Position relative to plate centre, mm:")
+orifice_position_label = tk.Label(master=orifice_position_frame, text="Polar position of first orifice:")
 orifice_position_label.grid(row=0, column=0, sticky="w")
 
-# x position entry field label
-orifice_position_xlabel = tk.Label(master=orifice_position_frame, text="x:")
-orifice_position_xlabel.grid(row=0, column=1, sticky="w")
+# angle entry field label
+orifice_position_alabel = tk.Label(master=orifice_position_frame, text="Angle:")
+orifice_position_alabel.grid(row=0, column=1, sticky="w")
 
-# x position entry field
+# angle entry field
 # Use a DoubleVar so we know when this is updated
-new_orifice_x = tk.DoubleVar()
-new_orifice_x.trace_add("write", orifice_preview_update)
-orifice_position_xentry = tk.Entry(master=orifice_position_frame, textvariable=new_orifice_x, width=5)
-orifice_position_xentry.grid(row=0, column=2, sticky="w")
+new_orifice_ang = tk.DoubleVar()
+new_orifice_ang.trace_add("write", orifice_preview_update)
+new_orifice_aentry = tk.Entry(master=orifice_position_frame, textvariable=new_orifice_ang, width=5)
+new_orifice_aentry.grid(row=0, column=2, sticky="w")
 
-# y position entry field label
-orifice_position_ylabel = tk.Label(master=orifice_position_frame, text="y:")
-orifice_position_ylabel.grid(row=0, column=3, sticky="w")
+# Angle entry unit label
+orifice_aentry_unit = tk.Label(master=orifice_position_frame, text=u"\N{DEGREE SIGN}")
+orifice_aentry_unit.grid(row=0, column=3, sticky="w")
 
-# y position entry field
+# Radius entry field label
+orifice_position_rrlabel = tk.Label(master=orifice_position_frame, text="Radius:")
+orifice_position_rrlabel.grid(row=0, column=4, sticky="w")
+
+# Radius entry field
 # Use a DoubleVar so we know when this is updated
-new_orifice_y = tk.DoubleVar()
-new_orifice_y.trace("w", orifice_preview_update)
-orifice_position_yentry = tk.Entry(master=orifice_position_frame, textvariable=new_orifice_y, width=5)
-orifice_position_yentry.grid(row=0, column=4, sticky="w")
+new_orifice_r = tk.DoubleVar()
+new_orifice_r.trace("w", orifice_preview_update)
+new_orifice_rentry = tk.Entry(master=orifice_position_frame, textvariable=new_orifice_r, width=5)
+new_orifice_rentry.grid(row=0, column=5, sticky="w")
 
-# Setup default states
-orifice_position_xentry.config(state="disabled")
-orifice_position_yentry.config(state="disabled")
+# Radius entry unit label
+orifice_rentry_unit = tk.Label(master=orifice_position_frame, text="mm")
+orifice_rentry_unit.grid(row=0, column=6, sticky="w")
+
+# Set up default states
+new_orifice_aentry.config(state="disabled")
+new_orifice_rentry.config(state="disabled")
 
 # Details of the second tab, manifold creation
 # Frame for title, possibly description in future
