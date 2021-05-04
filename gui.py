@@ -27,6 +27,7 @@ last_manifold_id = 0
 manifold_id_list = []
 manifolds = [0] # Initial 0 is so plates[plate_id] behaves intuitively
 manifold_mdot_list = [0] # Initial 0 is so manifold_mdot_list[manifold_id] behaves intuitively
+preview_series = []
 
 class Plate:
     """Class for representing the faceplate of an injector"""
@@ -103,12 +104,13 @@ class Plate:
         self.face_outline = self.face.create_oval(1, 1, self.diameter_px+1, self.diameter_px+1, fill="black")
         self.x_centre, self.y_centre = self.radius_px+1, self.radius_px+1
 
-        # Sneakily create a preview at the centre so it can be updated later, without creating a new object
+        """# Sneakily create a preview at the centre so it can be updated later, without creating a new object
         # hence there is only ever one preview and we don't need to track if one has been created
         # (not sure how best to do this for a series)
         self.preview = self.face.create_oval(self.x_centre, self.y_centre, \
                                              self.x_centre, self.y_centre, fill="white")
         self.face.itemconfigure(self.preview, state="hidden")
+        """
         self.face.grid()
         
         self.window.mainloop()
@@ -351,35 +353,28 @@ def orifice_edit():
     new_orifice_aentry.config(state="disabled")
     new_orifice_rentry.config(state="disabled")
 
-    # Find the old plate ID, hide its preview
+    # Find the old plate ID, delete its preview
     plate = plates[selected_plate.get()]
-    plate.face.itemconfigure(plate.preview, state="hidden")
+    for preview in preview_series:
+        plate.face.delete(preview)
 
     tab_parent.tab(0, state="normal")
     tab_parent.tab(1, state="normal")
     tab_parent.tab(3, state="normal")
 
 
-# Update menus for either a single orifice or series of orifices
-# in the orifice tab when a radio button is clicked
-def single_series_update():
-    global Oseries
-    Oseries = orifice_single_series.get()
-
-    if Oseries == "single":
-        pass
-
-    if Oseries == "series":
-        pass
-
-
 # Whenever the x position field is updated, try and update
 # the canvas preview.
 def orifice_preview_update(*args):
+    global preview_series
+
     try:
         angle = float(new_orifice_ang.get())
         radius = float(new_orifice_r.get())
         od = float(orifice_diameter_entry.get())
+        count = int(orifice_new_count.get())
+        if count <=0:
+            return None
     except Exception:
         return None
     if radius < 0:
@@ -392,6 +387,10 @@ def orifice_preview_update(*args):
     # And the manifold
     manifold_id = int(selected_manifold.get())
     manifold = manifolds[manifold_id]
+
+    # Erase old previews
+    for preview in preview_series:
+        plate.face.delete(preview)
 
     # Find the mm per pixel
     mmpp = 1000*plate.diameter/plate.diameter_px
@@ -407,21 +406,23 @@ def orifice_preview_update(*args):
     # For IPA (fuel), set red preview colour, for N2O (ox), set blue
     # else leave it white
     if manifold.fluid.ID == "nitrous oxide":
-        plate.face.itemconfig(plate.preview, fill="blue", state="normal")
+        colour = "blue"
     elif manifold.fluid.ID == "isopropyl alcohol":
-        plate.face.itemconfig(plate.preview, fill="red", state="normal")
+        colour = "red"
     else:
-        plate.face.itemconfig(plate.preview, fill="white", state="normal")
+        colour = "white"
 
-
-    # Show the preview
-    plate.face.itemconfigure(plate.preview, state="normal")
-
-   
-    # Update the preview, with appropriately scaled size
-    plate.face.coords(plate.preview, plate.x_centre+x+(odpx/2),\
-                      plate.y_centre-y+(odpx/2), plate.x_centre+x-(odpx/2),\
-                      plate.y_centre-y-(odpx/2))
+    preview_series = []
+    for i in range(count+1):
+        angle_new = angle + i*360/count # Adjust angle
+        x_new = np.sin(angle_new*np.pi/180)*radius/mmpp
+        y_new = np.cos(angle_new*np.pi/180)*radius/mmpp
+        # New Cartesian position from new angle
+        preview_series.append(plate.face.create_oval(plate.x_centre+x_new+(odpx/2),\
+                                                        plate.y_centre-y_new+(odpx/2),\
+                                                        plate.x_centre+x_new-(odpx/2),\
+                                                        plate.y_centre-y_new-(odpx/2),
+                                                        fill=colour))
     plate.face.grid()
 
 
@@ -637,12 +638,15 @@ orifice_count_label = tk.Label(master=orifice_count_frame, text="Number of new o
 orifice_count_label.grid(row=0, column=0, sticky="w")
 
 # Entry field for orifice count
-orifice_new_count = tk.StringVar()
+orifice_new_count = tk.IntVar()
+# Set the above to 1 by default
+orifice_new_count.set(1)
+
+orifice_new_count.trace_add("write", orifice_preview_update)
 orifice_count_entry = tk.Entry(master=orifice_count_frame, textvariable=orifice_new_count, width=5)
 orifice_count_entry.grid(row=0, column=1, sticky="w")
 # Disable initially
 orifice_count_entry.config(state="disabled")
-
 
 # Frame for orifice position (for first in series if a series is elected)
 orifice_position_frame = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
