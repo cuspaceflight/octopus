@@ -24,6 +24,7 @@ plate_id_list = []
 plates = [0] # Initial 0 is so plates[plate_id] behaves intuitively
 last_manifold_id = 0
 manifold_id_list = []
+manifolds = [0] # Initial 0 is so plates[plate_id] behaves intuitively
 manifold_mdot_list = [0] # Initial 0 is so manifold_mdot_list[manifold_id] behaves intuitively
 
 class Plate:
@@ -180,6 +181,7 @@ def new_manifold():
     # Create the fluid and manifold objects
     fluid = Fluid(ID=fluid_id, T=T, P=p, method=method_id)
     manifold = Manifold(fluid, PropertySource(p=p, T=T))
+    manifolds.append(manifold)
     manifold_mdot_list.append(0)
 
     # Create the window for this manifold
@@ -215,7 +217,7 @@ def model_update():
 # If the type is not Waxman, disable that mass flow model
 # If the type is Waxman, select that as the mass flow model and disable
 # the other mass flow models. At some point, should add the other models for
-# a Waxman injector, using the throat as the diameter.
+# a Waxman injector, using the throat as the diameter
 def type_update():
     global Otype, Omodel
     Otype = orifice_type.get()
@@ -261,7 +263,7 @@ def method_update():
 
 # Disable all the orifice configuration options once the settings are
 # confirmed. This makes it easier to draw the plate preview.
-# This also enables all the orifice creation options.
+# This also enables all the orifice creation options
 def orifice_confirm():
     global plate_select_dropdown, manifold_select_dropdown
     # Slightly clumsy error handling
@@ -322,7 +324,7 @@ def orifice_confirm():
 
 # Enable all the orifice configuration options again if the user
 # wants to abort creating a new orifice. This disables all the
-# orifice creation options again, and clears the preview.
+# orifice creation options again, and clears the preview
 def orifice_edit():
     global plate_select_dropdown, manifold_select_dropdown
 
@@ -379,8 +381,22 @@ def orifice_preview_update(*args):
         return None
     
     # Get the plate we're working with
-    plate_id = selected_plate.get()
+    plate_id = int(selected_plate.get())
     plate = plates[plate_id]
+
+    # And the manifold
+    manifold_id = int(selected_manifold.get())
+    manifold = manifolds[manifold_id]
+    
+    # For IPA (fuel), set red preview colour, for N2O (ox), set blue
+    # else leave it white
+    if manifold.fluid.ID == "nitrous oxide":
+        plate.face.itemconfig(plate.preview, fill="blue", state="normal")
+    elif manifold.fluid.ID == "isopropyl alcohol":
+        plate.face.itemconfig(plate.preview, fill="red", state="normal")
+    else:
+        plate.face.itemconfig(plate.preview, fill="white", state="normal")
+
 
     # Show the preview
     plate.face.itemconfigure(plate.preview, state="normal")
