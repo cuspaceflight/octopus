@@ -31,23 +31,25 @@ manifold_mdot_list = [0] # Initial 0 is so manifold_mdot_list[manifold_id] behav
 class Plate:
     """Class for representing the faceplate of an injector"""
 
-    def __init__(self, id: int, diameter: float, pc: float, diameter_px: int):
+    def __init__(self, id: int, radius: float, pc: float, radius_px: int):
         """Initialise :class:`Plate` object.
         
         :param id: Plate ID (int)
-        :param diameter: Plate diameter (m)
+        :param radius: Plate radius (m)
         :param pc: Combustion chamber pressure (Pa)
-        :param diameter_x: Injector plate display diameter (pixels)
+        :param radius_px: Injector plate display radius (pixels)
         
         """
         self.id = id
-        self.diameter = diameter
+        self.radius = radius
+        self.radius_px = radius_px
+        self.diameter = radius*2
+        self.diameter_px = radius_px*2
         self.pc = pc
         self.orifices = {"Z": []}
         self.orifice_count = 0
         self.x_centre = None
         self.y_centre = None
-        self.diameter_px = diameter_px
 
     def add_orifice(self, orifice: Orifice, x: int, y: int, arrayID="Z"):
         """Add a singular :class:'Orifice' object to the plate.
@@ -87,7 +89,7 @@ class Plate:
 
         # Label for the parameters
         self.plate_parameters = tk.Label(master=self.plate_top_frame, height=3, text= \
-            f"Plate ID: {self.id}\n Plate diameter: {self.diameter} m\n"
+            f"Plate ID: {self.id}\n Plate radius: {self.radius} m\n"
             f"Chamber pressure: {self.pc/1E5} bar")
         self.plate_parameters.grid(row=0, column=0)
 
@@ -97,9 +99,9 @@ class Plate:
 
         # Create the canvas for representing the plate and its orifices
         self.face = tk.Canvas(master=self.face_frame, bg="white", \
-                              height=self.diameter_px+10, width=self.diameter_px+10)
-        self.face_outline = self.face.create_oval(6, 6, self.diameter_px+6, self.diameter_px+6, fill="black")
-        self.x_centre, self.y_centre = (self.diameter_px+10)/2, (self.diameter_px+10)/2
+                              height=self.diameter_px+3, width=self.diameter_px+3)
+        self.face_outline = self.face.create_oval(1, 1, self.diameter_px+1, self.diameter_px+1, fill="black")
+        self.x_centre, self.y_centre = self.radius_px+1, self.radius_px+1
 
         # Sneakily create a preview at the centre so it can be updated later, without creating a new object
         # hence there is only ever one preview and we don't need to track if one has been created
@@ -117,11 +119,11 @@ class Plate:
 def new_plate():
     # Attempt to retrieve the needed parameters
     try:
-        diameter = float(diameter_entry.get())
+        radius = float(radius_entry.get())
         pc = float(chamber_pressure_entry.get())
-        diameter_px = float(canvas_size_entry.get())
-        if diameter <= 0 or pc <= 0:
-            tk.messagebox.showerror("New plate error", "Plate diameter and chamber pressure must be greater than zero")
+        radius_px = int(canvas_size_entry.get())
+        if radius <= 0 or pc <= 0 or radius_px <=0:
+            tk.messagebox.showerror("New plate error", "Plate radius and chamber pressure must be greater than zero")
             return None
     except Exception:
         tk.messagebox.showerror("New plate error", "Invalid plate parameters")
@@ -142,7 +144,7 @@ def new_plate():
     # Create the plate object, append it to the list
     # for access by indexing with plate id
     # (should change this to use a dict)
-    plates.append(Plate(last_plate_id, diameter, pc*1E5, diameter_px))
+    plates.append(Plate(last_plate_id, radius, pc*1E5, radius_px))
 
     # Create and display the plate's window
     # This is handled within the object, so other methods can reference
@@ -382,9 +384,9 @@ def orifice_preview_update(*args):
         angle = float(new_orifice_ang.get())
         radius = float(new_orifice_r.get())
         od = float(orifice_diameter_entry.get())
-        x = np.sin(angle)*radius
-        y = np.cos(angle)*radius
     except Exception:
+        return None
+    if radius < 0:
         return None
 
     # Polar to Cartesian for the first orifice
@@ -418,7 +420,9 @@ def orifice_preview_update(*args):
     odpx = od/mmpp
     
     # Update the preview, with appropriately scaled size
-    plate.face.coords(plate.preview, plate.x_centre+x, plate.y_centre-y, plate.x_centre+x-odpx, plate.y_centre-y-odpx)
+    plate.face.coords(plate.preview, plate.x_centre+x+(odpx/2),\
+                      plate.y_centre-y+(odpx/2), plate.x_centre+x-(odpx/2),\
+                      plate.y_centre-y-(odpx/2))
     plate.face.grid()
 
 
@@ -453,21 +457,21 @@ title_plate = tk.Label(master=frame_plate_top, text="Create a blank injector pla
 title_plate.config(font=(96))
 title_plate.grid(row=0, column=0)
 
-# Frame for plate diameter entry field and associated labels
-manage_diameter_frame = tk.Frame(master=tab_plate, width=50, height=50, padx=5, pady=5)
-manage_diameter_frame.grid(row=2, column=0, sticky="w")
+# Frame for plate radius entry field and associated labels
+manage_radius_frame = tk.Frame(master=tab_plate, width=50, height=50, padx=5, pady=5)
+manage_radius_frame.grid(row=2, column=0, sticky="w")
 
-# Plate diameter entry field label
-diameter_entry_label = tk.Label(master=manage_diameter_frame, text="Plate diameter:")
-diameter_entry_label.grid(row=0, column=0, sticky="w")
+# Plate radius entry field label
+radius_entry_label = tk.Label(master=manage_radius_frame, text="Plate radius:")
+radius_entry_label.grid(row=0, column=0, sticky="w")
 
-# Plate diameter entry field
-diameter_entry = tk.Entry(master=manage_diameter_frame, width=5)
-diameter_entry.grid(row=0, column=1, sticky="w")
+# Plate radius entry field
+radius_entry = tk.Entry(master=manage_radius_frame, width=5)
+radius_entry.grid(row=0, column=1, sticky="w")
 
-# Label for plate diameter unit
-diameter_entry_unit = tk.Label(master=manage_diameter_frame, text="m")
-diameter_entry_unit.grid(row=0, column=2, sticky="w")
+# Label for plate radius unit
+radius_entry_unit = tk.Label(master=manage_radius_frame, text="m")
+radius_entry_unit.grid(row=0, column=2, sticky="w")
 
 # Frame for combustion chamber pressure entry field and associated labels
 chamber_pressure_frame = tk.Frame(master=tab_plate, width=50, height=50, padx=5, pady=5)
@@ -490,7 +494,7 @@ canvas_size_frame = tk.Frame(master=tab_plate, width=50, height=50, padx=5, pady
 canvas_size_frame.grid(row=4, column=0, sticky="w")
 
 # Canvas size label
-canvas_size_label = tk.Label(master=canvas_size_frame, text="Injector display diameter:")
+canvas_size_label = tk.Label(master=canvas_size_frame, text="Injector display radius:")
 canvas_size_label.grid(row=0, column=0, sticky="w")
 
 # Canvas size entry field
@@ -624,32 +628,6 @@ orifice_config_edit.config(state="disabled")
 # Frame for orifice creation options
 orifice_create_frame = tk.Frame(master=tab_orifices, padx=5, pady=5, relief="sunken", bd=2)
 orifice_create_frame.grid(row=6, column=0, sticky="w")
-
-"""
-# Frame for choosing whether to add an orifice as a series or on its own
-orifice_add_type = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
-orifice_add_type.grid(row=0, column=0, sticky="w")
-
-# Label for single / series orifice
-orifice_single_label = tk.Label(master=orifice_add_type, text="Orifices to add:")
-orifice_single_label.grid(row=0, column=0, sticky="w")
-
-# Radio buttons for new orifice individual / series selection
-orifice_single_series = tk.StringVar(value="single")
-orifice_add_single = tk.Radiobutton(master=orifice_add_type, variable=orifice_single_series,\
-                                   text="Single orifice",\
-                                   value="single", command=single_series_update)
-orifice_add_single.grid(row=1, column=0, sticky="w")
-
-orifice_add_series = tk.Radiobutton(master=orifice_add_type, variable=orifice_single_series,\
-                                   text="Series of orifices",\
-                                   value="pattern", command=single_series_update)
-orifice_add_series.grid(row=1, column=1, sticky="w")
-# Call these to setup default states / values
-single_series_update()
-orifice_add_single.config(state="disabled")
-orifice_add_series.config(state="disabled")
-"""
 
 # Frame for choosing number of orifices to add
 orifice_count_frame = tk.Frame(master=orifice_create_frame, padx=5, pady=5)
