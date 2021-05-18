@@ -1,33 +1,46 @@
-import matplotlib.pyplot as plt
-from scipy.optimize import least_squares
+import numpy as np
+from matplotlib import pyplot as plt
 
-from octopus import Fluid, Orifice, PropertySource, Manifold, Element
+from octopus import Fluid, Orifice, Manifold, PropertySource
 
 
 def main():
-    nitrous = Fluid('nitrous oxide', P=20e5, method='helmholz')
-    isopropanol = Fluid('isopropanol', P=18e5, T=400, method='thermo')
-    nitrous_manifold = Manifold(nitrous, PropertySource(p=18e5, T=250))
-    ipa_manifold = Manifold(isopropanol, PropertySource(p=18e5, T=400))
-    nitrous_orifice = Orifice(nitrous_manifold, 1e-2, 2e-3)
-    ipa_orifice = Orifice(ipa_manifold, 1e-2, 1e-3)
-    element = Element([nitrous_orifice, nitrous_orifice], [ipa_orifice, ipa_orifice])
+    nitrous = Fluid('N2O')
+    ps = PropertySource(p=15e5, T=250)
+    ox_manifold = Manifold(fluid=nitrous.name, parent=ps)
+    ox_orifice = Orifice(manifold=ox_manifold, L=1e-2, D=1e-3, orifice_type=Orifice.STRAIGHT, Cd=0.7)
 
-    T = 293
-    p = 55e5
+    P1 = np.linspace(1e5, 15e5, 1000)
+    P0 = np.linspace(15e5, 20e5, 10)
+    M = []
 
-    x0 = [600, T]
+    for p0 in P0:
+        ps._p = p0
+        Mrow = []
+        for p1 in P1:
+            Mrow.append(ox_orifice.m_dot(P_cc=p1))
+        M.append(Mrow)
 
-    u = ['chi', 'p']
-    y = [0, p]
+    T = np.linspace(150, 310, 1000)
 
-    properties = least_squares(nitrous.fun_ps, x0, args=(u, y))
-    rho, T = properties.x
+    rhol = nitrous.rhol(T)
+    rhog = nitrous.rhog(T)
+    psat = nitrous.psat(T)
 
-    p = nitrous.get_properties(rho, T)['p']
-    chi = nitrous.get_properties(rho, T)['chi']
+    plt.figure(1)
+    plt.title('Dyer mass flow, increasing supercharge ^')
+    [plt.plot(P1, m, color='black') for m, p0 in zip(M, P0)] #label=f'p0: {p0}'
+    plt.legend()
+    '''
+    plt.figure(2)
+    plt.title('Density')
+    plt.plot(T, rhol, color='blue')
+    plt.plot(T, rhog, color='red')
 
-    print(rho, p, T, chi)
+    plt.figure(3)
+    plt.title('Pressure')
+    plt.plot(T, psat, color='blue')
+    '''
     plt.show()
 
 
