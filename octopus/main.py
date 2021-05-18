@@ -205,8 +205,7 @@ class Orifice:
         fluid = self.manifold.fluid
 
         pv = PropsSI('P', 'Q', 0.5, 'T', T0, fluid)
-        if p1>pv:
-            return self.m_dot_SPI(P_cc)
+
         kappa = np.sqrt((p0 - p1) / (pv - p1))
         W = 1 / (1 + kappa)
         if not (self.m_dot_SPI(P_cc) and self.m_dot_HEM(P_cc)):
