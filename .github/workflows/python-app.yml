@@ -31,6 +31,6 @@ jobs:
     - name: Run examples
       run: |
         python examples/dev.py
-        python examples/propert_charts.py
+        python examples/property_charts.py
 
 
