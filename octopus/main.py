@@ -30,6 +30,18 @@ class Fluid:
     def psat(self,T:Iterable):
         return [PropsSI('P', 'Q', 0.5, 'T', t, self.name) if (182.23 < t < 309.52) else None for t in T]
 
+    def hl(self, T: Iterable):
+        return [PropsSI('H', 'T', t, 'Q', 0, self.name) if (182.23 < t < 309.52) else None for t in T]
+
+    def hg(self, T: Iterable):
+        return [PropsSI('H', 'T', t, 'Q', 1, self.name) if (182.23 < t < 309.52) else None for t in T]
+
+    def sl(self, T: Iterable):
+        return [PropsSI('S', 'T', t, 'Q', 0, self.name) if (182.23 < t < 309.52) else None for t in T]
+
+    def sg(self, T: Iterable):
+        return [PropsSI('S', 'T', t, 'Q', 1, self.name) if (182.23 < t < 309.52) else None for t in T]
+
 
 class PropertySource:
     """An object to provide a constant pressure and temperature as a parent object for a :class:`Manifold`.
@@ -193,7 +205,8 @@ class Orifice:
         fluid = self.manifold.fluid
 
         pv = PropsSI('P', 'Q', 0.5, 'T', T0, fluid)
-
+        if p1>pv:
+            return self.m_dot_SPI(P_cc)
         kappa = np.sqrt((p0 - p1) / (pv - p1))
         W = 1 / (1 + kappa)
         if not (self.m_dot_SPI(P_cc) and self.m_dot_HEM(P_cc)):
