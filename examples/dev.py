@@ -10,7 +10,7 @@ def main():
     ox_manifold = Manifold(fluid=nitrous.name, parent=ps)
     ox_orifice = Orifice(manifold=ox_manifold, L=1e-2, D=1e-3, orifice_type=Orifice.STRAIGHT, Cd=0.7)
 
-    T = 298  # K
+    T = 298-17  # K
     psat = nitrous.psat([T])[0]
     ps._T = T
 
