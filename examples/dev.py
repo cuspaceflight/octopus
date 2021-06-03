@@ -7,15 +7,18 @@ from octopus import Fluid, Orifice, Manifold, PropertySource
 def main():
     nitrous = Fluid('N2O')
     ps = PropertySource(p=15e5, T=250)
-    ox_manifold = Manifold(fluid=nitrous.name, parent=ps)
+    ox_manifold = Manifold(fluid=nitrous, parent=ps)
     ox_orifice = Orifice(manifold=ox_manifold, L=1e-2, D=1e-3, orifice_type=Orifice.STRAIGHT, Cd=0.7)
 
-    T = 298-17  # K
+    T = 298 - 17  # K
     psat = nitrous.psat([T])[0]
     ps._T = T
 
-    p0 = np.linspace(psat + 100, psat + 3e5, 20)[::-1]
-    P_cc = np.linspace(psat - 5e5, psat - 100, 1000)
+    nitrous.set_state(D=200, T=250)
+    print(nitrous.state.p(), nitrous.state.Q())
+
+    p0 = np.linspace(psat + 100, psat + 3e5, 5)[::-1]
+    P_cc = np.linspace(psat - 5e5, psat - 100, 100)
 
     M = []
     for s in p0:

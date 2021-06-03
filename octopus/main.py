@@ -4,6 +4,7 @@
 from functools import lru_cache
 from typing import Sequence, Iterable
 
+import CoolProp.CoolProp as CP
 import numpy as np
 from CoolProp import AbstractState
 from CoolProp.CoolProp import PropsSI
@@ -20,27 +21,90 @@ class Fluid:
 
         self.name = name
         self.state = AbstractState('HEOS', name)
+        self.Tmax = self.state.Tmax()
+        self.Tmin = self.state.Tmin()
+        self.pmax = self.state.pmax()
+        self.pmin = 0
+
+    def set_state(self, D=None, P=None, T=None, Q=None, H=None, S=None, U=None):
+        if sum([bool(D), bool(P), bool(T), bool(Q), bool(H), bool(S), bool(U)]) != 2:
+            raise ValueError('Must have exactly 2 arguments')
+        args = []
+        if D:
+            if P:
+                args = CP.DmassP_INPUTS, D, P
+            elif T:
+                args = CP.DmassT_INPUTS, D, T
+            elif Q:
+                args = CP.DmassQ_INPUTS, D, Q
+            elif H:
+                args = CP.DmassHmass_INPUTS, D, H
+            elif S:
+                args = CP.DmassSmass_INPUTS, D, S
+            elif U:
+                args = CP.DmassUmass_INPUTS, D, U
+        elif P:
+            if T:
+                args = CP.PT_INPUTS, P, T
+            elif Q:
+                args = CP.PQ_INPUTS, P, Q
+            elif H:
+                args = CP.HmassP_INPUTS, H, P
+            elif S:
+                args = CP.PSmass_INPUTS, P, S
+            elif U:
+                args = CP.PUmass_INPUTS, P, U
+        elif T:
+            if Q:
+                args = CP.QT_INPUTS, Q, T
+            elif H:
+                args = CP.HmassT_INPUTS, H, T
+            elif S:
+                args = CP.SmassT_INPUTS, S, T
+            elif U:
+                args = CP.TUmass_INPUTS, T, U
+        elif Q:
+            if H:
+                args = CP.HmassQ_INPUTS, H, Q
+            elif S:
+                args = CP.QSmass_INPUTS, Q, S
+            elif U:
+                raise ValueError('Invalid combination: Q and U')
+        elif H:
+            if S:
+                args = CP.HmassSmass_INPUTS, H, S
+            elif U:
+                raise ValueError('Invalid combination: H and U')
+        elif S and U:
+            args = CP.SmassUmass_INPUTS, S, U
+        else:
+            raise ValueError('Invalid combination')
+
+        try:
+            self.state.update(*args)
+        except ValueError:
+            pass
 
     def rhol(self, T: Iterable):
-        return [PropsSI('D', 'T', t, 'Q', 0, self.name) if (182.23 < t < 309.52) else None for t in T]
+        return [PropsSI('D', 'T', t, 'Q', 0, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def rhog(self, T: Iterable):
-        return [PropsSI('D', 'T', t, 'Q', 1, self.name) if (182.23 < t < 309.52) else None for t in T]
+        return [PropsSI('D', 'T', t, 'Q', 1, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
-    def psat(self,T:Iterable):
-        return [PropsSI('P', 'Q', 0.5, 'T', t, self.name) if (182.23 < t < 309.52) else None for t in T]
+    def psat(self, T: Iterable):
+        return [PropsSI('P', 'Q', 0.5, 'T', t, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def hl(self, T: Iterable):
-        return [PropsSI('H', 'T', t, 'Q', 0, self.name) if (182.23 < t < 309.52) else None for t in T]
+        return [PropsSI('H', 'T', t, 'Q', 0, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def hg(self, T: Iterable):
-        return [PropsSI('H', 'T', t, 'Q', 1, self.name) if (182.23 < t < 309.52) else None for t in T]
+        return [PropsSI('H', 'T', t, 'Q', 1, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def sl(self, T: Iterable):
-        return [PropsSI('S', 'T', t, 'Q', 0, self.name) if (182.23 < t < 309.52) else None for t in T]
+        return [PropsSI('S', 'T', t, 'Q', 0, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def sg(self, T: Iterable):
-        return [PropsSI('S', 'T', t, 'Q', 1, self.name) if (182.23 < t < 309.52) else None for t in T]
+        return [PropsSI('S', 'T', t, 'Q', 1, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
 
 class PropertySource:
@@ -75,7 +139,7 @@ class Manifold:
     class and add the required computing into the :meth:`Manifold.p` and :meth:`Manifold.T`
     functions. """
 
-    def __init__(self, fluid: str, parent: PropertySource):
+    def __init__(self, fluid: Fluid, parent: PropertySource):
         """Initialise :class:`Manifold` object with a working fluid and property parent.
 
         :param fluid: :class:`Fluid` object to use EOS functions from
@@ -140,8 +204,8 @@ class Orifice:
             # check pressure drop
             if p0 < p1:
                 return None
-
-            rho0 = PropsSI('D', 'T', T0, 'P', p0, fluid)
+            fluid.set_state(T=T0, P=p0)
+            rho0 = fluid.state.rhomass()
 
             # compute mass flow
             return self.A * np.sqrt(2 * rho0 * (p0 - p1))
@@ -169,8 +233,9 @@ class Orifice:
                 return None
 
             # retrieve enthalpy and entropy
-            h0 = PropsSI('H', 'T', T0, 'P', p0, fluid)
-            s0 = PropsSI('S', 'T', T0, 'P', p0, fluid)
+            fluid.set_state(T=T0, P=p0)
+            h0 = fluid.state.hmass()
+            s0 = fluid.state.smass()
 
             # set final conditions
             # p1, s1 known
@@ -178,8 +243,9 @@ class Orifice:
             s1 = s0
 
             # compute isentropic flash expansion
-            rho1 = PropsSI('D', 'P', p1, 'S', s1, fluid)
-            h1 = PropsSI('H', 'P', p1, 'S', s1, fluid)
+            fluid.set_state(P=p1, S=s1)
+            rho1 = fluid.state.rhomass()
+            h1 = fluid.state.hmass()
 
             # check decrease in enthalpy
             if h1 > h0:
@@ -204,7 +270,8 @@ class Orifice:
         p1 = P_cc
         fluid = self.manifold.fluid
 
-        pv = PropsSI('P', 'Q', 0.5, 'T', T0, fluid)
+        fluid.set_state(Q=0.5,T=T0)
+        pv = fluid.state.p()
 
         kappa = np.sqrt((p0 - p1) / (pv - p1))
         W = 1 / (1 + kappa)
