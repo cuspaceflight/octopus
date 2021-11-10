@@ -6,7 +6,8 @@ from octopus import Fluid
 
 def main():
     nitrous = Fluid('N2O')
-    T = np.linspace(150, 310, 1000)
+    T = np.linspace(182.23, 309.5, 1000)
+    # T = np.linspace(64, 126, 1000)
 
     rhol = nitrous.rhol(T)
     rhog = nitrous.rhog(T)
@@ -18,28 +19,29 @@ def main():
     sg = nitrous.sg(T)
 
     psat = nitrous.psat(T)
+    psat = [p * 0.00001 if p else None for p in psat]
 
-    plt.figure(1)
-    plt.title('Saturation Density')
-    plt.plot(T, rhol, color='blue', label='liquid')
-    plt.plot(T, rhog, color='red', label='vapour')
-    plt.legend()
+    fig, axs = plt.subplots(2, 2, sharex=True)
 
-    plt.figure(2)
-    plt.title('Saturation Enthalpy')
-    plt.plot(T, hl, color='blue', label='liquid')
-    plt.plot(T, hg, color='red', label='vapour')
-    plt.legend()
+    fig.suptitle('N$_2$O Saturation Data')
 
-    plt.figure(3)
-    plt.title('Saturation Entropy')
-    plt.plot(T, sl, color='blue', label='liquid')
-    plt.plot(T, sg, color='red', label='vapour')
-    plt.legend()
+    axs[0, 0].plot(T, rhol, color='blue', label='liquid')
+    axs[0, 0].plot(T, rhog, color='red', label='vapour')
+    axs[0, 0].legend()
+    axs[0, 0].set_title('Density (kg/m3)')
 
-    plt.figure(4)
-    plt.title('Saturation Pressure')
-    plt.plot(T, psat, color='blue')
+    axs[1, 0].plot(T, hl, color='blue', label='liquid')
+    axs[1, 0].plot(T, hg, color='red', label='vapour')
+    axs[1, 0].legend()
+    axs[1, 0].set_title('Enthalpy (kJ/kg)')
+
+    axs[0, 1].plot(T, sl, color='blue', label='liquid')
+    axs[0, 1].plot(T, sg, color='red', label='vapour')
+    axs[0, 1].legend()
+    axs[0, 1].set_title('Entropy (kJ/kg.K)')
+
+    axs[1, 1].set_title('Pressure (bar)')
+    axs[1, 1].plot(T, psat, color='blue')
 
     plt.show()
 

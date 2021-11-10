@@ -2,7 +2,7 @@
 
 """
 from functools import lru_cache
-from typing import Sequence, Iterable
+from typing import Iterable, Sequence
 
 import CoolProp.CoolProp as CP
 import numpy as np
@@ -94,6 +94,9 @@ class Fluid:
     def psat(self, T: Iterable):
         return [PropsSI('P', 'Q', 0.5, 'T', t, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
+    def tsat(self, P: Iterable):
+        return [PropsSI('T', 'P', P, 'Q', 0.5, self.name) if (self.pmin < p < self.pmax) else None for p in P]
+
     def hl(self, T: Iterable):
         return [PropsSI('H', 'T', t, 'Q', 0, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
@@ -164,7 +167,8 @@ class Orifice:
     STRAIGHT = 0
     CAVITATING = 1
 
-    def __init__(self, manifold: Manifold, L: float, D: float, orifice_type: int = 0, Cd: float = 0.7):
+    def __init__(self, manifold: Manifold, L: float, D: float = None, A: float = None, orifice_type: int = 0,
+                 Cd: float = 0.7):
         """Initialise :class:`Orifice` object.
 
         :param manifold: :class:`Manifold` to get fluid EOS and properties from
@@ -179,14 +183,22 @@ class Orifice:
 
         self.orifice_type = orifice_type
         self.L = L
-        self.D = D
-        self.A = 0.2 * np.pi * self.D ** 2
+        if not A and not D:
+            raise AttributeError("need either A or D as an input")
+        elif A:
+            self.A = A
+        else:
+            self.A = 0.25 * np.pi * D ** 2
+
         self.Cd = Cd
 
         # defines default Orifice.m_dot(p1) function
         self.m_dot = self.m_dot_dyer
 
-    @lru_cache(maxsize=1)
+    def set_A(self, A):
+        self.A = A
+
+    # @lru_cache(maxsize=1)
     def m_dot_SPI(self, p1: float):
         """Return single-phase-incompressible mass flow rate.
 
@@ -208,11 +220,11 @@ class Orifice:
             rho0 = fluid.state.rhomass()
 
             # compute mass flow
-            return self.A * np.sqrt(2 * rho0 * (p0 - p1))
+            return self.A * self.Cd * np.sqrt(2 * rho0 * (p0 - p1))
         else:
             raise NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
-    @lru_cache(maxsize=1)
+    # @lru_cache(maxsize=1)
     def m_dot_HEM(self, p1: float):
         """Return homogeneous-equilibrium-model mass flow rate.
 
@@ -252,12 +264,12 @@ class Orifice:
                 return None
 
             # compute mass flow
-            return self.A * rho1 * np.sqrt(h0 - h1)
+            return self.A * self.Cd * rho1 * np.sqrt(2*(h0 - h1))
 
         else:
             return NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
-    @lru_cache(maxsize=1)
+    # @lru_cache(maxsize=1)
     def m_dot_dyer(self, P_cc: float):
         """Return Dyer model mass flow rate.
 
@@ -268,16 +280,14 @@ class Orifice:
         p0 = self.manifold.p
         T0 = self.manifold.T
         p1 = P_cc
-        fluid = self.manifold.fluid
 
-        fluid.set_state(Q=0.5,T=T0)
-        pv = fluid.state.p()
+        pv = self.manifold.fluid.psat([T0])[0]
 
         kappa = np.sqrt((p0 - p1) / (pv - p1))
         W = 1 / (1 + kappa)
         if not (self.m_dot_SPI(P_cc) and self.m_dot_HEM(P_cc)):
             return None
-        return self.Cd * ((1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc))
+        return (1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc)
 
 
 class Element:
