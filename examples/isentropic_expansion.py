@@ -25,13 +25,22 @@ def main():
     for i, d in enumerate(D):
         nitrous.set_state(D=d, S=s0)
         Q[i] = nitrous.state.Q()
+    QT = np.zeros_like(D)
+    for i, d in enumerate(D):
+        nitrous.set_state(D=d,T=T0)
+        QT[i] = nitrous.state.Q()
 
     print(f'{rho0:.1f},{rho1:.1f}')
     print(f'{max(x0, 0):.3f},{x1:.3f}')
 
     fig,ax = plt.subplots()
-    ax.plot(D, Q)
+    ax.plot(D, Q, label='isentropic')
+    ax.plot(D, QT, label='isothermal')
     ax.invert_xaxis()
+    ax.invert_yaxis()
+    ax.set_xlabel('Density/kg/m^3')
+    ax.set_ylabel('Dryness Fraction')
+    plt.legend()
     plt.show()
 
 if __name__ == "__main__":

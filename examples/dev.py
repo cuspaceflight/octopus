@@ -14,17 +14,6 @@ def dp_annular_gap(r_outer, r_inner, mdot, L, rho, mu, dp=0):
     return 0.5 * rho * (1 + fd(Re) * L / D) * V ** 2 - dp
 
 
-def mdot_annular_gap(mdot, dp, r_inner, r_outer, L, density, mu):
-    A = np.pi * (r_outer ** 2 - r_inner ** 2)
-    D = 2 * (r_outer - r_inner)
-    V = mdot / (density * A)
-
-    Re = density * V * D / mu
-    m_flux = np.sqrt((2 * density * dp) / (1 + fd(Re) * L / D))
-
-    return A * m_flux
-
-
 def fd(Re):
     laminar = 64 / Re
     turbulent_smooth = 1 / np.real(0.838 * scipy.special.lambertw(0.629 * Re)) ** 2
@@ -78,26 +67,11 @@ def main():
     h = A_o / (2 * np.pi * r_pintle * np.cos(alpha))
 
     # FUEL
-
     res = scipy.optimize.root_scalar(f=dp_annular_gap,
                                      args=(r_pintle, m_dot_f_target, L, ipa_density, ipa_mu, p0 - pcc),
                                      x0=r_pintle * 1.01, x1=r_pintle * 1.02)
     print(res)
     r_annular = res.root
-    # m_flux_f = np.sqrt(2 * ipa_density * (p0 - pcc))  # initial guess
-    # A_f = m_dot_f_target / m_flux_f  # initial guess
-    #
-    # r_annular = np.sqrt((A_f + np.pi * r_pintle ** 2) / np.pi)
-    # m = m_dot_f_target
-    # i = 0
-    # while True:
-    #     i += 1
-    #     m = mdot_annular_gap(m, p0 - pcc, r_pintle, r_annular, L, ipa_density, ipa_mu)
-    #     r_annular += 0.0001 * (m_dot_f_target - m)
-    #     if abs(m_dot_f_target - m) < 0.000001:
-    #         break
-    #     elif i > 100:
-    #         raise RecursionError
 
     A_f = np.pi * (r_annular ** 2 - r_pintle ** 2)  # flow area
     D = 2 * (r_annular - r_pintle)
