@@ -1,4 +1,5 @@
 """Implementation of data and mathematical utilities used in the `octopus.main` module"""
+import os
 from collections import OrderedDict
 from csv import reader
 from typing import Any, List, Union
@@ -25,7 +26,6 @@ def derivative(f: callable, axis: int, *args: Any, dx: float = 0.01) -> float:
     args_h[axis] += dx
 
     return nan_to_num(array((f(*args_h) - f(*args_l)) / (2 * dx)))
-
 
 
 class Nist:

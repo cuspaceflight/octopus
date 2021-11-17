@@ -195,31 +195,6 @@ required coefficients to use it with nitrous oxide. 19 other chemicals are also 
 <div class="section" id="module-octopus.main">
 <span id="octopus-main-module"></span><h1>Octopus.main module<a class="headerlink" href="#module-octopus.main" title="Permalink to this headline">¶</a></h1>
 <p>Implementation of injector fluid dynamics classes.</p>
-<dl class="simple">
-<dt>References:</dt><dd><ul class="simple">
-<li><dl class="simple">
-<dt>[1]   Thermophyiscal properties of nitrous oxide,</dt><dd><p>IHS ESDU, <a class="reference external" href="http://edge.rit.edu/edge/P07106/public/Nox.pdf">http://edge.rit.edu/edge/P07106/public/Nox.pdf</a></p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>[2]   An investigation of injectors for use with high vapor pressure propellants with applications to hybrid rockets,</dt><dd><p>Waxman B.S., <a class="reference external" href="https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf">https://stacks.stanford.edu/file/druid:ng346xh6244/BenjaminWaxmanFinal-augmented.pdf</a></p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>[3]   Short Fundamental Equations of State for 20 Industrial Fluids,</dt><dd><p>Lemmon; Span, <a class="reference external" href="https://pubs.acs.org/doi/pdf/10.1021/je050186n">https://pubs.acs.org/doi/pdf/10.1021/je050186n</a></p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>[4]   Engineering Model to Calculate Mass Flow Rate of a Two-Phase Saturated Fluid Through An Injector Orifice,</dt><dd><p>Solomon B.J., <a class="reference external" href="https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1110&amp;context=gradreports">https://digitalcommons.usu.edu/cgi/viewcontent.cgi?article=1110&amp;context=gradreports</a></p>
-</dd>
-</dl>
-</li>
-</ul>
-</dd>
-</dl>
 <p class="rubric">Classes</p>
 <table class="longtable docutils align-default">
 <colgroup>
@@ -227,8 +202,8 @@ required coefficients to use it with nitrous oxide. 19 other chemicals are also 
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluid</span></code></a>(ID, T, P[, method])</p></td>
-<td><p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Fluid</span></code></a>(name)</p></td>
+<td><p>Represents a fluid.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#octopus.main.PropertySource" title="octopus.main.PropertySource"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PropertySource</span></code></a>(p, T)</p></td>
 <td><p>An object to provide a constant pressure and temperature as a parent object for a <a class="reference internal" href="#octopus.main.Manifold" title="octopus.main.Manifold"><code class="xref py py-class docutils literal notranslate"><span class="pre">Manifold</span></code></a>.</p></td>
@@ -246,408 +221,49 @@ required coefficients to use it with nitrous oxide. 19 other chemicals are also 
 </table>
 <dl class="py class">
 <dt id="octopus.main.Fluid">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Fluid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ID</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">298.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">101325</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'thermo'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">thermo.chemical.Chemical</span></code></p>
-<p>Inherits the thermo Chemical class, represents a fluid with a Helmholz EOS.</p>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Fluid</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a fluid.</p>
 <p>Initiate a Fluid instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ID</strong> – id of fluid with a name recognisable by thermo</p></li>
-<li><p><strong>T</strong> – Temperature (K)</p></li>
-<li><p><strong>P</strong> – Pressure (Pa)</p></li>
-</ul>
+<dd class="field-odd"><p><strong>ID</strong> – id of fluid</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="octopus.main.Fluid.alpha_0">
-<code class="sig-name descname"><span class="pre">alpha_0</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.alpha_0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.alpha_0" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the reduced ideal gas Helmholz energy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>ideal gas component of Helmholz energy</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>float</p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="octopus.main.Fluid.rhol">
+<code class="sig-name descname"><span class="pre">rhol</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.rhol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.rhol" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt id="octopus.main.Fluid.alpha_r">
-<code class="sig-name descname"><span class="pre">alpha_r</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.alpha_r"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.alpha_r" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the reduced helmholz residual energy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>residual component of Helmholz energy</p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="octopus.main.Fluid.rhog">
+<code class="sig-name descname"><span class="pre">rhog</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.rhog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.rhog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt id="octopus.main.Fluid.rho_g">
-<code class="sig-name descname"><span class="pre">rho_g</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.rho_g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.rho_g" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate vapour density at T.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>T</strong> – Temperature (K)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>vapour density</p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="octopus.main.Fluid.psat">
+<code class="sig-name descname"><span class="pre">psat</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.psat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.psat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt id="octopus.main.Fluid.rho_l">
-<code class="sig-name descname"><span class="pre">rho_l</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.rho_l"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.rho_l" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate liquid density at T.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>T</strong> – Temperature (K)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>liquid density</p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="octopus.main.Fluid.hl">
+<code class="sig-name descname"><span class="pre">hl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.hl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.hl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt id="octopus.main.Fluid.a0_t">
-<code class="sig-name descname"><span class="pre">a0_t</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.a0_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.a0_t" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate derivative of alpha_0 with respect to tau.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d(alpha_0)/d(tau)</p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="octopus.main.Fluid.hg">
+<code class="sig-name descname"><span class="pre">hg</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.hg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.hg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt id="octopus.main.Fluid.a0_tt">
-<code class="sig-name descname"><span class="pre">a0_tt</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.a0_tt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.a0_tt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate second derivative of alpha_0 with respect to tau.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d2(alpha_0)/d(tau)d(tau)</p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="octopus.main.Fluid.sl">
+<code class="sig-name descname"><span class="pre">sl</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.sl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.sl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
-<dt id="octopus.main.Fluid.ar_d">
-<code class="sig-name descname"><span class="pre">ar_d</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.ar_d"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.ar_d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate derivative of alpha_r with respect to delta.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d(alpha_r)/d(delta)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.ar_t">
-<code class="sig-name descname"><span class="pre">ar_t</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.ar_t"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.ar_t" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate derivative of alpha_r with respect to tau.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d(alpha_r)/d(tau)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.ar_dd">
-<code class="sig-name descname"><span class="pre">ar_dd</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.ar_dd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.ar_dd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate second derivative of alpha_r with respect to delta.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d2(alpha_r)/d(delta)d(delta</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.ar_dt">
-<code class="sig-name descname"><span class="pre">ar_dt</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.ar_dt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.ar_dt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate derivative of alpha_r with respect to delta and tau.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d2(alpha_r)/d(delta)d(tau)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.ar_tt">
-<code class="sig-name descname"><span class="pre">ar_tt</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.ar_tt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.ar_tt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate second derivative of alpha_r with respect to tau.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>delta</strong> – rho/rho_c to be evaluated at</p></li>
-<li><p><strong>tau</strong> – T_c/T to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d2(alpha_r)/d(tau)d(tau)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.dp_drho">
-<code class="sig-name descname"><span class="pre">dp_drho</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.dp_drho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.dp_drho" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate derviative of pressure with respect to density.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density to be evaluated at</p></li>
-<li><p><strong>T</strong> – temperature to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d(p)/d(rho)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.dg_drho">
-<code class="sig-name descname"><span class="pre">dg_drho</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.dg_drho"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.dg_drho" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate derviative of specific gibbs free energy with respect to density.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density to be evaluated at</p></li>
-<li><p><strong>T</strong> – temperature to be evaluated at</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>d(g)/d(rho)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.p">
-<code class="sig-name descname"><span class="pre">p</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.p" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate pressure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>pressure</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.u">
-<code class="sig-name descname"><span class="pre">u</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.u"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.u" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate specific internal energy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>specific internal energy</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.h">
-<code class="sig-name descname"><span class="pre">h</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.h"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.h" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate specific enthalpy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>specific enthalpy</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.s">
-<code class="sig-name descname"><span class="pre">s</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.s" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate specific entropy.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>specific entropy</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.g">
-<code class="sig-name descname"><span class="pre">g</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.g"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.g" title="Permalink to this definition">¶</a></dt>
-<dd><p>Evaluate specific gibbs free energy</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>specific gibbs free energy</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.z">
-<code class="sig-name descname"><span class="pre">z</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.z"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.z" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return compressibility</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>compressibility, z</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.cp">
-<code class="sig-name descname"><span class="pre">cp</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.cp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.cp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return specific heat capacity at constant pressure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>heat capacity at constant pressure</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.cv">
-<code class="sig-name descname"><span class="pre">cv</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.cv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.cv" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return specific heat capacity at constant volume.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>heat capacity at constant volume</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.fun_ps">
-<code class="sig-name descname"><span class="pre">fun_ps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/octopus/main.html#Fluid.fun_ps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.fun_ps" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a vectorised cost function to be used in a property solver.</p>
-<p>See Usage for more info.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> – object containing arguments to be passed to get_properties</p></li>
-<li><p><strong>u</strong> – object containing property names of properties to be returned and compared</p></li>
-<li><p><strong>y</strong> – object containing property values to compare returned values to</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>object containing difference between calculated property values and those in y</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Fluid.get_properties">
-<code class="sig-name descname"><span class="pre">get_properties</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="_modules/octopus/main.html#Fluid.get_properties"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.get_properties" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return properties in a dict</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>rho</strong> – density</p></li>
-<li><p><strong>T</strong> – temperature</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>dict where keys are property names referring to float values</p>
-</dd>
-</dl>
-</dd></dl>
+<dt id="octopus.main.Fluid.sg">
+<code class="sig-name descname"><span class="pre">sg</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">T</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Iterable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Fluid.sg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Fluid.sg" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -675,7 +291,7 @@ required coefficients to use it with nitrous oxide. 19 other chemicals are also 
 
 <dl class="py class">
 <dt id="octopus.main.Manifold">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Manifold</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fluid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><span class="pre">octopus.main.Fluid</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#octopus.main.PropertySource" title="octopus.main.PropertySource"><span class="pre">octopus.main.PropertySource</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Manifold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Manifold" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">octopus.main.</span></code><code class="sig-name descname"><span class="pre">Manifold</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fluid</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#octopus.main.PropertySource" title="octopus.main.PropertySource"><span class="pre">octopus.main.PropertySource</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Manifold"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Manifold" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Represent a propellant manifold, at least one <a class="reference internal" href="#octopus.main.Fluid" title="octopus.main.Fluid"><code class="xref py py-class docutils literal notranslate"><span class="pre">Fluid</span></code></a> input and one
 <a class="reference internal" href="#octopus.main.Orifice" title="octopus.main.Orifice"><code class="xref py py-class docutils literal notranslate"><span class="pre">Orifice</span></code></a> output. If a user wishes to model losses within the manifold, they may extend this
@@ -764,32 +380,6 @@ functions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>P_cc</strong> – combustion chamber pressure (Pa)</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>mass flow rate (kg/s)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="octopus.main.Orifice.m_dot_waxman">
-<code class="sig-name descname"><span class="pre">m_dot_waxman</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">p1</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choke_margin</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.8</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cd_inj</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.65</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Cd_diff</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0.99</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suppress</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/octopus/main.html#Orifice.m_dot_waxman"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#octopus.main.Orifice.m_dot_waxman" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return estimate of cavitating injector mass flow rate and throat diameter.</p>
-<p>See Ref [2], section 6.</p>
-<p>D is used as the exit diameter.
-Both discharge coefficients default to 1 if not specified.
-Recommend 0.65 for Cd_total, 0.99 for Cd_diff.</p>
-<p>To increase the probability of the onset of choking, the safety
-factor should be increased.</p>
-<p>To be used as a tool for informing cold flow tests, NOT accurate simulation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>p1</strong> – combustion chamber pressure (Pa)</p></li>
-<li><p><strong>choke_margin</strong> – rough margin to reduce the vapour pressure why</p></li>
-<li><p><strong>Cd_inj</strong> – injector discharge coefficient</p></li>
-<li><p><strong>Cd_diff</strong> – diffuser discharge coefficient</p></li>
-</ul>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>mass flow rate (kg/s)</p>
