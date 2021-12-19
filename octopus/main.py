@@ -1,13 +1,15 @@
 """Implementation of injector fluid dynamics classes.
 
 """
-from functools import lru_cache
+from dataclasses import dataclass
 from typing import Iterable, Sequence
 
 import CoolProp.CoolProp as CP
 import numpy as np
 from CoolProp import AbstractState
 from CoolProp.CoolProp import PropsSI
+
+from .utils import fd
 
 
 class Fluid:
@@ -25,6 +27,11 @@ class Fluid:
         self.Tmin = self.state.Tmin()
         self.pmax = self.state.pmax()
         self.pmin = 0
+
+    def copy(self):
+        fluid = Fluid(self.name)
+        fluid.set_state(P=self.state.p(), T=self.state.T())
+        return fluid
 
     def set_state(self, D=None, P=None, T=None, Q=None, H=None, S=None, U=None):
         if sum([bool(D), bool(P), bool(T), bool(Q), bool(H), bool(S), bool(U)]) != 2:
@@ -85,6 +92,64 @@ class Fluid:
         except ValueError:
             pass
 
+    def Vf(self, S: float):
+        x = self.state.Q()
+        if x == -1:
+            if self.state.rhomass() > self.rhol([self.state.T()])[0]:
+                return 0
+            else:
+                return 1
+        else:
+            return 1 / (1 / (1 + S * ((1 - x) / x) * self.rhog([self.state.T()])[0] / self.rhol([self.state.T()])[0]))
+
+    def chi(self):
+        x = self.state.Q()
+        if x == -1:
+            if self.state.rhomass() > self.rhol([self.state.T()])[0]:
+                return 0
+            else:
+                return 1
+        else:
+            return x
+
+    def viscosityl(self, T):
+        b1 = 1.6089
+        b2 = 2.0439
+        b3 = 5.24
+        b4 = 0.0293423
+        theta = (self.state.T_critical() - b3) / (T - b3)
+        return b4 * np.exp(b1 * (theta - 1) ** (1 / 3) + b2 * (theta - 1) ** (4 / 3))
+
+    def viscosityg(self, T):
+        b1 = 3.3281
+        b2 = -1.18237
+        b3 = -0.055155
+        Tr = T / self.state.T_critical()
+        return 0.001 * np.exp(b1 + b2 * (1 / Tr - 1) ** (1 / 3) + b3 * (1 / Tr - 1) ** (4 / 3)) if (
+                self.Tmin < T < self.Tmax) else None
+
+    def viscosity(self):
+        a = self.Vf(S=1)
+        T = self.state.T()
+        if a == 0:
+            return self.viscosityl(T)
+        if a == 1:
+            return self.viscosityg(T)
+        mug = self.viscosityg(T)
+        mul = self.viscosityl(T)
+        x = self.state.Q()
+        rho = self.state.rhomass()
+        rhol = self.rhol([T])[0]
+        rhog = self.rhog([T])[0]
+        return mug * x * rho / rhog + mul * (1 - x) * rho / rhol
+
+    def dvg_dP_saturation(self):
+        dP = 0.002
+        rho1 = PropsSI('D', 'P', self.state.p() + dP / 2, 'Q', 1, self.name)
+        rho0 = PropsSI('D', 'P', self.state.p() - dP / 2, 'Q', 1, self.name)
+        dvg = 1 / rho1 - 1 / rho0
+        return dvg / dP
+
     def rhol(self, T: Iterable):
         return [PropsSI('D', 'T', t, 'Q', 0, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
@@ -108,6 +173,20 @@ class Fluid:
 
     def sg(self, T: Iterable):
         return [PropsSI('S', 'T', t, 'Q', 1, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+
+    def __repr__(self):
+        return f'Fluid({self.name}: p={self.state.p() / 100000:.1f}bar, t={self.state.T():.1f}K)'
+
+
+@dataclass
+class Cell:
+    p: float
+    x: float
+
+
+class Mesh:
+    def __init__(self, fluid: Fluid, velocity: float, L: float, n: int):
+        self.cells = [Cell(fluid=fluid.copy(), velocity=velocity, dx=L / n) for _ in range(n)]
 
 
 class PropertySource:
@@ -183,12 +262,15 @@ class Orifice:
 
         self.orifice_type = orifice_type
         self.L = L
+
         if not A and not D:
-            raise AttributeError("need either A or D as an input")
-        elif A:
+            raise TypeError
+        elif not D:
+            self.D = np.sqrt(4 * A / np.pi)
             self.A = A
         else:
             self.A = 0.25 * np.pi * D ** 2
+            self.D = D
 
         self.Cd = Cd
 
@@ -264,7 +346,7 @@ class Orifice:
                 return None
 
             # compute mass flow
-            return self.A * self.Cd * rho1 * np.sqrt(2*(h0 - h1))
+            return self.A * self.Cd * rho1 * np.sqrt(2 * (h0 - h1))
 
         else:
             return NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
@@ -273,10 +355,12 @@ class Orifice:
     def m_dot_dyer(self, P_cc: float):
         """Return Dyer model mass flow rate.
 
+        :param p0: optio
         :param P_cc: combustion chamber pressure (Pa)
         :return: mass flow rate (kg/s)
 
         """
+
         p0 = self.manifold.p
         T0 = self.manifold.T
         p1 = P_cc
@@ -288,6 +372,54 @@ class Orifice:
         if not (self.m_dot_SPI(P_cc) and self.m_dot_HEM(P_cc)):
             return None
         return (1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc)
+
+    def dP_HEM_frictional(self, mdot: float):
+        # find initial conditions
+        # p0,T0 known
+        p0 = self.manifold.p
+        T0 = self.manifold.T
+        fluid = self.manifold.fluid
+
+        # retrieve void fraction
+        fluid.set_state(T=T0, P=p0)
+        s0 = fluid.state.smass()
+        num_cells = 100
+        dz = self.L / num_cells
+        G = mdot / self.A
+
+        rho0 = fluid.state.rhomass()
+        V0 = G/rho0
+        dP0 = 0.5*rho0*V0**2
+
+        cells = [Cell(p=p0-dP0, x=0) for _ in range(num_cells)]
+        cells = [Cell(p=p0-dP0, x=0), *cells]
+
+        try:
+
+            for i in range(num_cells):
+                vf = 1 / fluid.rhol([fluid.state.T()])[0]
+                vfg = 1 / fluid.rhog([fluid.state.T()])[0] - vf
+
+                fluid.set_state(P=cells[i].p, S=s0)
+                cells[i + 1].x = fluid.chi()
+
+                dx_dz = (cells[i + 1].x - cells[i].x) / dz
+                dvg_dP = fluid.dvg_dP_saturation()
+
+                V = G / fluid.state.rhomass()
+                Re = fluid.state.rhomass() * V * self.D / fluid.viscosity()
+
+                dP_dz = -((2 * (fd(Re) / 4) * G ** 2 * vf / self.D) * (1 + cells[i + 1].x * (vfg / vf)) + G ** 2 * vf * (
+                        vfg / vf) * dx_dz) / (1 + G ** 2 * cells[i + 1].x * dvg_dP)
+
+                cells[i + 1].p = cells[i].p + dP_dz * dz
+                print(f'{dP_dz * dz:7.0f}\t{Re:4.0f}\t{fluid.viscosity():2.3f}\t{vf:.5f}\t{vfg:.5f}')
+
+        except Exception:
+            pass
+
+        print(dP0,cells[-1].p)
+        return [cell.p for cell in cells]
 
 
 class Element:

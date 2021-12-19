@@ -7,13 +7,13 @@ from octopus import Fluid
 def main():
     nitrous = Fluid('N2O')
     T = np.linspace(182.23, 309.5, 1000)
-    # T = np.linspace(64, 126, 1000)
+    T = np.linspace(280, 309.5, 1000)
 
     rhol = nitrous.rhol(T)
     rhog = nitrous.rhog(T)
 
-    hl = nitrous.hl(T)
-    hg = nitrous.hg(T)
+    vl = [nitrous.viscosityl(t) if rhol[i] is not None else None for i,t in enumerate(T)]
+    vg = [nitrous.viscosityg(t) if rhol[i] is not None else None for i,t in enumerate(T)]
 
     sl = nitrous.sl(T)
     sg = nitrous.sg(T)
@@ -30,10 +30,10 @@ def main():
     axs[0, 0].legend()
     axs[0, 0].set_title('Density (kg/m3)')
 
-    axs[1, 0].plot(T, hl, color='blue', label='liquid')
-    axs[1, 0].plot(T, hg, color='red', label='vapour')
+    axs[1, 0].plot(T, vl, color='blue', label='liquid')
+    axs[1, 0].plot(T, vg, color='red', label='vapour')
     axs[1, 0].legend()
-    axs[1, 0].set_title('Enthalpy (kJ/kg)')
+    axs[1, 0].set_title('Viscosity (Pa.s)')
 
     axs[0, 1].plot(T, sl, color='blue', label='liquid')
     axs[0, 1].plot(T, sg, color='red', label='vapour')

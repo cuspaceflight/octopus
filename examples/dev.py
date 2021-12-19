@@ -14,6 +14,7 @@ def dp_annular_gap(r_outer, r_inner, mdot, L, rho, mu, dp=0):
     return 0.5 * rho * (1 + fd(Re) * L / D) * V ** 2 - dp
 
 
+# often fd/4 is used in literature: check
 def fd(Re):
     laminar = 64 / Re
     turbulent_smooth = 1 / np.real(0.838 * scipy.special.lambertw(0.629 * Re)) ** 2
@@ -44,6 +45,7 @@ def main():
 
     nitrous = Fluid('N2O')
     nitrous_ps = PropertySource(p=p0, T=T0)
+    nitrous.set_state(P=p0,T=T0)
     ox_manifold = Manifold(fluid=nitrous, parent=nitrous_ps)
     ox_orifice = Orifice(manifold=ox_manifold, L=1e-2, A=1, orifice_type=Orifice.STRAIGHT, Cd=0.7)
 
@@ -57,10 +59,12 @@ def main():
     print(f'ipa_density: {ipa_density:.1f}kg/m3\n')
 
     # OXIDISER
+    print(f'mu before: {nitrous.viscosity()}')
     m_flux_o = ox_orifice.m_dot_dyer(pcc)
     A_o = m_dot_o_target / m_flux_o  # A is area of cylinder to inject over
     p_o = m_dot_o_target * m_flux_o / nitrous.state.rhomass()
     V_o = m_dot_o_target / (nitrous.state.rhomass() * A_o)
+    print(f'mu after: {nitrous.viscosity()}')
 
     r_pintle = 10e-3  # radius of 20mm
     L = 20e-3  # length of annular gap
@@ -87,10 +91,10 @@ def main():
     print(f'pintle opening height: {1000 * h:.4f}mm')
     print(f'annular gap: {1000 * (r_annular - r_pintle):.4f}mm\n')
 
-    print(f'Oxidiser injection velocity: {V_o:.1f}m/s\n')
+    print(f'Oxidiser injection velocity: {V_o:.1f}m/s')
+    print(f'Fuel injection velocity: {V_f:.1f}m/s\n')
 
-    print(f'Fuel injection velocity: {V_f:.1f}m/s')
-    print(f'Fuel Reynolds number at exit: {Re_f:.0f}')
+    print(f'Fuel Reynolds number at exit: {Re_f:.0f}\n')
 
     print(f'momentum ratio: {p_o:.2f}/{p_f:.2f} = {p_o / p_f:.2f}\n')
 

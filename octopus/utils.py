@@ -1,10 +1,10 @@
 """Implementation of data and mathematical utilities used in the `octopus.main` module"""
-import os
 from collections import OrderedDict
 from csv import reader
 from typing import Any, List, Union
 
-from numpy import array, nan_to_num, ndarray
+from numpy import array, nan_to_num, ndarray, real
+from scipy.special import lambertw
 
 
 def derivative(f: callable, axis: int, *args: Any, dx: float = 0.01) -> float:
@@ -69,3 +69,16 @@ class Nist:
             else:
                 data.append(None)
         return data
+
+
+# often fd/4 is used in literature: check
+def fd(Re):
+
+    if Re < 2000:
+        return 64 / Re
+    elif Re > 4000:
+        return 1 / real(0.838 * lambertw(0.629 * Re)) ** 2
+    else:
+        laminar = 64 / Re
+        turbulent_smooth = 1 / real(0.838 * lambertw(0.629 * Re)) ** 2
+        return (laminar * (4000 - Re) + turbulent_smooth * (Re - 2000)) / (4000 - 2000)

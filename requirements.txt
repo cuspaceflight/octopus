@@ -2,3 +2,4 @@ numpy
 scipy
 CoolProp
 matplotlib
+h5py
