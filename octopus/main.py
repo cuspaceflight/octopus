@@ -6,6 +6,7 @@ from typing import Iterable, Sequence
 
 import CoolProp.CoolProp as CP
 import numpy as np
+import scipy.optimize
 from CoolProp import AbstractState
 from CoolProp.CoolProp import PropsSI
 
@@ -93,24 +94,17 @@ class Fluid:
             pass
 
     def Vf(self, S: float):
-        x = self.state.Q()
-        if x == -1:
-            if self.state.rhomass() > self.rhol([self.state.T()])[0]:
-                return 0
-            else:
-                return 1
-        else:
-            return 1 / (1 / (1 + S * ((1 - x) / x) * self.rhog([self.state.T()])[0] / self.rhol([self.state.T()])[0]))
+        x = self.chi()
+        return 1 / (1 / (1 + S * ((1 - x) / x) * self.rhog([self.state.T()])[0] / self.rhol([self.state.T()])[0]))
 
     def chi(self):
         x = self.state.Q()
-        if x == -1:
-            if self.state.rhomass() > self.rhol([self.state.T()])[0]:
-                return 0
-            else:
-                return 1
-        else:
+        if x >= 0:
             return x
+        if self.state.rhomass() > self.rhol([self.state.T()])[0]:
+            return 0
+        else:
+            return 1
 
     def viscosityl(self, T):
         b1 = 1.6089
@@ -129,15 +123,10 @@ class Fluid:
                 self.Tmin < T < self.Tmax) else None
 
     def viscosity(self):
-        a = self.Vf(S=1)
         T = self.state.T()
-        if a == 0:
-            return self.viscosityl(T)
-        if a == 1:
-            return self.viscosityg(T)
         mug = self.viscosityg(T)
         mul = self.viscosityl(T)
-        x = self.state.Q()
+        x = self.chi()
         rho = self.state.rhomass()
         rhol = self.rhol([T])[0]
         rhog = self.rhog([T])[0]
@@ -180,13 +169,18 @@ class Fluid:
 
 @dataclass
 class Cell:
+    pos: float
     p: float
+    T: float
+    v: float
+    rho: float
+    h: float
     x: float
+    A: float
+    D: float
 
-
-class Mesh:
-    def __init__(self, fluid: Fluid, velocity: float, L: float, n: int):
-        self.cells = [Cell(fluid=fluid.copy(), velocity=velocity, dx=L / n) for _ in range(n)]
+    def __repr__(self):
+        return f'Cell[p: {self.p:.0f}, v: {self.v:2.1f}, rho: {self.rho:.3f}, x: {self.x:.3f}, A: {self.A:.5f}, D: {self.D:.3f}]'
 
 
 class PropertySource:
@@ -221,7 +215,7 @@ class Manifold:
     class and add the required computing into the :meth:`Manifold.p` and :meth:`Manifold.T`
     functions. """
 
-    def __init__(self, fluid: Fluid, parent: PropertySource):
+    def __init__(self, fluid: Fluid, parent: PropertySource, A: float):
         """Initialise :class:`Manifold` object with a working fluid and property parent.
 
         :param fluid: :class:`Fluid` object to use EOS functions from
@@ -230,6 +224,7 @@ class Manifold:
         self.fluid = fluid
         self.parent = parent
         self.chi = 0
+        self.A = A
 
     @property
     def p(self):
@@ -245,6 +240,7 @@ class Orifice:
 
     STRAIGHT = 0
     CAVITATING = 1
+    ANNULAR = 2
 
     def __init__(self, manifold: Manifold, L: float, D: float = None, A: float = None, orifice_type: int = 0,
                  Cd: float = 0.7):
@@ -297,6 +293,7 @@ class Orifice:
 
             # check pressure drop
             if p0 < p1:
+                print('no pressure drop in SPI calc')
                 return None
             fluid.set_state(T=T0, P=p0)
             rho0 = fluid.state.rhomass()
@@ -324,7 +321,7 @@ class Orifice:
 
             # check for pressure drop
             if p0 < p1:
-                return None
+                print('no pressure drop in HEM calc')
 
             # retrieve enthalpy and entropy
             fluid.set_state(T=T0, P=p0)
@@ -343,7 +340,7 @@ class Orifice:
 
             # check decrease in enthalpy
             if h1 > h0:
-                return None
+                print('no decrease in enthalpy in HEM calc')
 
             # compute mass flow
             return self.A * self.Cd * rho1 * np.sqrt(2 * (h0 - h1))
@@ -373,37 +370,108 @@ class Orifice:
             return None
         return (1 - W) * self.m_dot_SPI(P_cc) + W * self.m_dot_HEM(P_cc)
 
+    def sub(self, pcc, mdot):
+        return mdot - self.m_dot_dyer(pcc)
+
+    def p_dyer(self, mdot):
+
+        res = scipy.optimize.least_squares(self.sub, 13e5, args=[mdot], bounds=[1e5, 20e5], ftol=0.0001, gtol=None)
+        print(mdot, self.m_dot_dyer(res.x)[0])
+        return res.x[0]
+
+    def p_patel(self, mdot):
+        # aliases
+        fluid = self.manifold.fluid
+
+        # setup distributions
+        N = 100
+        pos_dist = np.linspace(0, 1.5 * self.L, N)
+        A = np.interp(pos_dist, [0, 0.5 * self.L, 1.5 * self.L], [self.manifold.A, self.A, self.A])
+        inlet_Dh = np.sqrt(4 * self.manifold.A / np.pi)
+        Dh = np.interp(pos_dist, [0, 0.5 * self.L, 1.5 * self.L], [inlet_Dh, self.D, self.D])
+        p = np.linspace(self.manifold.p, 12.5e5, N)
+
+        # init cells
+        cells = []
+        for i in range(N):
+            cells.append(Cell(pos=pos_dist[i], p=p[i], A=A[i], D=Dh[i], T=0, v=0, rho=0, h=0, x=0))
+
+        # known values in first cell
+        cells[0].T = self.manifold.T
+        fluid.set_state(P=cells[0].p, T=cells[0].T)
+        cells[0].x = fluid.chi()
+        cells[0].rho = fluid.state.rhomass()
+        cells[0].h = fluid.state.hmass()
+        cells[0].v = mdot / (cells[0].rho * cells[0].A)
+        orig = cells
+        new = self._advance(cells)
+
+        return orig, new
+
+    def _advance(self, cells):
+        fluid = self.manifold.fluid
+        # initialise fluid
+        fluid.set_state(P=cells[0].p, T=cells[0].T)
+        s0 = fluid.state.smass()
+        # calculate derivative of pressure with respect to position
+        dx = cells[1].pos - cells[0].pos
+        dp_dx = np.diff([cell.p for cell in cells]) / dx
+
+
+        for cell in cells:
+            # changes from last iteration
+            i = cells.index(cell)
+            dp_dx_last = dp_dx[min(i, len(dp_dx) - 1)]
+            # isentropic iteration
+            fluid.set_state(P=cell.p, S=s0)
+            cell.rho = fluid.state.rhomass()
+            cell.x = fluid.chi()
+            # calculate kinematic properties
+            Re = cell.rho * cell.v * cell.D / fluid.viscosity()
+            cf = 4 * fd(Re)
+            C = 4 * cell.A / cell.D
+            print(cell)
+            # calc v for next cell
+            dv_dx = -(cf * 0.5 * cell.rho * cell.v ** 2 * C/cell.A + dp_dx_last) / (cell.rho * cell.v)
+            cells[min(i + 1,len(cells) - 1)].v = cell.v + dv_dx*dx
+        return cells
+
     def dP_HEM_frictional(self, mdot: float):
-        # find initial conditions
         # p0,T0 known
         p0 = self.manifold.p
         T0 = self.manifold.T
         fluid = self.manifold.fluid
 
-        # retrieve void fraction
-        fluid.set_state(T=T0, P=p0)
+        # find initial conditions
+        fluid.set_state(P=p0, T=T0)
         s0 = fluid.state.smass()
-        num_cells = 100
+
+        # calculate inlet pressure drop
+        p_inlet = self.p_dyer(mdot)
+
+        # set conditions after inlet
+        fluid.set_state(S=s0, P=p_inlet)
+
+        # setup integration values
+        num_cells = 500
         dz = self.L / num_cells
+
+        # constant properties
         G = mdot / self.A
 
-        rho0 = fluid.state.rhomass()
-        V0 = G/rho0
-        dP0 = 0.5*rho0*V0**2
-
-        cells = [Cell(p=p0-dP0, x=0) for _ in range(num_cells)]
-        cells = [Cell(p=p0-dP0, x=0), *cells]
+        # cell arrays for integration
+        cells = [Cell(p=p_inlet, x=fluid.chi())] + [Cell(p=p_inlet, x=fluid.chi()) for _ in range(num_cells)]
+        print(fluid.state.T())
 
         try:
-
-            for i in range(num_cells):
+            for i in range(num_cells - 1):
                 vf = 1 / fluid.rhol([fluid.state.T()])[0]
                 vfg = 1 / fluid.rhog([fluid.state.T()])[0] - vf
 
                 fluid.set_state(P=cells[i].p, S=s0)
                 cells[i + 1].x = fluid.chi()
 
-                dx_dz = (cells[i + 1].x - cells[i].x) / dz
+                dx_dz = np.clip((cells[i + 1].x - cells[i].x) / dz, -0.3, 0.3)
                 dvg_dP = fluid.dvg_dP_saturation()
 
                 V = G / fluid.state.rhomass()
@@ -412,14 +480,14 @@ class Orifice:
                 dP_dz = -((2 * (fd(Re) / 4) * G ** 2 * vf / self.D) * (1 + cells[i + 1].x * (vfg / vf)) + G ** 2 * vf * (
                         vfg / vf) * dx_dz) / (1 + G ** 2 * cells[i + 1].x * dvg_dP)
 
-                cells[i + 1].p = cells[i].p + dP_dz * dz
-                print(f'{dP_dz * dz:7.0f}\t{Re:4.0f}\t{fluid.viscosity():2.3f}\t{vf:.5f}\t{vfg:.5f}')
+                cells[i + 2].p = cells[i].p + dP_dz * dz
+                print(f'{dP_dz * dz:7.0f}\t{dx_dz:4.0f}\t{V:3.0f}')
 
-        except Exception:
-            pass
+        except Exception as e:
+            print('intgration failed in dP_HEM_frictional')
+            print(e)
 
-        print(dP0,cells[-1].p)
-        return [cell.p for cell in cells]
+        return [cell.p / 100000 for cell in cells]
 
 
 class Element:

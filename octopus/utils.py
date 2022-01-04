@@ -73,7 +73,6 @@ class Nist:
 
 # often fd/4 is used in literature: check
 def fd(Re):
-
     if Re < 2000:
         return 64 / Re
     elif Re > 4000:

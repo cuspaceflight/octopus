@@ -7,7 +7,7 @@ from octopus import Fluid
 def main():
     nitrous = Fluid('N2O')
     T = np.linspace(182.23, 309.5, 1000)
-    T = np.linspace(280, 309.5, 1000)
+    T = np.linspace(250, 309.5, 1000)
 
     rhol = nitrous.rhol(T)
     rhog = nitrous.rhog(T)
