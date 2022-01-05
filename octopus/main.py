@@ -175,12 +175,13 @@ class Cell:
     v: float
     rho: float
     h: float
-    x: float
+    mu: float
     A: float
     D: float
+    s: float
 
     def __repr__(self):
-        return f'Cell[p: {self.p:.0f}, v: {self.v:2.1f}, rho: {self.rho:.3f}, x: {self.x:.3f}, A: {self.A:.5f}, D: {self.D:.3f}]'
+        return f'Cell[p: {self.p:.0f}, v: {self.v:2.1f}, rho: {self.rho:.3f}, mu: {self.mu:.3f}, A: {self.A:.5f}]'
 
 
 class PropertySource:
@@ -382,58 +383,78 @@ class Orifice:
     def p_patel(self, mdot):
         # aliases
         fluid = self.manifold.fluid
+        fluid.set_state(P=self.manifold.p, T=self.manifold.T)
 
         # setup distributions
-        N = 100
+        N = 1000
         pos_dist = np.linspace(0, 1.5 * self.L, N)
         A = np.interp(pos_dist, [0, 0.5 * self.L, 1.5 * self.L], [self.manifold.A, self.A, self.A])
         inlet_Dh = np.sqrt(4 * self.manifold.A / np.pi)
         Dh = np.interp(pos_dist, [0, 0.5 * self.L, 1.5 * self.L], [inlet_Dh, self.D, self.D])
-        p = np.linspace(self.manifold.p, 12.5e5, N)
+        p = np.interp(pos_dist, [0, 1.5 * self.L], [self.manifold.p, 12.5e5])
 
         # init cells
         cells = []
         for i in range(N):
-            cells.append(Cell(pos=pos_dist[i], p=p[i], A=A[i], D=Dh[i], T=0, v=0, rho=0, h=0, x=0))
+            cells.append(Cell(pos=pos_dist[i], p=p[i], A=A[i], D=Dh[i], T=0, v=0, rho=0, h=0, s=None, mu=fluid.viscosity()))
 
         # known values in first cell
         cells[0].T = self.manifold.T
-        fluid.set_state(P=cells[0].p, T=cells[0].T)
-        cells[0].x = fluid.chi()
+        cells[0].mu = fluid.viscosity()
         cells[0].rho = fluid.state.rhomass()
         cells[0].h = fluid.state.hmass()
         cells[0].v = mdot / (cells[0].rho * cells[0].A)
-        orig = cells
-        new = self._advance(cells)
 
-        return orig, new
+        # run advance repeatedly on cells
+        sets_0 = [[cell.p for cell in cells]]
+        sets_1 = [[cell.s for cell in cells]]
+        for i in range(2):
+            print(i)
+            self._advance(cells, mdot)
+            sets_0.append([cell.p for cell in cells])
+            sets_1.append([cell.s for cell in cells])
 
-    def _advance(self, cells):
+        return sets_0,sets_1
+
+    def _advance(self, cells, mdot):
         fluid = self.manifold.fluid
         # initialise fluid
         fluid.set_state(P=cells[0].p, T=cells[0].T)
-        s0 = fluid.state.smass()
         # calculate derivative of pressure with respect to position
         dx = cells[1].pos - cells[0].pos
         dp_dx = np.diff([cell.p for cell in cells]) / dx
-
+        # calculate h+0.5*v**2 from first cell
+        h_const = cells[0].h + 0.5 * cells[0].v ** 2
 
         for cell in cells:
             # changes from last iteration
             i = cells.index(cell)
             dp_dx_last = dp_dx[min(i, len(dp_dx) - 1)]
-            # isentropic iteration
-            fluid.set_state(P=cell.p, S=s0)
-            cell.rho = fluid.state.rhomass()
-            cell.x = fluid.chi()
+
+            # calculate density and h
+            cell.rho = mdot / (cell.v * cell.A)
+            cell.h = h_const - 0.5*cell.v ** 2
+            # calculate viscosity
+            fluid.set_state(P=cell.p, H=cell.h)
+            cell.mu = fluid.viscosity()
+
             # calculate kinematic properties
-            Re = cell.rho * cell.v * cell.D / fluid.viscosity()
+            Re = mdot * cell.D / (cell.mu * cell.A)
             cf = 4 * fd(Re)
             C = 4 * cell.A / cell.D
-            print(cell)
-            # calc v for next cell
-            dv_dx = -(cf * 0.5 * cell.rho * cell.v ** 2 * C/cell.A + dp_dx_last) / (cell.rho * cell.v)
-            cells[min(i + 1,len(cells) - 1)].v = cell.v + dv_dx*dx
+
+            # calculate v for next cell
+            dv_dx = -(cf * 0.5 * cell.rho * cell.v ** 2 * C / cell.A + dp_dx_last) / (cell.rho * cell.v)
+            cells[min(i + 1, len(cells) - 1)].v = cell.v + dv_dx * dx
+
+            # calculate new pressure from density and enthalpy
+            fluid.set_state(D=cell.rho, H=cell.h)
+            cell.p = fluid.state.p()
+            try:
+                cell.s = fluid.state.smass()
+            except ValueError:
+                cell.s = None
+
         return cells
 
     def dP_HEM_frictional(self, mdot: float):

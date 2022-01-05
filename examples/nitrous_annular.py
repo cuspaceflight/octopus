@@ -20,10 +20,10 @@ def main():
 
     nitrous = Fluid('N2O')
     nitrous_ps = PropertySource(p=p0, T=T0)
-    ox_manifold = Manifold(fluid=nitrous, parent=nitrous_ps, A=0.25*np.pi * 25e-3 ** 2)
+    ox_manifold = Manifold(fluid=nitrous, parent=nitrous_ps, A=0.25 * np.pi * 25e-3 ** 2)
     gaps = np.linspace(3.2e-3, 3.5e-3, 1)
     ps = []
-    plt.figure(0)
+    fig, axs = plt.subplots(2)
 
     for gap in gaps:
         r_inner = 25e-3
@@ -32,11 +32,17 @@ def main():
         Dh = 2 * annular_gap
         A = np.pi * (r_outer ** 2 - r_inner ** 2)
         ox_orifice = Orifice(manifold=ox_manifold, L=25e-3, D=Dh, A=A, orifice_type=Orifice.STRAIGHT, Cd=0.7)
-        orig, new = ox_orifice.p_patel(m_dot_o)
-        plt.plot([cell.pos for cell in orig],[cell.v for cell in orig])
-        plt.plot([cell.pos for cell in new],[cell.v for cell in new])
+        p, v = ox_orifice.p_patel(m_dot_o)
 
-    plt.legend()
+        [axs[0].plot(p, label=f'pressure {i}') for i, p in enumerate(p)]
+        axs[0].set_ylabel('pressure/Pa')
+        axs[0].legend()
+
+        [axs[1].plot(v, label=f'entropy {i}') for i, v in enumerate(v)]
+        axs[1].set_ylabel('entropy/idontknowtheunit')
+        axs[1].legend()
+
+    plt.xlabel('distance/m')
     plt.show()
 
 
