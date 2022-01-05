@@ -397,11 +397,12 @@ class Orifice:
         A = self.A * np.ones_like(pos_dist)
         Dh = self.D * np.ones_like(pos_dist)
         p = np.interp(pos_dist, [0, self.L], [p0, 0.9 * p0])
+        v = mdot / (fluid.state.rhomass() * self.A)
 
         # init cells
         cells = []
         for i in range(N):
-            cells.append(Cell(pos=pos_dist[i], p=p[i], A=A[i], D=Dh[i], T=0, v=0, rho=0, h=0, s=None, mu=fluid.viscosity()))
+            cells.append(Cell(pos=pos_dist[i], p=p[i], A=A[i], D=Dh[i], T=0, v=v, rho=0, h=0, s=None, mu=fluid.viscosity()))
 
         # known values in first cell
         cells[0].T = self.manifold.T
@@ -415,14 +416,17 @@ class Orifice:
         sets_1 = [[cell.v for cell in cells]]
         sets_2 = [[cell.s for cell in cells]]
         sets_3 = [[cell.rho for cell in cells]]
-        for i in range(10):
-            print(i)
+        print('beginning iterations: ')
+        num_iter = 30
+        print(f'0{"-"*(num_iter-1-len(str(num_iter)))}{num_iter}')
+        for i in range(num_iter):
+            print(f'|', end='')
             self.p_patel_advance(cells, mdot)
             sets_0.append([cell.p for cell in cells])
             sets_1.append([cell.v for cell in cells])
             sets_2.append([cell.s for cell in cells])
             sets_3.append([cell.rho for cell in cells])
-
+        print('\niteration complete')
         return sets_0, sets_1, sets_2, sets_3
 
     def p_patel(self, mdot):
@@ -474,13 +478,12 @@ class Orifice:
         dp_dx_l = np.diff([cell.p for cell in cells]) / dx_l
         # calculate h+0.5*v**2 from first cell
         h_const = cells[0].h + 0.5 * cells[0].v ** 2
-
         for cell in cells:
             try:
                 # changes from last iteration
                 i = cells.index(cell)
-                dp_dx = dp_dx_l[min(i, len(dp_dx_l) - 1)]
-                dx = dx_l[min(i, len(dp_dx_l) - 1)]
+                dp_dx = dp_dx_l[max(i-1, 0)]
+                dx = dx_l[max(i-1, 0)]
 
                 # calculate density and h
                 cell.rho = mdot / (cell.v * cell.A)
@@ -492,9 +495,12 @@ class Orifice:
                 # calculate kinematic properties
                 Re = mdot * cell.D / (cell.mu * cell.A)
 
+                # alias for next cell
+                out = cells[min(i + 1, len(cells) - 1)]
+
                 # calculate v for next cell
-                dv_dx = -(-fd(Re) * 0.5 * cell.rho * cell.v ** 2 * 4 / cell.D + dp_dx) / (cell.rho * cell.v)
-                cells[min(i + 1, len(cells) - 1)].v = cell.v + dv_dx * dx
+                dv_dx = -(fd(Re) * 0.5 * cell.rho * cell.v ** 2 * 4 / cell.D + dp_dx) / (cell.rho * cell.v)
+                out.v += (cell.v + (dv_dx * dx) - out.v) * 0.7
 
                 # calculate new pressure from density and enthalpy
                 fluid.set_state(D=cell.rho, H=cell.h)

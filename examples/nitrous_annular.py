@@ -23,7 +23,7 @@ def main():
     ox_manifold = Manifold(fluid=nitrous, parent=nitrous_ps, A=0.25 * np.pi * 25e-3 ** 2)
     gaps = np.linspace(3.2e-3, 3.5e-3, 1)
     ps = []
-    fig, axs = plt.subplots(2,2)
+    fig, axs = plt.subplots(2, 2)
 
     for gap in gaps:
         r_inner = 25e-3
@@ -34,21 +34,21 @@ def main():
         ox_orifice = Orifice(manifold=ox_manifold, L=25e-3, D=Dh, A=A, orifice_type=Orifice.STRAIGHT, Cd=1)
         p, v, s, d = ox_orifice.p_patel_dyer(m_dot_o)
 
-        [axs[0,0].plot(x, label=f'pressure {i}') for i, x in enumerate(p)]
-        axs[0,0].set_ylabel('pressure/Pa')
-        axs[0,0].legend()
+        [axs[0, 0].plot(x, label=f'pressure {i}', color=(i / len(d), 0, 1 - i / len(d))) for i, x in enumerate(p)]
+        axs[0, 0].set_ylabel('pressure/Pa')
+        # axs[0,0].legend()
 
-        [axs[0,1].plot(x, label=f'velocity {i}') for i, x in enumerate(v)]
-        axs[0,1].set_ylabel('velocity/ms-1')
-        axs[0,1].legend()
+        [axs[0, 1].plot(x, label=f'velocity {i}', color=(i / len(d), 0, 1 - i / len(d))) for i, x in enumerate(v)]
+        axs[0, 1].set_ylabel('velocity/ms-1')
+        # axs[0,1].legend()
 
-        [axs[1,0].plot(x, label=f'entropy {i}') for i, x in enumerate(s)]
-        axs[1,0].set_ylabel('entropy/kJ/kg.K')
-        axs[1,0].legend()
+        [axs[1, 0].plot(x, label=f'entropy {i}', color=(i / len(d), 0, 1 - i / len(d))) for i, x in enumerate(s)]
+        axs[1, 0].set_ylabel('entropy/kJ/kg.K')
+        # axs[1,0].legend()
 
-        [axs[1, 1].plot(x, label=f'density {i}') for i, x in enumerate(d)]
+        [axs[1, 1].plot(x, label=f'density {i}', color=(i / len(d), 0, 1 - i / len(d))) for i, x in enumerate(d)]
         axs[1, 1].set_ylabel('density/kgm-3')
-        axs[1, 1].legend()
+        # axs[1, 1].legend()
 
     plt.xlabel('distance/m')
     plt.show()
