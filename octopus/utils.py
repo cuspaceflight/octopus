@@ -72,6 +72,7 @@ class Nist:
 
 
 # often fd/4 is used in literature: check
+# this is fd or cf: darcy friction factor
 def fd(Re):
     if Re < 2000:
         return 64 / Re
