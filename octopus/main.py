@@ -470,8 +470,8 @@ class Orifice:
         # initialise fluid
         fluid.set_state(P=cells[0].p, T=cells[0].T)
         # calculate derivative of pressure with respect to position
-        dx = cells[1].pos - cells[0].pos
-        dp_dx = np.diff([cell.p for cell in cells]) / dx
+        dx_l = np.diff([cell.pos for cell in cells])
+        dp_dx_l = np.diff([cell.p for cell in cells]) / dx_l
         # calculate h+0.5*v**2 from first cell
         h_const = cells[0].h + 0.5 * cells[0].v ** 2
 
@@ -479,7 +479,8 @@ class Orifice:
             try:
                 # changes from last iteration
                 i = cells.index(cell)
-                dp_dx_last = dp_dx[min(i, len(dp_dx) - 1)]
+                dp_dx = dp_dx_l[min(i, len(dp_dx_l) - 1)]
+                dx = dx_l[min(i, len(dp_dx_l) - 1)]
 
                 # calculate density and h
                 cell.rho = mdot / (cell.v * cell.A)
@@ -492,7 +493,7 @@ class Orifice:
                 Re = mdot * cell.D / (cell.mu * cell.A)
 
                 # calculate v for next cell
-                dv_dx = -(fd(Re) * 0.5 * cell.rho * cell.v ** 2 * 4 / cell.D + dp_dx_last) / (cell.rho * cell.v)
+                dv_dx = -(-fd(Re) * 0.5 * cell.rho * cell.v ** 2 * 4 / cell.D + dp_dx) / (cell.rho * cell.v)
                 cells[min(i + 1, len(cells) - 1)].v = cell.v + dv_dx * dx
 
                 # calculate new pressure from density and enthalpy
