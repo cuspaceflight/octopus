@@ -16,21 +16,22 @@ from .utils import fd
 class Fluid:
     """Represents a fluid."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, eos: str = 'HEOS'):
         """Initiate a Fluid instance.
 
         :param ID: id of fluid
         """
 
         self.name = name
-        self.state = AbstractState('HEOS', name)
-        self.Tmax = self.state.Tmax()
-        self.Tmin = self.state.Tmin()
+        self.eos = eos.upper()
+        self.state = AbstractState(self.eos, self.name)
+        self.Tmax = 309.5 # self.state.Tmax()
+        self.Tmin = 182.23 # self.state.Tmin()
         self.pmax = self.state.pmax()
         self.pmin = 0
 
     def copy(self):
-        fluid = Fluid(self.name)
+        fluid = Fluid(self.name, self.eos)
         fluid.set_state(P=self.state.p(), T=self.state.T())
         return fluid
 
@@ -140,28 +141,28 @@ class Fluid:
         return dvg / dP
 
     def rhol(self, T: Iterable):
-        return [PropsSI('D', 'T', t, 'Q', 0, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('D', 'T', t, 'Q', 0, self.eos + "::" + self.name) for t in T]
 
     def rhog(self, T: Iterable):
-        return [PropsSI('D', 'T', t, 'Q', 1, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('D', 'T', t, 'Q', 1, self.eos + "::" + self.name)for t in T]
 
     def psat(self, T: Iterable):
-        return [PropsSI('P', 'Q', 0.5, 'T', t, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('P', 'Q', 0.5, 'T', t, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def tsat(self, P: Iterable):
-        return [PropsSI('T', 'P', P, 'Q', 0.5, self.name) if (self.pmin < p < self.pmax) else None for p in P]
+        return [PropsSI('T', 'P', P, 'Q', 0.5, self.eos + "::" + self.name) if (self.pmin < p < self.pmax) else None for p in P]
 
     def hl(self, T: Iterable):
-        return [PropsSI('H', 'T', t, 'Q', 0, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('H', 'T', t, 'Q', 0, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def hg(self, T: Iterable):
-        return [PropsSI('H', 'T', t, 'Q', 1, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('H', 'T', t, 'Q', 1, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def sl(self, T: Iterable):
-        return [PropsSI('S', 'T', t, 'Q', 0, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('S', 'T', t, 'Q', 0, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def sg(self, T: Iterable):
-        return [PropsSI('S', 'T', t, 'Q', 1, self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('S', 'T', t, 'Q', 1, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
 
     def __repr__(self):
         return f'Fluid({self.name}: p={self.state.p() / 100000:.1f}bar, t={self.state.T():.1f}K)'
@@ -243,7 +244,7 @@ class Orifice:
     CAVITATING = 1
     ANNULAR = 2
 
-    def __init__(self, manifold: Manifold, L: float, D: float = None, A: float = None, orifice_type: int = 0,
+    def __init__(self, manifold: Manifold, L: float = None, D: float = None, A: float = None, orifice_type: int = 0,
                  Cd: float = 0.7):
         """Initialise :class:`Orifice` object.
 
@@ -268,14 +269,13 @@ class Orifice:
         else:
             self.A = 0.25 * np.pi * D ** 2
             self.D = D
-
-        self.Cd = Cd
+        if self.orifice_type == self.ANNULAR:
+            self.Cd = 0.6
+        else:
+            self.Cd = Cd
 
         # defines default Orifice.m_dot(p1) function
         self.m_dot = self.m_dot_dyer
-
-    def set_A(self, A):
-        self.A = A
 
     # @lru_cache(maxsize=1)
     def m_dot_SPI(self, p1: float):
@@ -285,7 +285,7 @@ class Orifice:
         :return: mass flow rate (kg/s)
 
         """
-        if self.orifice_type == self.STRAIGHT:
+        if self.orifice_type in [self.STRAIGHT, self.ANNULAR]:
             # find initial conditions
             # T0,p0 known
             p0 = self.manifold.p
@@ -312,7 +312,7 @@ class Orifice:
         :return: mass flow rate (kg/s)
 
         """
-        if self.orifice_type == self.STRAIGHT:
+        if self.orifice_type in [self.STRAIGHT, self.ANNULAR]:
 
             # find initial conditions
             # p0,T0 known
@@ -347,7 +347,7 @@ class Orifice:
             return self.A * self.Cd * rho1 * np.sqrt(2 * (h0 - h1))
 
         else:
-            return NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
+            raise NotImplementedError(f'Orifice type "{self.orifice_type}" not implemented')
 
     # @lru_cache(maxsize=1)
     def m_dot_dyer(self, P_cc: float):
@@ -418,7 +418,7 @@ class Orifice:
         sets_3 = [[cell.rho for cell in cells]]
         print('beginning iterations: ')
         num_iter = 30
-        print(f'0{"-"*(num_iter-1-len(str(num_iter)))}{num_iter}')
+        print(f'0{"-" * (num_iter - 1 - len(str(num_iter)))}{num_iter}')
         for i in range(num_iter):
             print(f'|', end='')
             self.p_patel_advance(cells, mdot)
@@ -482,8 +482,8 @@ class Orifice:
             try:
                 # changes from last iteration
                 i = cells.index(cell)
-                dp_dx = dp_dx_l[max(i-1, 0)]
-                dx = dx_l[max(i-1, 0)]
+                dp_dx = dp_dx_l[max(i - 1, 0)]
+                dx = dx_l[max(i - 1, 0)]
 
                 # calculate density and h
                 cell.rho = mdot / (cell.v * cell.A)
@@ -500,15 +500,15 @@ class Orifice:
 
                 # calculate v for next cell
                 dv_dx = -(fd(Re) * 0.5 * cell.rho * cell.v ** 2 * 4 / cell.D + dp_dx) / (cell.rho * cell.v)
-                out.v += (cell.v + (dv_dx * dx) - out.v) * 0.7
+                out.v += (cell.v + (dv_dx * dx) - out.v) * 0.5
 
                 # calculate new pressure from density and enthalpy
                 fluid.set_state(D=cell.rho, H=cell.h)
                 cell.p = fluid.state.p()
-                try:
-                    cell.s = fluid.state.smass()
-                except ValueError:
-                    cell.s = None
+
+                # calculate entropy for debugging
+                cell.s = fluid.state.smass()
+
             except TypeError:
                 pass
 

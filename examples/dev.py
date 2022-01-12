@@ -46,7 +46,7 @@ def main():
     nitrous = Fluid('N2O')
     nitrous_ps = PropertySource(p=p0, T=T0)
     nitrous.set_state(P=p0,T=T0)
-    ox_manifold = Manifold(fluid=nitrous, parent=nitrous_ps)
+    ox_manifold = Manifold(fluid=nitrous, parent=nitrous_ps, A=1)
     ox_orifice = Orifice(manifold=ox_manifold, L=1e-2, A=1, orifice_type=Orifice.STRAIGHT, Cd=0.7)
 
     print(f'feed pressure: {p0 / 100000} bar')
