@@ -7,9 +7,9 @@ def main():
     p0 = 18e5
     T0 = 253
 
-    pcc = 12.5e5
+    pcc = 10e5
 
-    m_dot = 0.75
+    m_dot = 0.803
     OF = 3.5
 
     alpha = (np.pi / 180) * 20  # chosen alpha=20
@@ -30,13 +30,13 @@ def main():
     data = Nist('ipa')
     concentration, density = data.get_fields('concentration', 'density')
     ipa_rho = 1000 * np.interp(100 - ipa_water_content, concentration, density)
-    ipa_Cd = 0.7
+    ipa_Cd = 0.8
 
     # fixed geometry definition
     inner_diam = 20e-3  # mm
 
     # find nitrous mass flow per unit area (assume linear scaling for inlet, little viscous effects in annulus)
-    ox_G = ox_orifice.m_dot_dyer(P_cc=12.5e5)
+    ox_G = ox_orifice.m_dot_dyer(P_cc=pcc)
     ox_A = m_dot_o/ox_G
     # find annular gap dimensions from flow area
     outer_diam = np.sqrt(4 * ox_A / np.pi + inner_diam ** 2)
@@ -54,15 +54,16 @@ def main():
     # find spray half angle
     theta = np.arctan(ipa_v*m_dot_f*np.cos(alpha)/(ox_v*m_dot_o+ipa_v*m_dot_f*np.sin(alpha)))
 
-    print(f'inner diameter: {inner_diam*1000:.1f} mm\n'
-          f'outer diameter: {outer_diam*1000:.1f} mm\n'
+    print(f'inner diameter: {inner_diam*1000:.2f} mm\n'
+          f'outer diameter: {outer_diam*1000:.2f} mm\n'
           f'annular gap: {0.5*(outer_diam-inner_diam)*1000:.2f} mm\n'
-          f'total opening distance: {pintle_tod*1000:.1f} mm\n\n'
+          f'total opening distance: {pintle_tod*1000:.2f} mm\n\n'
           
           f'oxidiser mass flow rate: {m_dot_o:.3f} kg/s\n'
           f'fuel mass flow rate: {m_dot_f:.3f} kg/s\n'
           f'oxidiser injection velocity: {ox_v:.1f} m/s\n'
-          f'fuel injection velocity: {ipa_v:.1f} m/s\n\n'
+          f'fuel injection velocity: {ipa_v:.1f} m/s\n'
+          f'TMR: {(m_dot_o*ox_v)/(m_dot_f*ipa_v):.2f}\n\n'
           
           f'spray cone half angle: {180*theta/np.pi:.1f}°')
 

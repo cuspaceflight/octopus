@@ -31,76 +31,69 @@ def main():
     p0 = 18e5
     T0 = 253
 
-    pcc = 12.5e5
+    pcc = 10e5
 
-    m_dot = 0.75
+    m_dot = 0.803
     OF = 3.5
 
     alpha = (np.pi / 180) * 20  # chosen alpha=20
 
-    m_dot_o_target = m_dot * OF / (1 + OF)
-    m_dot_f_target = m_dot * 1 / (1 + OF)
-
-    print(f'mass flows:\n\toxidiser - {m_dot_o_target:.3f}\n\tfuel - {m_dot_f_target:.3f}')
+    m_dot_o = m_dot * OF / (1 + OF)
+    m_dot_f = m_dot * 1 / (1 + OF)
 
     nitrous = Fluid('N2O')
     nitrous_ps = PropertySource(p=p0, T=T0)
-    nitrous.set_state(P=p0,T=T0)
+    nitrous.set_state(P=p0, T=T0)
     ox_manifold = Manifold(fluid=nitrous, parent=nitrous_ps, A=1)
     ox_orifice = Orifice(manifold=ox_manifold, L=1e-2, A=1, orifice_type=Orifice.STRAIGHT, Cd=0.7)
 
-    print(f'feed pressure: {p0 / 100000} bar')
-    print(f'nitrous Tsat at {p0 / 100000} bar: {nitrous.tsat([p0])[0]:.1f}\n')
-
     data = Nist('ipa')
     concentration, density = data.get_fields('concentration', 'density')
-    ipa_density = 1000 * np.interp(80, concentration, density)
+    ipa_rho = 1000 * np.interp(80, concentration, density)
     ipa_mu = 2.4e-3
-    print(f'ipa_density: {ipa_density:.1f}kg/m3\n')
 
     # OXIDISER
-    print(f'mu before: {nitrous.viscosity()}')
-    m_flux_o = ox_orifice.m_dot_dyer(pcc)
-    A_o = m_dot_o_target / m_flux_o  # A is area of cylinder to inject over
-    p_o = m_dot_o_target * m_flux_o / nitrous.state.rhomass()
-    V_o = m_dot_o_target / (nitrous.state.rhomass() * A_o)
-    print(f'mu after: {nitrous.viscosity()}')
+    print(nitrous.state.rhomass())
+    print(nitrous.psat([253])[0])
+    ox_G = ox_orifice.m_dot_dyer(pcc)
+    ox_A = m_dot_o / ox_G  # A is area of cylinder to inject over
+    ox_v = m_dot_o / (nitrous.state.rhomass() * ox_A)
 
-    r_pintle = 10e-3  # radius of 20mm
-    L = 20e-3  # length of annular gap
-    h = A_o / (2 * np.pi * r_pintle * np.cos(alpha))
+
+    r_pintle = 10e-3  # diameter of 20mm
+    L = 10e-3  # length of annular gap
+    h = ox_A / (2 * np.pi * r_pintle * np.cos(alpha))
 
     # FUEL
     res = scipy.optimize.root_scalar(f=dp_annular_gap,
-                                     args=(r_pintle, m_dot_f_target, L, ipa_density, ipa_mu, p0 - pcc),
-                                     x0=r_pintle * 1.01, x1=r_pintle * 1.02)
-    print(res)
+                                     args=(r_pintle, m_dot_f, L, ipa_rho, ipa_mu, p0 - pcc),
+                                     x0=r_pintle * 1.01,
+                                     x1=r_pintle * 1.02)
+
     r_annular = res.root
 
-    A_f = np.pi * (r_annular ** 2 - r_pintle ** 2)  # flow area
+    ipa_A = np.pi * (r_annular ** 2 - r_pintle ** 2)  # flow area
     D = 2 * (r_annular - r_pintle)
-    m_flux_f = m_dot_f_target / A_f
-    p_f = m_dot_f_target * m_flux_f / ipa_density
-    V_f = m_dot_f_target / (ipa_density * A_f)
+    ipa_v = m_dot_f / (ipa_rho * ipa_A)
 
-    Re_f = ipa_density * V_f * D / ipa_mu  # Reynolds number
+    TMR = ox_v * m_dot_o * np.cos(alpha) / (ipa_v * m_dot_f + ox_v * m_dot_o * np.sin(alpha))
+    theta = np.arctan(TMR)
 
-    print(f'Oxidiser injection area: {1e6 * A_o:.2f}mm^2\n'
-          f'Fuel injection area: {1e6 * A_f:.2f}mm^2\n')
+    print(f'inner diameter: {2 * r_pintle * 1000:.2f} mm\n'
+          f'outer diameter: {2 * r_annular * 1000:.2f} mm\n'
+          f'annular gap: {(r_annular - r_pintle) * 1000:.2f} mm\n'
+          f'total opening distance: {h * 1000:.2f} mm\n\n'
 
-    print(f'pintle opening height: {1000 * h:.4f}mm')
-    print(f'annular gap: {1000 * (r_annular - r_pintle):.4f}mm\n')
+          f'oxidiser injection area: {1e6*ox_A:.2f}mm^2\n'
+          f'fuel injection area: {1e6*ipa_A:.2f}mm^2\n\n'
 
-    print(f'Oxidiser injection velocity: {V_o:.1f}m/s')
-    print(f'Fuel injection velocity: {V_f:.1f}m/s\n')
+          f'oxidiser mass flow rate: {m_dot_o:.3f} kg/s\n'
+          f'fuel mass flow rate: {m_dot_f:.3f} kg/s\n'
+          f'oxidiser injection velocity: {ox_v:.1f} m/s\n'
+          f'fuel injection velocity: {ipa_v:.1f} m/s\n'
+          f'TMR: {TMR:.2f}\n\n'
 
-    print(f'Fuel Reynolds number at exit: {Re_f:.0f}\n')
-
-    print(f'momentum ratio: {p_o:.2f}/{p_f:.2f} = {p_o / p_f:.2f}\n')
-
-    theta = np.arctan(1 / (np.tan(alpha) + p_f / (p_o * np.cos(alpha))))
-    print(f'pintle tip angle: {(180 / np.pi) * alpha:.0f} deg\n'
-          f'spray cone half angle: {(180 / np.pi) * theta:.0f} deg')
+          f'spray cone half angle: {180 * theta / np.pi:.1f}°')
 
 
 if __name__ == "__main__":
