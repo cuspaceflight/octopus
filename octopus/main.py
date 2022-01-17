@@ -25,8 +25,8 @@ class Fluid:
         self.name = name
         self.eos = eos.upper()
         self.state = AbstractState(self.eos, self.name)
-        self.Tmax = 309.5 # self.state.Tmax()
-        self.Tmin = 182.23 # self.state.Tmin()
+        self.Tmax = 309.5  # self.state.Tmax()
+        self.Tmin = 182.23  # self.state.Tmin()
         self.pmax = self.state.pmax()
         self.pmin = 0
 
@@ -35,56 +35,66 @@ class Fluid:
         fluid.set_state(P=self.state.p(), T=self.state.T())
         return fluid
 
-    def set_state(self, D=None, P=None, T=None, Q=None, H=None, S=None, U=None):
-        if sum([bool(D), bool(P), bool(T), bool(Q), bool(H), bool(S), bool(U)]) != 2:
-            raise ValueError('Must have exactly 2 arguments')
+    def set_state(self, D: float = None, P: float = None, T: float = None, Q: float = None, H: float = None, S: float = None,
+                  U: float = None):
+
+        args_present = {'D': D is not None,
+                        'P': P is not None,
+                        'T': T is not None,
+                        'Q': Q is not None,
+                        'H': H is not None,
+                        'S': S is not None,
+                        'U': U is not None}
+
+        if sum(args_present.values()) != 2:
+            raise ValueError(f'Must have exactly 2 arguments: {sum(args_present.values())} provided')
         args = []
-        if D:
-            if P:
+        if args_present['D']:
+            if args_present['P']:
                 args = CP.DmassP_INPUTS, D, P
-            elif T:
+            elif args_present['T']:
                 args = CP.DmassT_INPUTS, D, T
-            elif Q:
+            elif args_present['Q']:
                 args = CP.DmassQ_INPUTS, D, Q
-            elif H:
+            elif args_present['H']:
                 args = CP.DmassHmass_INPUTS, D, H
-            elif S:
+            elif args_present['S']:
                 args = CP.DmassSmass_INPUTS, D, S
-            elif U:
+            elif args_present['U']:
                 args = CP.DmassUmass_INPUTS, D, U
-        elif P:
-            if T:
+        elif args_present['P']:
+            if args_present['T']:
                 args = CP.PT_INPUTS, P, T
-            elif Q:
+            elif args_present['Q']:
                 args = CP.PQ_INPUTS, P, Q
-            elif H:
+            elif args_present['H']:
                 args = CP.HmassP_INPUTS, H, P
-            elif S:
+            elif args_present['S']:
                 args = CP.PSmass_INPUTS, P, S
-            elif U:
+            elif args_present['U']:
                 args = CP.PUmass_INPUTS, P, U
-        elif T:
-            if Q:
+        elif args_present['T']:
+            if args_present['Q']:
                 args = CP.QT_INPUTS, Q, T
-            elif H:
+            elif args_present['H']:
                 args = CP.HmassT_INPUTS, H, T
-            elif S:
+            elif args_present['S']:
                 args = CP.SmassT_INPUTS, S, T
-            elif U:
+            elif args_present['U']:
                 args = CP.TUmass_INPUTS, T, U
-        elif Q:
-            if H:
+        elif args_present['Q']:
+            if args_present['H']:
                 args = CP.HmassQ_INPUTS, H, Q
-            elif S:
+            elif args_present['S']:
                 args = CP.QSmass_INPUTS, Q, S
-            elif U:
+            elif args_present['U']:
                 raise ValueError('Invalid combination: Q and U')
-        elif H:
-            if S:
+        elif args_present['H']:
+            if args_present['S']:
                 args = CP.HmassSmass_INPUTS, H, S
-            elif U:
+            elif args_present['U']:
                 raise ValueError('Invalid combination: H and U')
-        elif S and U:
+        elif args_present['S'] and args_present['U']:
             args = CP.SmassUmass_INPUTS, S, U
         else:
             raise ValueError('Invalid combination')
@@ -144,25 +154,31 @@ class Fluid:
         return [PropsSI('D', 'T', t, 'Q', 0, self.eos + "::" + self.name) for t in T]
 
     def rhog(self, T: Iterable):
-        return [PropsSI('D', 'T', t, 'Q', 1, self.eos + "::" + self.name)for t in T]
+        return [PropsSI('D', 'T', t, 'Q', 1, self.eos + "::" + self.name) for t in T]
 
     def psat(self, T: Iterable):
-        return [PropsSI('P', 'Q', 0.5, 'T', t, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('P', 'Q', 0.5, 'T', t, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in
+                T]
 
     def tsat(self, P: Iterable):
-        return [PropsSI('T', 'P', P, 'Q', 0.5, self.eos + "::" + self.name) if (self.pmin < p < self.pmax) else None for p in P]
+        return [PropsSI('T', 'P', P, 'Q', 0.5, self.eos + "::" + self.name) if (self.pmin < p < self.pmax) else None for p in
+                P]
 
     def hl(self, T: Iterable):
-        return [PropsSI('H', 'T', t, 'Q', 0, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('H', 'T', t, 'Q', 0, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in
+                T]
 
     def hg(self, T: Iterable):
-        return [PropsSI('H', 'T', t, 'Q', 1, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('H', 'T', t, 'Q', 1, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in
+                T]
 
     def sl(self, T: Iterable):
-        return [PropsSI('S', 'T', t, 'Q', 0, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('S', 'T', t, 'Q', 0, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in
+                T]
 
     def sg(self, T: Iterable):
-        return [PropsSI('S', 'T', t, 'Q', 1, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in T]
+        return [PropsSI('S', 'T', t, 'Q', 1, self.eos + "::" + self.name) if (self.Tmin < t < self.Tmax) else None for t in
+                T]
 
     def __repr__(self):
         return f'Fluid({self.name}: p={self.state.p() / 100000:.1f}bar, t={self.state.T():.1f}K)'

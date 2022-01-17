@@ -36,7 +36,7 @@ def main():
     m_dot = 0.803
     OF = 3.5
 
-    alpha = (np.pi / 180) * 20  # chosen alpha=20
+    alpha = (np.pi / 180) * 40  # chosen alpha=20
 
     m_dot_o = m_dot * OF / (1 + OF)
     m_dot_f = m_dot * 1 / (1 + OF)
@@ -59,17 +59,16 @@ def main():
     ox_A = m_dot_o / ox_G  # A is area of cylinder to inject over
     ox_v = m_dot_o / (nitrous.state.rhomass() * ox_A)
 
-
-    r_pintle = 10e-3  # diameter of 20mm
-    L = 10e-3  # length of annular gap
+    r_pintle = 7e-3  # diameter of 20mm
+    L = 30e-3  # length of annular gap
     h = ox_A / (2 * np.pi * r_pintle * np.cos(alpha))
 
     # FUEL
     res = scipy.optimize.root_scalar(f=dp_annular_gap,
-                                     args=(r_pintle, m_dot_f, L, ipa_rho, ipa_mu, p0 - pcc),
+                                     args=(r_pintle, m_dot_f, L, ipa_rho, ipa_mu, 11.5e5 - pcc),
                                      x0=r_pintle * 1.01,
                                      x1=r_pintle * 1.02)
-
+    #
     r_annular = res.root
 
     ipa_A = np.pi * (r_annular ** 2 - r_pintle ** 2)  # flow area
@@ -79,13 +78,16 @@ def main():
     TMR = ox_v * m_dot_o * np.cos(alpha) / (ipa_v * m_dot_f + ox_v * m_dot_o * np.sin(alpha))
     theta = np.arctan(TMR)
 
+    Re = ipa_rho * ipa_v * D / ipa_mu
+    print(Re)
+
     print(f'inner diameter: {2 * r_pintle * 1000:.2f} mm\n'
           f'outer diameter: {2 * r_annular * 1000:.2f} mm\n'
           f'annular gap: {(r_annular - r_pintle) * 1000:.2f} mm\n'
           f'total opening distance: {h * 1000:.2f} mm\n\n'
 
-          f'oxidiser injection area: {1e6*ox_A:.2f}mm^2\n'
-          f'fuel injection area: {1e6*ipa_A:.2f}mm^2\n\n'
+          f'oxidiser injection area: {1e6 * ox_A:.2f}mm^2\n'
+          f'fuel injection area: {1e6 * ipa_A:.2f}mm^2\n\n'
 
           f'oxidiser mass flow rate: {m_dot_o:.3f} kg/s\n'
           f'fuel mass flow rate: {m_dot_f:.3f} kg/s\n'
