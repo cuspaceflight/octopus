@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.optimize
 import scipy.special
+from matplotlib import pyplot as plt
 
 from octopus import Fluid, Manifold, Nist, Orifice, PropertySource
 
@@ -36,7 +37,7 @@ def main():
     m_dot = 0.803
     OF = 3.5
 
-    alpha = (np.pi / 180) * 40  # chosen alpha=20
+    alpha = (np.pi / 180) * 20  # chosen alpha=20
 
     m_dot_o = m_dot * OF / (1 + OF)
     m_dot_f = m_dot * 1 / (1 + OF)
@@ -59,8 +60,8 @@ def main():
     ox_A = m_dot_o / ox_G  # A is area of cylinder to inject over
     ox_v = m_dot_o / (nitrous.state.rhomass() * ox_A)
 
-    r_pintle = 7e-3  # diameter of 20mm
-    L = 30e-3  # length of annular gap
+    r_pintle = 5e-3  # diameter of 20mm
+    L = 10e-3  # length of annular gap
     h = ox_A / (2 * np.pi * r_pintle * np.cos(alpha))
 
     # FUEL
@@ -75,8 +76,13 @@ def main():
     D = 2 * (r_annular - r_pintle)
     ipa_v = m_dot_f / (ipa_rho * ipa_A)
 
+    alpha = (np.pi / 180)*40
     TMR = ox_v * m_dot_o * np.cos(alpha) / (ipa_v * m_dot_f + ox_v * m_dot_o * np.sin(alpha))
     theta = np.arctan(TMR)
+    # plt.figure(0)
+    # plt.plot(alpha*180/np.pi,180*theta/np.pi)
+    # plt.plot(alpha*180/np.pi,90-alpha*180/np.pi)
+    # plt.show()
 
     Re = ipa_rho * ipa_v * D / ipa_mu
     print(Re)
