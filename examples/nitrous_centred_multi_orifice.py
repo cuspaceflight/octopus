@@ -30,7 +30,7 @@ def fd(Re):
 
 def main():
     # geometry and boundary condition set
-    p0_nitrous = 18e5  # 17.9bar vapour pressure -> 1bar overpressure
+    p0_nitrous = 19e5  # 17.9bar vapour pressure -> 1bar overpressure
     p0_ipa = 11.5e5  # set *total* pressure of inlet fluids
     T0 = 253  # inlet temperature of N2O
     pcc = 10e5  # chamber pressure
