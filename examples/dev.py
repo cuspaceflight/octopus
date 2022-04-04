@@ -15,10 +15,16 @@ def dp_annular_gap(r_outer, r_inner, mdot, L, rho, mu, dp=0):
     return 0.5 * rho * (1 + fd(Re) * L / D) * V ** 2 - dp
 
 
+def _fd_to_solve(fd_x, Re):
+    sqrtfd = np.sqrt(fd_x)
+    return 1 / sqrtfd - 1.93 * np.log10(Re * sqrtfd) + 0.537
+
+
 # often fd/4 is used in literature: check
 def fd(Re):
     laminar = 64 / Re
-    turbulent_smooth = 1 / np.real(0.838 * scipy.special.lambertw(0.629 * Re)) ** 2
+    # turbulent_smooth = 1 / np.real(0.838 * scipy.special.lambertw(0.629 * Re)) ** 2
+    turbulent_smooth = scipy.optimize.fsolve(_fd_to_solve, np.array(0.035), Re)[0]
     if Re < 2000:
         return laminar
     elif Re > 4000:
@@ -28,7 +34,10 @@ def fd(Re):
 
 
 def main():
-    roughness = 5e-6
+    R = np.linspace(1200, 6000, 1000)
+    plt.plot(R, [fd(r) for r in R])
+    plt.show()
+
     p0 = 18e5
     T0 = 253
 
@@ -66,7 +75,7 @@ def main():
 
     # FUEL
     res = scipy.optimize.root_scalar(f=dp_annular_gap,
-                                     args=(r_pintle, m_dot_f, L, ipa_rho, ipa_mu, 11.5e5 - pcc),
+                                     args=(r_pintle, m_dot_f, L, ipa_rho, ipa_mu, 12e5 - pcc),
                                      x0=r_pintle * 1.01,
                                      x1=r_pintle * 1.02)
     #
@@ -76,7 +85,7 @@ def main():
     D = 2 * (r_annular - r_pintle)
     ipa_v = m_dot_f / (ipa_rho * ipa_A)
 
-    alpha = (np.pi / 180)*40
+    alpha = (np.pi / 180) * 40
     TMR = ox_v * m_dot_o * np.cos(alpha) / (ipa_v * m_dot_f + ox_v * m_dot_o * np.sin(alpha))
     theta = np.arctan(TMR)
     # plt.figure(0)
@@ -86,7 +95,6 @@ def main():
 
     Re = ipa_rho * ipa_v * D / ipa_mu
     print(Re)
-
     print(f'inner diameter: {2 * r_pintle * 1000:.2f} mm\n'
           f'outer diameter: {2 * r_annular * 1000:.2f} mm\n'
           f'annular gap: {(r_annular - r_pintle) * 1000:.2f} mm\n'

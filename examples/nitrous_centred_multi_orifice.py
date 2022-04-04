@@ -2,30 +2,7 @@ import numpy as np
 import scipy.optimize
 import scipy.special
 
-from octopus import Fluid, Manifold, Nist, Orifice, PropertySource
-
-
-def dp_annular_gap(D_outer, D_inner, mdot, L, rho, mu, dp=0):
-    """Calculates the frictional and accelerationsal pressure drop over an annular gap"""
-    A = np.pi * (D_outer ** 2 - D_inner ** 2) / 4
-    Dh = D_outer - D_inner
-    V = mdot / (rho * A)
-
-    Re = rho * V * Dh / mu
-    return 0.5 * rho * (1 + fd(Re) * L / Dh) * V ** 2 - dp
-
-
-# often fd/4 is used in literature: check
-def fd(Re):
-    """Calculates the smooth pipe Darcy friction factor from a given Reynolds number"""
-    laminar = 64 / Re
-    turbulent_smooth = 1 / np.real(0.838 * scipy.special.lambertw(0.629 * Re)) ** 2
-    if Re < 2000:
-        return laminar
-    elif Re > 4000:
-        return turbulent_smooth
-    else:
-        return (laminar * (4000 - Re) + turbulent_smooth * (Re - 2000)) / (4000 - 2000)
+from octopus import Fluid, Manifold, Nist, Orifice, PropertySource, utils
 
 
 def main():
@@ -37,6 +14,7 @@ def main():
     m_dot = 0.803  # total mass flow rate
     OF = 3.5  # Oxidiser/Fuel ratio
     water_content = 25  # percentage water content of fuel (Isp max at 25%)
+    alpha = (np.pi / 180) * 40
 
     # oxidiser and fuel mass flow rates
     m_dot_o = m_dot * OF / (1 + OF)
@@ -63,14 +41,15 @@ def main():
     A_crit = m_dot_o / (ox_rho0 * v_crit)
     D_crit = np.sqrt(4 * A_crit / np.pi)
 
-    D_pintle = 14e-3
-    drill_sizes = 0.001 * np.arange(1, 1.25, 0.05)
-    num = np.int32(ox_A / (np.pi * (drill_sizes ** 2) / 4))
-    coverage = np.pi * D_pintle / (num * 0.001)
+    D_pintle = 11e-3
+    sleeve_thickness = 1e-3
+    slot_width = 1e-3
+    num_slots = np.floor(np.pi * (D_pintle-2*sleeve_thickness) / slot_width / 2)
+    slot_height = ox_A / num_slots / slot_width + sleeve_thickness*np.sin(alpha)
 
     # FUEL
     L = 30e-3
-    res = scipy.optimize.root_scalar(f=dp_annular_gap,
+    res = scipy.optimize.root_scalar(f=utils.dp_annular_gap,
                                      args=(D_pintle, m_dot_f, L, ipa_rho, ipa_mu, p0_ipa - pcc),
                                      x0=D_pintle * 1.01,
                                      x1=D_pintle * 1.02)
@@ -81,32 +60,31 @@ def main():
     D = D_outer - D_pintle
     ipa_v = m_dot_f / (ipa_rho * ipa_A)
 
-    TMR = ox_v * m_dot_o / (ipa_v * m_dot_f)
+    TMR = ox_v * m_dot_o * np.cos(alpha) / (ipa_v * m_dot_f + ox_v * m_dot_o * np.sin(alpha))
     theta = np.arctan(TMR)
 
     dP_ipa_manifold = p0_nitrous - p0_ipa
     rat_A = 1 / np.sqrt(ipa_A ** 2 * 2 * ipa_rho * dP_ipa_manifold / (m_dot_f ** 2) + 1)
     mill_sizes = 0.001 * np.arange(1.5, 3.5, 0.5)
-    n = np.pi * rat_A * D_pintle / mill_sizes
+    num_holes = np.pi * rat_A * D_pintle / mill_sizes
+    for m,n in zip(mill_sizes,num_holes): print(m,n)
 
-    Re = ipa_rho * ipa_v * D / ipa_mu
 
     print(f'OXIDISER CENTRED, MULTI-ORIFICE PINTLE\n'
           f'======================================')
 
     print(f'nitrous manifold pressure: {p0_nitrous / 100000:.1f}bar\n'
           f'nitrous manifold temp: {T0:.0f}K\n'
-          f'ipa manifold pressure: {p0_ipa / 100000:.1f}bar\n' 
+          f'ipa manifold pressure: {p0_ipa / 100000:.1f}bar\n'
           f'chamber pressure: {pcc / 100000:.1f}bar\n')
 
     print(f'inner diameter: {D_pintle * 1000:.2f} mm\n'
           f'outer diameter: {D_outer * 1000:.2f} mm\n'
           f'annular gap: {0.5 * (D_outer - D_pintle) * 1000:.2f} mm\n')
 
-    print(f'Nitrous orifices:\n'
-          f'D->n: circumferential coverage\n'
-          f'------------------------------')
-    [print(f'{1000 * d:.2f}mm->{n}: {100 * c:.1f}%') for d, n, c in zip(drill_sizes, num, coverage)]
+    print(f'Nitrous slots:\n'
+          f'  dimensions: {slot_width * 1000:.1f}x{slot_height * 1000:.2f}mm\n'
+          f'  count: {int(num_slots)}')
 
     print(f'\nFuel area reduction ratio: {rat_A:.2f}\n')
     print(f'oxidiser injection area: {1e6 * ox_A:.2f}mm^2\n'

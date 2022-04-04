@@ -1,4 +1,7 @@
 import os
+import sys
+import argparse
+from pathlib import Path
 
 import h5py
 import numpy as np
@@ -6,6 +9,7 @@ from matplotlib import pyplot as plt
 
 
 def main():
+    # I don't think any of this is needed as it's in the HD5 already
     dirname = 'G:\\Shared drives\\Cambridge University Spaceflight\\rclone is the shit and so is robin\\Rockets\\Hybrid\\Static Firing 01 19'
 
     data = {}
@@ -23,19 +27,66 @@ def main():
         print(f'saved {filename} to hd5')
 
 
-def openhd5():
-    f = h5py.File('20190122-006.h5', 'r')
-    print(list(f['channels']))
+def load_file(path, type):
+
+    if type == "HD5":
+        hd5_file = h5py.File(path, 'r')
+        print("HD5 file loaded")
+        print("Structure:")
+        # for channel in hd5_file['channels']: print(channel)
+
+        #print(list(hd5_file['channels']))
+        # for section in hd5_file:
+        #     print(f'{section}:')
+        #     for item in hd5_file[section]:
+        #         if section=='config':
+        #             f = open(item,'w')
+        #             f.write(str(hd5_file[section][item][0],'UTF-8'))
+        #             f.close()
+        #         else: print(f'  {item}')
+        res = []
+        grp = 'channels'
+        for dset in hd5_file[grp]:
+            if dset[:2] == 'PT':
+                res.append(hd5_file[f'{grp}/{dset}'])
+        return res
+    else:
+        raise ValueError(f"Unknown file type: {type}")
+
+
+def plot_datasets(datasets, max_datapoints):
 
     plt.figure(0)
-    grp = 'channels'
-    for dset in f[grp]:
-        if dset[:2]=='TC':
-            d = f[f'{grp}/{dset}']
-            plt.plot(d['time'][:], d['data'][:], label=dset)
+    for d in datasets:
+        # Reduce data to not kill matplotlib
+        # Ideally this is either set dynamically for a zoom level
+        # Or we use some other plotting library that does not suck
+        stepsize = 1 if len(d['time']) < max_datapoints else len(d['time']) // max_datapoints
+        plt.plot(d['time'][::stepsize], d['data'][::stepsize], label=d)
+
     plt.legend(loc='upper left')
     plt.show()
 
 
 if __name__ == "__main__":
-    openhd5()
+
+    # Process arguments
+    parser = argparse.ArgumentParser("Compares test fire data with octopus simulations")
+    parser.add_argument("--file", "-f", type=Path, help="File to load data from")
+    parser.add_argument("--type", type=str, help="Specify filetype: HD5 [more to be added??]", default="HD5")
+    parser.add_argument("--max_datapoints", type=int, help="Max datapoints for plotting", default=5000)
+
+    args = parser.parse_args()
+
+    if args.file is None:
+        print(f"File not specified, exiting...", file=sys.stderr)
+        exit(1)
+
+    # args.type should never be none due to the default value
+    # if it is, then the python standard library is broken anyway
+    datasets = load_file(args.file, args.type)
+    plt.plot(datasets[3]['data'][::10000])
+    plt.show()
+    # plot_datasets(datasets, args.max_datapoints)
+
+    #openhd5()

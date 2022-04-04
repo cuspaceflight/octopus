@@ -25,6 +25,9 @@ class Fluid:
         self.name = name
         self.eos = eos.upper()
         self.state = AbstractState(self.eos, self.name)
+
+        if self.state.name() not in ["NitrousOxide"]:
+            raise NotImplementedError(f'{self.state.name()} is not supported currently')
         self.Tmax = 309.5  # self.state.Tmax()
         self.Tmin = 182.23  # self.state.Tmin()
         self.pmax = self.state.pmax()
