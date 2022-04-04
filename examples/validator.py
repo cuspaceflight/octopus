@@ -32,11 +32,18 @@ def load_file(path, type):
     if type == "HD5":
         hd5_file = h5py.File(path, 'r')
         print("HD5 file loaded")
-        print("Found following channels")
-        for channel in hd5_file['channels']: print(channel)
+        print("Structure:")
+        # for channel in hd5_file['channels']: print(channel)
 
         #print(list(hd5_file['channels']))
-
+        # for section in hd5_file:
+        #     print(f'{section}:')
+        #     for item in hd5_file[section]:
+        #         if section=='config':
+        #             f = open(item,'w')
+        #             f.write(str(hd5_file[section][item][0],'UTF-8'))
+        #             f.close()
+        #         else: print(f'  {item}')
         res = []
         grp = 'channels'
         for dset in hd5_file[grp]:
@@ -54,7 +61,6 @@ def plot_datasets(datasets, max_datapoints):
         # Reduce data to not kill matplotlib
         # Ideally this is either set dynamically for a zoom level
         # Or we use some other plotting library that does not suck
-
         stepsize = 1 if len(d['time']) < max_datapoints else len(d['time']) // max_datapoints
         plt.plot(d['time'][::stepsize], d['data'][::stepsize], label=d)
 
@@ -79,7 +85,8 @@ if __name__ == "__main__":
     # args.type should never be none due to the default value
     # if it is, then the python standard library is broken anyway
     datasets = load_file(args.file, args.type)
-
-    plot_datasets(datasets, args.max_datapoints)
+    plt.plot(datasets[3]['data'][::10000])
+    plt.show()
+    # plot_datasets(datasets, args.max_datapoints)
 
     #openhd5()

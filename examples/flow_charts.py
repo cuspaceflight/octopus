@@ -5,12 +5,12 @@ from octopus import utils
 
 
 def main():
-    Re = np.linspace(1, 8000, 1000)
+    Re = np.linspace(500, 8000, 1000)
 
     plt.figure()
 
-    plt.plot(Re, fd, label='fd')
-    plt.plot(Re, cf, label='cf')
+    plt.plot(Re, [utils.fd_solved(r) for r in Re], label='fd_solved')
+    plt.plot(Re, [utils.fd(r) for r in Re], label='fd')
 
     plt.legend()
     plt.show()

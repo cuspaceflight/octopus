@@ -3,6 +3,9 @@ from collections import OrderedDict
 from csv import reader
 from typing import Any, List, Union
 
+import numpy as np
+import scipy
+
 from numpy import array, nan_to_num, ndarray, real
 from scipy.special import lambertw
 
@@ -82,3 +85,13 @@ def fd(Re):
         laminar = 64 / Re
         turbulent_smooth = 1 / real(0.838 * lambertw(0.629 * Re)) ** 2
         return (laminar * (4000 - Re) + turbulent_smooth * (Re - 2000)) / (4000 - 2000)
+
+
+def dp_annular_gap(D_outer, D_inner, mdot, L, rho, mu, dp=0):
+    """Calculates the frictional and accelerationsal pressure drop over an annular gap"""
+    A = np.pi * (D_outer ** 2 - D_inner ** 2) / 4
+    Dh = D_outer - D_inner
+    V = mdot / (rho * A)
+
+    Re = rho * V * Dh / mu
+    return 0.5 * rho * (1 + fd(Re) * L / Dh) * V ** 2 - dp
