@@ -87,11 +87,17 @@ def fd(Re):
         return (laminar * (4000 - Re) + turbulent_smooth * (Re - 2000)) / (4000 - 2000)
 
 
-def dp_annular_gap(D_outer, D_inner, mdot, L, rho, mu, dp=0.0, cd=1.0):
+def dp_annular_gap(D_outer, D_inner, mdot, L, rho, mu, dp=0.0):
     """Calculates the frictional and accelerationsal pressure drop over an annular gap"""
     A = np.pi * (D_outer ** 2 - D_inner ** 2) / 4
     Dh = D_outer - D_inner
     V = mdot / (rho * A)
 
     Re = rho * V * Dh / mu
-    return 0.5 * rho * cd * (1 + fd(Re) * L / Dh) * V ** 2 - dp
+    return 0.5 * rho * (1 + fd(Re) * L / Dh) * V ** 2 - dp
+
+
+def dp_ipa_throttle(A_rat, D_outer, D_inner, mdot, rho, dp=0.0, cd=1.0):
+    A = A_rat * np.pi * (D_outer ** 2 - D_inner ** 2) / 4
+    V = mdot / (rho * A)
+    return 0.5 * rho * V ** 2 * (1 - A_rat ** 2) / cd ** 2 - dp
